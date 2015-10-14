@@ -120,7 +120,9 @@ class Main {
     	$this->loadConfig();
         $this->loadSettings();
         
-        date_default_timezone_set($this->config->get('date:timezone'));
+        if (($timezone = $this->config->get('date:timezone')) !== false) {
+        	date_default_timezone_set($timezone);
+        }
 
         $this->handleSessions();
         
@@ -130,7 +132,7 @@ class Main {
                 
     	$this->loadDatabase();
                 
-        $this->initDictionaries($this->config->get('language:locales'), $this->getSetting('defaultlocale'));
+        $this->initDictionaries($this->config->get('language:locales')?: array(), $this->getSetting('defaultlocale'));
         
         $this->registerClasses();
         $this->executeHandlers();
@@ -465,36 +467,40 @@ class Main {
      * @param array $cookie PHP $_COOKIE variable
      */
     public function handleDictionary($cookie) {
-    		    	
-    	$this->_lang = Language::getDefault();
     	
-    	$languageCode = $this->getRequest()->get('l');
+    	if (count(Language::getLanguages()) > 0) {
     	
-    	//Get browser language
-    	/* TODO:: Check caching problem
-		if (count($this->config->get('language:locales')) > 0 && isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
-			$regex = '/'.implode('|',$this->config->get('language:locales')).'/';
-			if (preg_match_all($regex, $_SERVER['HTTP_ACCEPT_LANGUAGE'], $matches) > 0) {
-				$languageCode = $matches[0][0];
+	    	$this->_lang = Language::getDefault();
+	    	
+	    	$languageCode = $this->getRequest()->get('l');
+	    	
+	    	//Get browser language
+	    	/* TODO:: Check caching problem
+			if (count($this->config->get('language:locales')) > 0 && isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
+				$regex = '/'.implode('|',$this->config->get('language:locales')).'/';
+				if (preg_match_all($regex, $_SERVER['HTTP_ACCEPT_LANGUAGE'], $matches) > 0) {
+					$languageCode = $matches[0][0];
+				}
 			}
-		}
-    	*/
-    	//Get route language 
-    	if ($this->getRouter()->hasRoute()) {
-	    	$languageViaRequest = $this->getRouter()->getRoute()->get(Route::DATA_LANG);
-	    	if ($languageViaRequest !== false) {
-	    		$languageCode = $languageViaRequest;
+	    	*/
+	    	//Get route language 
+	    	if ($this->getRouter()->hasRoute()) {
+		    	$languageViaRequest = $this->getRouter()->getRoute()->get(Route::DATA_LANG);
+		    	if ($languageViaRequest !== false) {
+		    		$languageCode = $languageViaRequest;
+		    	}
 	    	}
-    	}
+	    	
+	    	if ($languageCode !== null) {
+	    	    $this->_lang = Language::validate($languageCode);
+	    	    //$this->getResponse()->saveCookie('language', $this->_lang);
+	    	}
+	    	
+	    	//if (isset($cookie["language"]) && Language::validate($cookie["language"])) $this->_lang = $cookie["language"];
+	    	    	
+	    	$this->getDict()->loadLanguage($this->_lang, $this->getSetting('localetype'));
     	
-    	if ($languageCode !== null) {
-    	    $this->_lang = Language::validate($languageCode);
-    	    //$this->getResponse()->saveCookie('language', $this->_lang);
     	}
-    	
-    	//if (isset($cookie["language"]) && Language::validate($cookie["language"])) $this->_lang = $cookie["language"];
-    	    	
-    	$this->getDict()->loadLanguage($this->_lang, $this->getSetting('localetype'));
     		
     }
     
