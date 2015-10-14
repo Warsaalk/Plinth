@@ -4,6 +4,12 @@
     "type" : "library",
     "authors" : [{"name": "Klaas Van Parys"}],
     "autoload" : {
-        "psr-4": {"Plinth\\": "src/Plinth"}
+        "psr-4": {
+        	"Plinth\\" : "src/Plinth",
+        	"PlinthScripts\\" : "src/PlinthScripts"
+        }
+    },
+    "scripts" : {
+    	"post-create-project-cmd" : "PlinthScripts\\ComposerHandler::createProject"
     }
 }
