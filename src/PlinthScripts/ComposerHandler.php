@@ -6,7 +6,7 @@ use Composer\Installer\PackageEvent;
 
 class ComposerHandler {
 	
-	public static function createProject(Event $event) {
+	public static function initProject(Event $event) {
 	
 		print __DIR__;
 	

@@ -8,8 +8,5 @@
         	"Plinth\\" : "src/Plinth",
         	"PlinthScripts\\" : "src/PlinthScripts"
         }
-    },
-    "scripts" : {
-    	"post-create-project-cmd" : "PlinthScripts\\ComposerHandler::createProject"
     }
 }
