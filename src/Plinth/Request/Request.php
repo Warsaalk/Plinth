@@ -185,7 +185,9 @@ class Request extends Connector {
 	 */
 	private function getActionClass($action, $method) {
 		
-		$actionClassName = __NS_APP_ACTION . ucfirst($action) . ucfirst(strtolower($method));
+		$actionClassName = ucfirst($action) . ucfirst(strtolower($method));
+		
+		require __APP_ACTION . strtolower($actionClassName) . __EXTENSION_PHP;
 		
 		return new $actionClassName($this->Main());
 		

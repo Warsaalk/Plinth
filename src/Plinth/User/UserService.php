@@ -158,7 +158,7 @@ class UserService extends Connector {
 				if (strcmp($current_session, $check_session) === 0) { 
 					
 					//Regenerate session id after a while
-					if (time() > $_SESSION['generated'] + __SESSION_REGENERATE) {
+					if (time() > $_SESSION['generated'] + $this->Main()->getSetting('sessionregenerate')) {
 						session_regenerate_id(); //Don't use true as it'll delete the old session
 						$new_session = $this->encrypt_session();
 						$this->Main()->getEntityManager()->updateSession($this->_user->getId(), $new_session);

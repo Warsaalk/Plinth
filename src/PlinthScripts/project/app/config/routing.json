@@ -1,0 +1,11 @@
+{
+	"page_home" : 
+	{
+		"path" : "",
+		"type" : "page",
+		"template" : "home",
+		"methods" : ["GET"],
+		"public" : true,
+		"default" : true
+	}
+}	

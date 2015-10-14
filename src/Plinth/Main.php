@@ -97,7 +97,9 @@ class Main {
         'forcelogin' => false,
         'userservice' => true,
     	'defaultlocale' => false,
-    	'localetype' => 'php'
+    	'localetype' => 'php',
+    	'tokenexpire' => 300,
+    	'sessionregenerate' => 300
     );
     
     /**
@@ -598,7 +600,7 @@ class Main {
 			if (isset($_SESSION['tokens'][$label])) {
 				
 				if ($_SESSION['tokens'][$label]['token_time'] !== false) {
-					if (time() > $_SESSION['tokens'][$label]['token_time'] + __TOKEN_EXPIRE) return false;
+					if (time() > $_SESSION['tokens'][$label]['token_time'] + $this->getSetting('tokenexpire')) return false;
 				}
 				
 				if ($token === $_SESSION['tokens'][$label]['token']) return true;
