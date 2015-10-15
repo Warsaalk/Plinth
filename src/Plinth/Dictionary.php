@@ -35,13 +35,22 @@ class Dictionary extends Connector {
 	public function loadFile($file, $type, $merge = false, $extension = __EXTENSION_PHP, $directory = __DICTIONARY) {
 		
 		$lang = array();
-		 
-		if ($type === self::TYPE_JSON)
-			$lang = json_decode(file_get_contents($directory . $file . $extension), true);
-		else
-			require($directory . $file . $extension);
-						
-		$this->_messages = $merge === true ? array_merge($this->_messages, $lang) : $lang;
+		$path = $directory . $file . $extension;
+		
+		if (file_exists($path)) {
+			
+			if ($type === self::TYPE_JSON)
+				$lang = json_decode(file_get_contents($path), true);
+			else
+				require($path);
+							
+			$this->_messages = $merge === true ? array_merge($this->_messages, $lang) : $lang;
+		
+		} else {
+			
+			throw new \Exception("Plinth - Dictionary: Please create your language file, $file");
+			
+		}
 		
 	}
 	
