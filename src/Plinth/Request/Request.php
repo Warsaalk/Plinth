@@ -187,7 +187,7 @@ class Request extends Connector {
 		
 		$actionClassName = ucfirst($action) . ucfirst(strtolower($method));
 		
-		require __APP_ACTION . strtolower($actionClassName) . __EXTENSION_PHP;
+		require __APP_ACTION . $actionClassName . __EXTENSION_PHP;
 		
 		return new $actionClassName($this->Main());
 		
