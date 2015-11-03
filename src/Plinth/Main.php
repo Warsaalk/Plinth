@@ -97,6 +97,7 @@ class Main {
         'forcelogin' => false,
         'userservice' => true,
     	'defaultlocale' => false,
+    	'fallbacklocale' => false,
     	'localetype' => 'php',
     	'tokenexpire' => 300,
     	'sessionregenerate' => 300
@@ -232,7 +233,7 @@ class Main {
     	$this->getRouter()->loadRoutes(__APP_CONFIG_ROUTING, !$this->getSetting('forcelogin'));
     	$this->getRouter()->handleRoute($baseRoute);
     	
-    	$this->handleDictionary($_COOKIE); //Handle Dictionary
+    	$this->handleDictionary($_COOKIE, $this->getSetting('fallbacklocale')); //Handle Dictionary
     	
     }
     
@@ -465,8 +466,9 @@ class Main {
     
     /**
      * @param array $cookie PHP $_COOKIE variable
+     * @param string|boolean $fallback (optional)
      */
-    public function handleDictionary($cookie) {
+    public function handleDictionary($cookie, $fallback = false) {
     	
     	if (count(Language::getLanguages()) > 0) {
     	
@@ -499,6 +501,14 @@ class Main {
 	    	//if (isset($cookie["language"]) && Language::validate($cookie["language"])) $this->_lang = $cookie["language"];
 	    	    	
 	    	$this->getDict()->loadLanguage($this->_lang, $this->getSetting('localetype'));
+	    	
+	    	if ($fallback !== false) {
+	    		if (Language::validate($fallback) === $fallback) {
+	    			$this->getDict()->loadLanguage($fallback, $this->getSetting('localetype'), true);	    			
+	    		} else {
+	    			throw new \Exception("Plinth - Dictionary: Your fallback locale, $fallback, doesn't exist");	
+	    		}	    		
+	    	}
     	
     	}
     		

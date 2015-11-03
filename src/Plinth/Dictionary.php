@@ -6,6 +6,11 @@ class Dictionary extends Connector {
 	
 	CONST 	TYPE_PHP = 'php',
 			TYPE_JSON = 'json';
+
+	/**
+	 * @var string[]
+	 */
+	private $_fallback = array();
 	
     /**
      * @var string[]
@@ -15,13 +20,14 @@ class Dictionary extends Connector {
 	/**
 	 * @param string $languageCode
 	 * @param string $type
+	 * @param boolean $fallback (optional)
 	 */
-	public function loadLanguage($languageCode, $type) {
+	public function loadLanguage($languageCode, $type, $fallback = false) {
 	    
 		if ($type === self::TYPE_JSON)	$extension = __EXTENSION_DICT_JSON;
 	    else							$extension = __EXTENSION_DICT_PHP;
 
-		$this->loadFile($languageCode, $type, false, $extension);
+		$this->loadFile($languageCode, $type, false, $extension, __DICTIONARY, $fallback);
 			
 	}
 	
@@ -32,7 +38,7 @@ class Dictionary extends Connector {
 	 * @param string $extension
 	 * @param string $directory
 	 */
-	public function loadFile($file, $type, $merge = false, $extension = __EXTENSION_PHP, $directory = __DICTIONARY) {
+	public function loadFile($file, $type, $merge = false, $extension = __EXTENSION_PHP, $directory = __DICTIONARY, $fallback = false) {
 		
 		$lang = array();
 		$path = $directory . $file . $extension;
@@ -43,8 +49,9 @@ class Dictionary extends Connector {
 				$lang = json_decode(file_get_contents($path), true);
 			else
 				require($path);
-							
-			$this->_messages = $merge === true ? array_merge($this->_messages, $lang) : $lang;
+			
+			if ($fallback === true) $this->_fallback = $merge === true ? array_merge($this->_fallback, $lang) : $lang;
+			else					$this->_messages = $merge === true ? array_merge($this->_messages, $lang) : $lang;
 		
 		} else {
 			
@@ -69,15 +76,13 @@ class Dictionary extends Connector {
 	 * @return string
 	 */
 	public function get($i) {
-				
-		$noTrans = 'No translation present';
-		
+						
 		$n = func_num_args();
 		
 		if ($n > 0) {
 		
 			$s = func_get_arg(0);
-			$s = isset($this->_messages[$s]) ? $this->_messages[$s] : 'No translation present';
+			$s = isset($this->_messages[$s]) ? $this->_messages[$s] : (isset($this->_fallback[$s]) ? $this->_fallback[$s] : $s);
 		
 			if ($n > 1) {
 		
@@ -92,7 +97,7 @@ class Dictionary extends Connector {
 		
 		}
 		
-		return $noTrans;
+		return $i;
 	
 	}
 	
