@@ -2,6 +2,7 @@
 	"name" : "plinth/plinth",
 	"description" : "A light weight PHP framework",
     "type" : "library",
+    "license": "MIT",
     "authors" : [{"name": "Klaas Van Parys"}],
     "autoload" : {
         "psr-4": {
