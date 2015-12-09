@@ -243,7 +243,7 @@ class Request extends Connector {
 				$this->addError(new Info($this->Main()->getDict()->get('token.expire'), Info::ERROR));
 			}
 			
-			if ($userlevel !== false && $userservice->getUser()->getAuthlevel() < $userlevel) {
+			if ($userlevel !== false && $userservice->getUser()->getRole() < $userlevel) {
 				$this->addError(new Info('//TODO:: permissions error', Info::ERROR));
 			}
 			if (!$this->hasErrors()) {
@@ -293,11 +293,13 @@ class Request extends Connector {
 	 */
 	public function isRouteAuthorized(Route $route) {
 	    
+		$loginpage = $this->Main()->getSetting('loginpage');
+		
 	    if (!$route->isPublic() && !$this->Main()->getUserService()->isSessionValid()) {
 	         
-	        if ($route->getName() === 'page_login') throw new \Exception('Please set your login page to public');
+	        if ($route->getName() === $loginpage) throw new \Exception('Please set your login page to public');
 	         
-	        $this->Main()->getRouter()->redirect('page_login');
+	        $this->Main()->getRouter()->redirect($loginpage);
 	        $this->Main()->handleRequest(true);
 	    }
 	    

@@ -2,33 +2,34 @@
 
 namespace Plinth\User;
 
-use App\Entity\User\User;
-use Plinth\Database\Query\Where_Query;
-use Plinth\Database\Query\Select_Query;
-use PDO;
 use Plinth\Database\Connection;
 use Plinth\Connector;
 use Plinth\Validation\Validator;
+use Plinth\Common\Debug;
 
-//TODO:: Implement
 class UserService extends Connector {
 
 	/**
 	 * @var User
 	 */
-	private $_user = NULL;
+	private $user = NULL;
+	
+	/**
+	 * @var UserRepository
+	 */
+	private $userrepository;
 	
 	/**
 	 * @var boolean
 	 */
-	private $_validSession = false;
+	private $validSession = false;
 	
 	/**
 	 * @return User
 	 */
 	public function getUser() {
 		 
-		return $this->_user;
+		return $this->user;
 	
 	}
 	
@@ -37,8 +38,17 @@ class UserService extends Connector {
 	 */
 	public function hasUser() {
 		 
-		return $this->_user !== NULL;
+		return $this->user !== NULL;
 	
+	}
+	
+	/**
+	 * @param UserRepository $userrepository
+	 */
+	public function setUserRepository(UserRepository $userrepository) {
+		
+		$this->userrepository = $userrepository;
+		
 	}
 	
 	/**
@@ -46,129 +56,136 @@ class UserService extends Connector {
 	 */
 	public function isSessionValid() {
 		 
-		return $this->_validSession;
+		return $this->validSession;
 		 
 	}
 	
 	/**
-	 * @param string $name
-	 * @return array
-	 */
-	public function getLogin($login) {
-		    
-		//TODO:: Make this general and defineable
-	    $data 	= array(array(':login', $login, PDO::PARAM_STR));
-	
-	    $query	= (new Select_Query($this->Main()->config->get('mysql:table:user')))
-	    	->select('id')
-	    	->select('password')
-	    	->select('authlevel')
-	    	->where('name', Where_Query::OPERATOR_EQUAL, ':login', Where_Query::WHERE_OR)
-	    	->where('email', Where_Query::OPERATOR_EQUAL, ':login', Where_Query::WHERE_OR);
-	    	    
-	    return $this->Main()->getConnection()->exec($query->get(), $data, Connection::FETCH);
-	    
-	}
-	
-	/**
-	 * @param string $name
-	 * @param string $pass
+	 * @param string $token
+	 * @param function $validationCallback
 	 * @return boolean
 	 */
-	public function login($name, $pass) {
-		    
-	    $id = $this->checkCreds($name, $pass);
+	public function loginWithToken($token, $validationCallback = NULL) {
 		
-		if($id !== false) {
-		
-			session_regenerate_id(true); //Always generate new id on login
-			
-			$new_session = $this->encrypt_session();
-			
-			//$this->Main()->getEntityManager()->updateSession($id, $new_session);
-			
-			$_SESSION['user_id'] = $id;
-			$_SESSION['generated'] = time();
-			
-			return true;
-			
-		}
-		
-		return false;
+		return $this->login(NULL, $token, $validationCallback);
 		
 	}
-
+	
 	/**
-	 * @param string $name
-	 * @param string $pass
-	 * @return integer|boolean
+	 * @param string $login
+	 * @param string $token
+	 * @param function $validationCallback
+	 * @return boolean
 	 */
-	private function checkCreds($name, $pass) {
-
-	    $passsalt = $this->Main()->config->get('keys:passsalt');
-	    
-		$user = $this->getLogin($name);
+	public function login($login, $token, $validationCallback = NULL) {
+		    
+	    $this->user = $this->checkCreds($login, $token);
 		
-		if ($user && $user['authlevel'] != 0) { //Authlevel 0 is banned/disabled
+		if($this->user !== NULL) {
 		
-			$password = crypt($pass, $passsalt);
-			if (strcmp($password, $user['password']) === 0) {
+			if ($validationCallback === NULL || $validationCallback($this->user)) {
 			
-				return $user['id'];
+				session_regenerate_id(true); //Always generate new id on login
+								
+				if ($this->Main()->getSetting('usersession')) {
+					$session = $this->encrypt_session();
+					$this->user->setSession($session);
+					$this->userrepository->updateUserSession($this->user->getID(), $session);
+				}
+					
+				$_SESSION['plinth_user_id'] = $this->user->getID();
+				$_SESSION['plinth_user_generated'] = time();
 				
+				return true;
+			
 			}
 			
 		}
 		
 		return false;
+		
 	}
-	
-	public static function randomPassword( $length = 30, $prefix = '' ) {
-	
-		$dict 	= "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/.";
-		$str 	= $prefix;
 
-		while (strlen($str) < $length-1) {
-			$str .= $dict{rand(0, strlen($dict)-1)};
+	/**
+	 * @param string $login
+	 * @param string $token
+	 * @return User|boolean
+	 */
+	private function checkCreds($login, $token) {
+
+	    $salt = $this->Main()->config->get('keys:tokensalt');
+	    
+	    if ($login === NULL) {
+	    	
+	    	$usertoken = crypt($token, $salt);
+	    	$userlogin = $this->userrepository->findUserWithToken($usertoken);
+	    	
+	    	if ($userlogin && $userlogin->canLogin()) return $userlogin;
+	    	
+		} else {
+	    	
+	    	$userlogin = $this->userrepository->findUserWithLogin($login);
+
+			if ($userlogin && $userlogin->canLogin()) {
+			
+				$usertoken = crypt($token, $salt);
+			
+				if (strcmp($usertoken, $userlogin->getToken()) === 0) {
+	
+					return $userlogin;
+					
+				}
+				
+			}
+			
 		}
-
-		return $str;
 		
-    }
+		return NULL;
 		
-	
+	}	
     
     /**
      * @return boolean
      */
 	public function verifySession(){
 
-		if (isset($_SESSION['user_id'])) {
-
-			$repo = $this->Main()->getEntityRepository()->getRepository(User::class);
+		if (isset($_SESSION['plinth_user_id'])) {
 			
-			$this->_user = $repo->find($_SESSION['user_id']);
-				
-			if ($this->_user) {
-				
-				return $this->_validSession = true; /*
-				$current_session 	= $this->_user->getSession();
-				$check_session 		= $this->encrypt_session();
-
-				if (strcmp($current_session, $check_session) === 0) { 
-					
-					//Regenerate session id after a while
-					if (time() > $_SESSION['generated'] + $this->Main()->getSetting('sessionregenerate')) {
-						session_regenerate_id(); //Don't use true as it'll delete the old session
-						$new_session = $this->encrypt_session();
-						$this->Main()->getEntityManager()->updateSession($this->_user->getId(), $new_session);
-						$_SESSION['generated'] = time();
-					}
-					
-					return $this->_validSession = true;
+			if ($this->user === NULL) {
+				$this->user = $this->userrepository->find($_SESSION['plinth_user_id']);
+			}	
 						
-				} else $this->logout();*/
-			
+			if ($this->user !== NULL) {
+				//If application uses usersessions
+				if ($this->Main()->getSetting('usersession')) {
+					
+					$current_session = $this->user->getSession();
+					
+					//Check if User::getSession is implemented
+					if ($current_session !== false) {
+						
+						$check_session = $this->encrypt_session();
+						
+						//Compare current session against the session generator
+						if (strcmp($current_session, $check_session) === 0) {
+								
+							//Regenerate session id after a while
+							if ($this->Main()->getSetting('sessionregenerate') !== false) {
+								$now = time();
+								if ($now > $_SESSION['plinth_user_generated'] + $this->Main()->getSetting('sessionregenerate')) {
+									session_regenerate_id(); //Don't use true as it'll delete the old session
+									$this->userrepository->updateUserSession($this->user->getID(), $this->encrypt_session());
+									$_SESSION['plinth_user_generated'] = $now;
+								}
+							}
+								
+							return $this->validSession = true;
+						
+						} else $this->logout();
+					}				
+				} else {
+					return $this->validSession = true;
+				}			
 			}
 				
 		}
@@ -201,7 +218,9 @@ class UserService extends Connector {
 	 */
 	public function logout(){
 		
-		$this->_user = NULL;
+		$this->user = NULL;
+		
+		if (session_status() !== PHP_SESSION_ACTIVE) session_start();
 		
 		//Destory session
 		session_unset();
