@@ -490,6 +490,7 @@ class Main {
     	
     		$languageCookieIndex = 'plinth-language';
     		$languageCookieAble = false;
+    		$languageCode = null;
     		
 	    	$this->_lang = Language::getDefault();
 		    		    	
