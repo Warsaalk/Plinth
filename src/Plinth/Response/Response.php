@@ -9,6 +9,7 @@ class Response extends Connector {
 	
 	const  CODE_201 = "HTTP/1.0 201 Created",
 	       CODE_204 = "HTTP/1.0 204 No Content",
+	       CODE_401 = "HTTP/1.0 401 Unauthorized",
 	       CODE_403 = "HTTP/1.0 403 Forbidden",
 	       CODE_404 = "HTTP/1.0 404 Not Found",
 	       CODE_405 = "HTTP/1.0 405 Method Not Allowed";
