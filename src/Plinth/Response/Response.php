@@ -152,10 +152,11 @@ class Response extends Connector {
 	
 	/**
 	 * @param string $routeName
+	 * @param array $data
 	 */
-	public function hardRedirect($routeName) {
+	public function hardRedirect($routeName, array $data = array()) {
 	    
-	    header('Location: ' . __BASE_URL . $this->Main()->getRouter()->getRoute($routeName)->getPath());
+	    header('Location: ' . __BASE_URL . $this->Main()->getRouter()->getRoute($routeName)->getPath($data));
 	    exit;
 	    
 	}
