@@ -10,6 +10,7 @@ use Plinth\Validation\Validator;
 use Plinth\Common\Info;
 use Plinth\Main;
 use Plinth\Common\Debug;
+use Plinth\Response\Response;
 
 class Request extends Connector {
 	
@@ -78,6 +79,12 @@ class Request extends Connector {
 	
 	private static $defaultTokenSettings = array(
 		'required'	=> false,
+		'message'	=> null
+	);
+	
+	private static $defaultUserSettings = array(
+		'required'	=> false,
+		'callback'	=> false,
 		'message'	=> null
 	);
 	
@@ -162,24 +169,24 @@ class Request extends Connector {
 	        
 	    } else {
 	    
-		$method	= $this->getRequestMethod();
-		
-		$this->_data = $this->loadData($method);
-		$this->_files = $this->loadFiles();
-		
-		if ($route->hasActions()) {
-						
-			$actions = $route->getActions();
-				
-			if (array_key_exists($method, $actions)) {
-		
-				$this->_action = $actions[$method];
-				
+			$method	= $this->getRequestMethod();
+			
+			$this->_data = $this->loadData($method);
+			$this->_files = $this->loadFiles();
+			
+			if ($route->hasActions()) {
+							
+				$actions = $route->getActions();
+					
+				if (array_key_exists($method, $actions)) {
+			
+					$this->_action = $actions[$method];
+					
+				}
+					
 			}
-				
+					
 		}
-				
-	}
 	
 	}
 	
@@ -213,7 +220,7 @@ class Request extends Connector {
 		$variables 	= isset($actionSettings['variables']) ? $actionSettings['variables'] : false;
 		$uploadfiles= isset($actionSettings['files']) ? $actionSettings['files'] : false;
 		$token		= isset($actionSettings['token']) ? array_merge(self::$defaultTokenSettings, $actionSettings['token']) : false;
-		$userlevel	= isset($actionSettings['userlevel']) ? $actionSettings['userlevel'] : false;
+		$user		= isset($actionSettings['user']) ? array_merge(self::$defaultUserSettings, $actionSettings['user']) : false;
 		$invalid	= false;
 		
 		if ($variables !== false) {
@@ -248,8 +255,13 @@ class Request extends Connector {
 				$invalid = true;
 			}
 			
-			if ($userlevel !== false && $userservice->getUser()->getRole() < $userlevel) {
-				$this->addError(new Info('//TODO:: permissions error', Info::ERROR));
+			if (!$this->isLoginRequest() && $user !== false && $user['required'] === true) {
+				$callback = $user['callback'];
+				if (!$userservice->isSessionValid() || ($callback !== false && !$callback($userservice->getUser()))) {
+					if ($user['message']) $this->addError($user['message']);
+					$invalid = true;
+					header(Response::CODE_401);
+				}
 			}
 			if (!$this->hasErrors() && !$invalid) {
 				$action->onFinish($validator->getVariables(), $validator->getFiles());
