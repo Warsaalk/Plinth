@@ -23,6 +23,11 @@ class UserService extends Connector {
 	 * @var boolean
 	 */
 	private $validSession = false;
+
+	/**
+	 * @var boolean
+	 */
+	private $loggedOut = false;
 	
 	/**
 	 * @return User
@@ -58,6 +63,15 @@ class UserService extends Connector {
 		 
 		return $this->validSession;
 		 
+	}
+	
+	/**
+	 * @return boolean
+	 */
+	public function isLoggedOut() {
+		
+		return $this->loggedOut;
+		
 	}
 	
 	/**
@@ -219,6 +233,7 @@ class UserService extends Connector {
 	public function logout(){
 		
 		$this->user = NULL;
+		$this->loggedOut = true;
 		
 		if (session_status() !== PHP_SESSION_ACTIVE) session_start();
 		

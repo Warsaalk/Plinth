@@ -243,12 +243,8 @@ class Main {
     	
     	$this->getRouter()->loadRoutes(__APP_CONFIG_ROUTING, !$this->getSetting('forcelogin'));
     	$this->getRouter()->handleRoute($baseRoute);
-    	
+
     	$this->handleSessions();
-    	//TODO:: the logout message will now return "No translation present" as we moved the handleDictionary method
-    	//As suggestion which would also come in handy for Request action and other Info pushers:
-    	//Only send the message tag instead of the translated string
-    	//Somewhere at the end before printing info, it shoud map the tag to the corresponding translated string
     	$this->handleLogout();
     	$this->handleDictionary($_COOKIE, $this->getSetting('fallbacklocale')); //Handle Dictionary
     	
@@ -474,8 +470,7 @@ class Main {
         
         if ($this->getRequest()->get('logout') !== null) {
             
-            if ($this->getUserService()->logout())
-                $this->addInfo(new Info($this->getDict()->get('logout.succes')));
+            $this->getUserService()->logout();
             
         }
     
