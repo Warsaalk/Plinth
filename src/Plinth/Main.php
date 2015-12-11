@@ -594,24 +594,26 @@ class Main {
 				
 		if (ctype_alpha($label)) {
 		
+			if (session_status() !== PHP_SESSION_ACTIVE) session_start();
+			
 			if (isset($_SESSION)) {
 			
-			$token = md5(uniqid(rand(), TRUE));
-			
-			$_SESSION['tokens'][$label]['token'] = $token;
-			$_SESSION['tokens'][$label]['token_time'] = $expires ? time() : false;
-			
-			return $label . '_' . $token;
+				$token = md5(uniqid(rand(), TRUE));
+				
+				$_SESSION['tokens'][$label]['token'] = $token;
+				$_SESSION['tokens'][$label]['token_time'] = $expires ? time() : false;
+				
+				return $label . '_' . $token;
 		
 			} else {
 				
-				throw new \Exception('This function can only be used when you are using PHP sessions');
+				throw new \Exception('Plinth - getToken, this function can only be used when you are using PHP sessions');
 				
 			}
 			
 		} else {
 			
-			throw new \Exception('The label can only contain alphabetic characters');
+			throw new \Exception('Plinth - getToken, the label can only contain alphabetic characters');
 			
 		}
 		
@@ -629,6 +631,8 @@ class Main {
 			
 			$label = $tokeninfo[0];
 			$token = $tokeninfo[1];
+			
+			if (session_status() !== PHP_SESSION_ACTIVE) session_start();
 			
 			if (isset($_SESSION['tokens'][$label])) {
 				
