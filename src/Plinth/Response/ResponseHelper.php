@@ -38,8 +38,7 @@ class ResponseHelper {
     		case Route::TYPE_JSON 	: return self::JSON;
     		case Route::TYPE_XML 	: return self::XML;
     		case Route::TYPE_PAGE 	: 
-    		case Route::TYPE_HTML 	: 
-    		case Route::TYPE_ERROR	: return self::HTML;
+    		case Route::TYPE_HTML 	: return self::HTML;
     		default					: false;
     		
     	}
@@ -55,7 +54,6 @@ class ResponseHelper {
     		case Route::TYPE_PAGE 	: return __TEMPLATE_PAGE;
     		case Route::TYPE_HTML 	: return __TEMPLATE_HTML;
     		case Route::TYPE_XML 	: return __TEMPLATE_HTML;
-    		case Route::TYPE_ERROR	: return __TEMPLATE_ERROR;
     		default					: return false;
     	
     	}
