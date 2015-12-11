@@ -76,6 +76,11 @@ class Request extends Connector {
 	    'message'   => null
 	);
 	
+	private static $defaultTokenSettings = array(
+		'required'	=> false,
+		'message'	=> null
+	);
+	
 	/**
 	 * @param Main $main
 	 */
@@ -207,9 +212,9 @@ class Request extends Connector {
 		$userservice= $this->Main()->getUserService();
 		$variables 	= isset($actionSettings['variables']) ? $actionSettings['variables'] : false;
 		$uploadfiles= isset($actionSettings['files']) ? $actionSettings['files'] : false;
-		$token		= isset($actionSettings['token']) && $actionSettings['token'] === true;
+		$token		= isset($actionSettings['token']) ? array_merge(self::$defaultTokenSettings, $actionSettings['token']) : false;
 		$userlevel	= isset($actionSettings['userlevel']) ? $actionSettings['userlevel'] : false;
-		$errors		= array();
+		$invalid	= false;
 		
 		if ($variables !== false) {
 		
@@ -233,20 +238,20 @@ class Request extends Connector {
 		    
 		}
 		
-		if ($token) $validator->addValidation('token');
+		if ($token !== false) $validator->addValidation('token');
 		
 		$validator->validate($this->_data, $this->_files);
 
 		if ($validator->isValid()) {
 			
-			if ($token && !$this->Main()->validateToken($validator->getVariable('token'))) {
-				$this->addError(new Info($this->Main()->getDict()->get('token.expire'), Info::ERROR));
+			if ($token !== false && $token['required'] === true && !$this->Main()->validateToken($validator->getVariable('token'))) {				if ($token['message']) $this->addError($token['message']);
+				$invalid = true;
 			}
 			
 			if ($userlevel !== false && $userservice->getUser()->getRole() < $userlevel) {
 				$this->addError(new Info('//TODO:: permissions error', Info::ERROR));
 			}
-			if (!$this->hasErrors()) {
+			if (!$this->hasErrors() && !$invalid) {
 				$action->onFinish($validator->getVariables(), $validator->getFiles());
 			}
 			
@@ -258,10 +263,12 @@ class Request extends Connector {
 		    
 		}
 		
-		if ($this->hasErrors()) {
+		if ($this->hasErrors() || $invalid) {
 		
 		    foreach ($this->_errors as $i => $error) {
-		        $this->Main()->addInfo($error);
+		    	if ($error !== null) {
+		        	$this->Main()->addInfo($error);
+		    	}
 		    }
 		    $action->onError();
 		    
