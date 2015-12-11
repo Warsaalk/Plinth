@@ -245,7 +245,10 @@ class Request extends Connector {
 		    
 		}
 		
-		if ($token !== false) $validator->addValidation('token');
+		if ($token !== false) {
+			$tokensettings = array_merge(self::$defaultVariableSettings, $token);
+			$validator->addValidation('token', $tokensettings['rules'], Validator::PARAM_STRING, $settings['required'], false, array(), $tokensettings['message'], $settings['preCallback'], $settings['postCallback']);
+		}
 		
 		$validator->validate($this->_data, $this->_files);
 
