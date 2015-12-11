@@ -272,6 +272,7 @@ class Request extends Connector {
 		    foreach ($validator->getErrors() as $error) {
 		    	$this->addError($error);
 		    }
+		    $invalid = true;
 		    
 		}
 		
