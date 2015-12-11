@@ -3,6 +3,7 @@
 namespace Plinth\User;
 
 use Plinth\Entity\EntityRepository;
+use Plinth\Exception\PlinthException;
 
 abstract class UserRepository extends EntityRepository {
 
@@ -24,7 +25,7 @@ abstract class UserRepository extends EntityRepository {
 	 */
 	public function findUserWithLogin($login) {
 		
-		throw new \Exception('Plinth:: Please implement the findUserWithLogin method in your UserRepository');
+		throw new PlinthException('Please implement the findUserWithLogin method in your UserRepository');
 		
 	}
 	
@@ -38,7 +39,7 @@ abstract class UserRepository extends EntityRepository {
 	 */
 	public function findUserWithToken($token) {
 		
-		throw new \Exception('Plinth:: Please implement the findUserWithToken method in your UserRepository');
+		throw new PlinthException('Please implement the findUserWithToken method in your UserRepository');
 		
 	}
 	
@@ -49,7 +50,7 @@ abstract class UserRepository extends EntityRepository {
 	 */
 	public function updateUserSession($ID, $session) {
 		
-		throw new \Exception('Plinth:: Please implement the updateUserSession method in your UserRepository');
+		throw new PlinthException('Please implement the updateUserSession method in your UserRepository');
 		
 	}
 

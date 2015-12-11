@@ -11,6 +11,7 @@ use Plinth\Common\Info;
 use Plinth\Main;
 use Plinth\Common\Debug;
 use Plinth\Response\Response;
+use Plinth\Exception\PlinthException;
 
 class Request extends Connector {
 	
@@ -207,13 +208,12 @@ class Request extends Connector {
 	
 	/**
 	 * @param ActionType $action
-	 * @throws \Exception
 	 */
 	private function validateAction(ActionType $action) {
 		
 		$actionSettings = $action->getSettings();
 		
-		//if (!isset($actionSettings['variables'])) throw new \Exception("Please defined your action variables");
+		//if (!isset($actionSettings['variables'])) throw new PlinthException("Please defined your action variables");
 		
 		$validator 	= $this->Main()->getValidator();
 		$userservice= $this->Main()->getUserService();
@@ -312,7 +312,7 @@ class Request extends Connector {
 	
 	/**
 	 * @param Route $route
-	 * @throws \Exception
+	 * @throws PlinthException
 	 */
 	public function isRouteAuthorized(Route $route) {
 	    
@@ -320,7 +320,7 @@ class Request extends Connector {
 		
 	    if (!$route->isPublic() && !$this->Main()->getUserService()->isSessionValid()) {
 	         
-	        if ($route->getName() === $loginpage) throw new \Exception('Please set your login page to public');
+	        if ($route->getName() === $loginpage) throw new PlinthException('Please set your login page to public');
 	         
 	        $this->Main()->getRouter()->redirect($loginpage);
 	        $this->Main()->handleRequest(true);

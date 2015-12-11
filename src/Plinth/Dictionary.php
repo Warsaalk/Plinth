@@ -2,6 +2,7 @@
 
 namespace Plinth;
 
+use Plinth\Exception\PlinthException;
 class Dictionary extends Connector {
 	
 	CONST 	TYPE_PHP = 'php',
@@ -55,7 +56,7 @@ class Dictionary extends Connector {
 		
 		} else {
 			
-			throw new \Exception("Plinth - Dictionary: Please create your language file, $file");
+			throw new PlinthException("Dictionary: Please create your language file, $file");
 			
 		}
 		

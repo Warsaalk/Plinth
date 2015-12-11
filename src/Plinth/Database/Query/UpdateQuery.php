@@ -2,6 +2,7 @@
 
 namespace Plinth\Database\Query;
 
+use Plinth\Exception\PlinthException;
 class UpdateQuery extends WhereQuery {
 
 	/**
@@ -43,7 +44,7 @@ class UpdateQuery extends WhereQuery {
 				
 			$data = implode(',', array_map(function($c,$v) { return "$c=$v"; }, $this->_columns, $this->_values));
 			
-		} else throw new Exception('UpdateQuery:: Your columns and values must match');
+		} else throw new PlinthException('Your columns and values must match');
 
 		return $data !== false ? $data : "";
 

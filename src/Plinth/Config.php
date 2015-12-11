@@ -3,6 +3,7 @@
 namespace Plinth;
 
 use Plinth\Common\Debug;
+use Plinth\Exception\PlinthException;
 class Config {
 
         /**
@@ -64,7 +65,7 @@ class Config {
 		 */
 		private function parse($config) {
 		    
-		    if ($config === false) throw new \Exception('Your config file contains some errors');
+		    if ($config === false) throw new PlinthException('Your config file contains some errors');
 		    
 			$parsed = array();
 			

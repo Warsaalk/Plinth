@@ -2,6 +2,7 @@
 
 namespace Plinth\User;
 
+use Plinth\Exception\PlinthException;
 abstract class User {
 
 	/**
@@ -46,7 +47,7 @@ abstract class User {
 	 */
 	public function getSession() {
 		
-		throw new \Exception('Plinth:: Please implement the getSession method in your User class');
+		throw new PlinthException('Please implement the getSession method in your User class');
 		
 	}
 	
@@ -56,7 +57,7 @@ abstract class User {
 	 */
 	public function setSession($session) {
 		
-		throw new \Exception('Plinth:: Please implement the setSession method in your User class');
+		throw new PlinthException('Please implement the setSession method in your User class');
 		
 	}
 

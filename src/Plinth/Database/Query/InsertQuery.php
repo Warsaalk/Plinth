@@ -2,6 +2,7 @@
 
 namespace Plinth\Database\Query;
 
+use Plinth\Exception\PlinthException;
 class InsertQuery extends BaseQuery {
 	
 	const VALUES_COLUMNS = 0;
@@ -33,18 +34,18 @@ class InsertQuery extends BaseQuery {
 	 * Force a user to use only the values in his query, a value-column combination or setColumn with multiple values
 	 * 
 	 * @param string $useColumn
-	 * @throws Exception
+	 * @throws PlinthException
 	 */
 	private function setType ($useType) {
 		
 		if ($this->_type === NULL) {
 		    $this->_type = $useType !== self::VALUES_ONLY && $useType !== self::SELECT_ONLY && $useType !== self::VALUES_MULTIPLE ? self::VALUES_COLUMNS : $useType;
 		} else {
-		    if ($this->_type === self::SELECT_ONLY) throw new Exception('InsertQuery:: You already used insertSelectQuery, which cannnot be combined with other inserts.');
+		    if ($this->_type === self::SELECT_ONLY) throw new PlinthException('You already used insertSelectQuery, which cannnot be combined with other inserts.');
 		        
 			if (($this->_type === self::VALUES_COLUMNS && $useType === false)
 			&&	($this->_type === self::VALUES_ONLY && $useType !== false))
-			throw new Exception('InsertQuery:: Please only use values or a value-column combination for all your inserts.');
+			throw new PlinthException('Please only use values or a value-column combination for all your inserts.');
 		}
 		
 	}
@@ -57,11 +58,11 @@ class InsertQuery extends BaseQuery {
 		
 		if ($this->_type === self::VALUES_MULTIPLE) {
 			
-			if (!is_array($value)) throw new Exception('InsertQuery:: Please use an array for the column values');
+			if (!is_array($value)) throw new PlinthException('Please use an array for the column values');
 						
 		} else {
 		
-			if (is_array($value)) throw new Exception('InsertQuery:: Please use setColumns first before you insert multiple values');
+			if (is_array($value)) throw new PlinthException('Please use setColumns first before you insert multiple values');
 			
 			$this->setType($column);
 		
@@ -89,7 +90,7 @@ class InsertQuery extends BaseQuery {
     	    
     	    $this->_selectQuery = $query;
 	    
-	    } else throw new Exception('InsertQuery:: insertSelectQuery can only be use once and cannot be combined with other inserts.');
+	    } else throw new PlinthException('insertSelectQuery can only be use once and cannot be combined with other inserts.');
 	    
 	    return $this;
 	    
@@ -97,7 +98,7 @@ class InsertQuery extends BaseQuery {
 	
 	/**
 	 * @param string[] $columns
-	 * @throws Exception
+	 * @throws PlinthException
 	 * @return InsertQuery
 	 */
 	public function setColumns($columns=array()) {
@@ -108,7 +109,7 @@ class InsertQuery extends BaseQuery {
     	    
     	    $this->_columns = $columns;
 	    
-	    } else throw new Exception('InsertQuery:: setColumns can only be use once and cannot be combined with other inserts.');
+	    } else throw new PlinthException('setColumns can only be use once and cannot be combined with other inserts.');
 	    
 	    return $this;
 		
@@ -120,7 +121,7 @@ class InsertQuery extends BaseQuery {
 	private function hasData()	{ return count($this->_values) > 0; }
 	
 	/**
-	 * @throws Exception
+	 * @throws PlinthException
 	 * @return string
 	 */
 	private function getData()	{
@@ -133,7 +134,7 @@ class InsertQuery extends BaseQuery {
 				
 				$data = " (" . implode(',', $this->_columns) . ") VALUES (" . implode(',', $this->_values) . ")";
 				
-			} else throw new Exception('InsertQuery:: Your columns and values must match');
+			} else throw new PlinthException('Your columns and values must match');
 
 		} elseif ($this->_type === self::VALUES_MULTIPLE) {
 			
@@ -142,12 +143,12 @@ class InsertQuery extends BaseQuery {
 			$data = " (" . implode(',', $this->_columns) . ") VALUES ";
 			$dataValues = array();
 			
-			if (!$this->hasData()) throw new Exception('InsertQuery:: Please insert values');
+			if (!$this->hasData()) throw new PlinthException('Please insert values');
 						
 			foreach ($this->_values as $i => $row) {
 				
 				if (count($row) === $columns) $dataValues[] = "(" . implode(',', $row) . ")";
-				else throw new Exception('InsertQuery:: Your values must match the number of columns');
+				else throw new PlinthException('Your values must match the number of columns');
 				
 			}
 			

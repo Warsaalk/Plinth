@@ -21,6 +21,7 @@ use Plinth\Response\Response;
 use Plinth\Entity\EntityRepository;
 use Plinth\Logging\KLogger;
 use Plinth\Routing\Route;
+use Plinth\Exception\PlinthException;
 
 /**
 * This is the main class which handles and provides all the data
@@ -175,14 +176,14 @@ class Main {
 			
 				try {
 				
-					if ($this->getSetting('userclass') === false) throw new \Exception('Please define a user class and user repository');
+					if ($this->getSetting('userclass') === false) throw new PlinthException('Please define a user class and user repository');
 						
 					$this->getUserService()->setUserRepository($this->getEntityRepository()->getRepository($this->getSetting('userclass')));
 					
 			    	session_set_cookie_params(0, __BASE);
 			    	session_start();
 		    	
-				} catch (\Exception $e) {
+				} catch (PlinthException $e) {
 					
 					throw $e;
 					
@@ -198,7 +199,7 @@ class Main {
     	
         $path = $this->config->get('logger:path')?: __LOGGING_PATH;
                 
-        if (!file_exists($path)) throw new \Exception('Logging directory does not exist');
+        if (!file_exists($path)) throw new PlinthException('Logging directory does not exist');
         
         $this->_logger = KLogger::instance($path, KLogger::INFO);
         
@@ -518,7 +519,7 @@ class Main {
 	    		if (Language::validate($fallback) === $fallback) {
 	    			$this->getDict()->loadLanguage($fallback, $this->getSetting('localetype'), true);	    			
 	    		} else {
-	    			throw new \Exception("Plinth - Dictionary: Your fallback locale, $fallback, doesn't exist");	
+	    			throw new PlinthException("Your fallback locale, $fallback, doesn't exist");	
 	    		}	    		
 	    	}
     	
@@ -602,13 +603,13 @@ class Main {
 		
 			} else {
 				
-				throw new \Exception('Plinth - getToken, this function can only be used when you are using PHP sessions');
+				throw new PlinthException('getToken, this function can only be used when you are using PHP sessions');
 				
 			}
 			
 		} else {
 			
-			throw new \Exception('Plinth - getToken, the label can only contain alphabetic characters');
+			throw new PlinthException('getToken, the label can only contain alphabetic characters');
 			
 		}
 		

@@ -2,6 +2,7 @@
 
 namespace Plinth\Database\Query;
 
+use Plinth\Exception\PlinthException;
 abstract class BaseQuery implements IQuery {
 
 	/* Limit types */
@@ -70,14 +71,14 @@ abstract class BaseQuery implements IQuery {
 	 * @param string $type
 	 * @param string $condition
 	 * @param string $as
-	 * @throws Exception
+	 * @throws PlinthException
 	 */
 	public function join( $tojoin, $type=JoinQuery::Join, $condition=false, $as=false ) {
 
 		if ($tojoin instanceof SelectQuery || $tojoin instanceof UnionQuery || is_string($tojoin))
 			$this->joins[] = new JoinQuery($tojoin, $type, $condition, $as);
 		else
-			throw new Exception("BaseQuery:: It's only possible to join a SelectQuery instance or a string");
+			throw new PlinthException("It's only possible to join a SelectQuery instance or a string");
 		
 		return $this;
 

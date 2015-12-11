@@ -2,6 +2,7 @@
 
 namespace Plinth\Database\Query;
 
+use Plinth\Exception\PlinthException;
 abstract class WhereQuery extends BaseQuery {
 	
 	/* Where */
@@ -74,7 +75,7 @@ abstract class WhereQuery extends BaseQuery {
 				if ($seperator !== false) {
 					if ($seperator === self::WHERE_AND || $seperator === self::WHERE_OR)
 						$this->where .= $seperator;
-					else throw new \Exception('Please use a valid where seperator');
+					else throw new PlinthException('Please use a valid where seperator');
 				} else $this->where .= self::WHERE_AND; //Use Where and by default if not defined
 				
 			} else {

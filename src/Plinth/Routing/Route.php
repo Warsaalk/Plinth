@@ -4,6 +4,7 @@ namespace Plinth\Routing;
 
 use Translate;
 use Plinth\Common\Language;
+use Plinth\Exception\PlinthException;
 
 class Route {
 
@@ -89,7 +90,7 @@ class Route {
 	/**
 	 * @param array $routeArray
 	 * @param boolean $public Default public setting
-	 * @throws \Exception
+	 * @throws PlinthException
 	 */
 	public function __construct($args, $public=false) {
 
@@ -100,7 +101,7 @@ class Route {
 			!isset($args['type']) || 
 			!isset($args['template']) || 
 			!isset($args['methods'])) 
-			throw new \Exception('A route needs to have these parameters: path, type, template, methods');
+			throw new PlinthException('A route needs to have these parameters: path, type, template, methods');
 				
 		$this->_path = $args['path'];
 		$this->_type = $args['type'];

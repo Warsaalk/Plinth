@@ -4,6 +4,7 @@ namespace Plinth\Routing;
 
 use Plinth\Connector;
 use Plinth\Common\Debug;
+use Plinth\Exception\PlinthException;
 
 class Router extends Connector {
 	
@@ -35,15 +36,15 @@ class Router extends Connector {
 	/**
 	 * @param string $routesFile
 	 * @param boolean $public Default public setting
-	 * @throws \Exception
+	 * @throws PlinthException
 	 */
 	public function loadRoutes($routesFile, $public) {
 		
-		if (!file_exists($routesFile)) throw new \Exception('Add routing.json to your application config');
+		if (!file_exists($routesFile)) throw new PlinthException('Add routing.json to your application config');
 		
 		$routes = json_decode(file_get_contents($routesFile), true);
 		
-		if (!is_array($routes)) throw new \Exception('Cannot parse routing.json config');
+		if (!is_array($routes)) throw new PlinthException('Cannot parse routing.json config');
 		
 		$this->_routes = array();
 		
@@ -53,7 +54,7 @@ class Router extends Connector {
 			$this->_routes[$routeName] = $newroute;
 			
 			if ($newroute->isDefault()) {
-				if ($this->_defaultRoute !== false) throw new \Exception('You can only define 1 default route');
+				if ($this->_defaultRoute !== false) throw new PlinthException('You can only define 1 default route');
 				$this->_defaultRoute = $newroute;
 			}
 			
@@ -62,7 +63,7 @@ class Router extends Connector {
 	}
 	
 	/**
-	 * @throws \Exception
+	 * @throws PlinthException
 	 * @return boolean
 	 */
 	private function findRoute() {
@@ -83,11 +84,11 @@ class Router extends Connector {
 					
 					if (count($routeData) > 1) {
 						
-						if ($route->hasPathData() < 1) throw new \Exception('Please define your route data');
+						if ($route->hasPathData() < 1) throw new PlinthException('Please define your route data');
 						
 						foreach ($route->getPathData() as $label => $regex) {
 							
-							if (!isset($routeData[$label])) throw new \Exception('Your route data indexes don\'t match');
+							if (!isset($routeData[$label])) throw new PlinthException('Your route data indexes don\'t match');
 								
 							$route->addData($label, $routeData[$label]);
 							
@@ -126,11 +127,11 @@ class Router extends Connector {
 	/**
 	 * @param string $routeName
 	 * @param array $routeData
-	 * @throws \Exception
+	 * @throws PlinthException
 	 */
 	public function redirect($routeName) {
 		
-		if (!isset($this->_routes[$routeName])) throw new \Exception('Can\'t redirect to non existing route');
+		if (!isset($this->_routes[$routeName])) throw new PlinthException('Can\'t redirect to non existing route');
 		
 		//TODO:: Maybe check if routeData is defined 
 		
@@ -149,21 +150,21 @@ class Router extends Connector {
 	}
 	
 	/**
-	 * @throws \Exception
+	 * @throws PlinthException
 	 * @return Route
 	 */
 	public function getRoute($name=false) {
 		
 	    if ($name === false) {
 
-	        if (!$this->hasRoute()) throw new \Exception('No route selected yet');
+	        if (!$this->hasRoute()) throw new PlinthException('No route selected yet');
 	        
 	        return $this->_route;
 	        
 	    } else {
 	        
 	        if (isset($this->_routes[$name])) return $this->_routes[$name];
-	        else throw new \Exception('The route does not exist');
+	        else throw new PlinthException('The route does not exist');
 	        
 	    }
 		
@@ -179,12 +180,12 @@ class Router extends Connector {
 	}
 	
 	/**
-	 * @throws \Exception
+	 * @throws PlinthException
 	 * @return Route|boolean
 	 */
 	public function getDefault() {
 		
-		if ($this->_defaultRoute === false)  throw new \Exception('No default route defined');
+		if ($this->_defaultRoute === false)  throw new PlinthException('No default route defined');
 			
 		return $this->_defaultRoute;
 		
