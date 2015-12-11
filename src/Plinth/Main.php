@@ -103,6 +103,8 @@ class Main {
     	'defaultlocale' => false,
     	'fallbacklocale' => false,
     	'localetype' => 'php',
+    	'localeget' => false,
+    	'localeaccept' => false,
     	'tokenexpire' => 300,
     	'sessionregenerate' => 300
     );
@@ -486,19 +488,25 @@ class Main {
     	if (count(Language::getLanguages()) > 0) {
     	
 	    	$this->_lang = Language::getDefault();
-	    	
-	    	$languageCode = $this->getRequest()->get('l');
-	    	
-	    	//Get browser language
-	    	/* TODO:: Check caching problem
-			if (count($this->config->get('language:locales')) > 0 && isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
+		    		    	
+	    	//Get browser language, Accept-Language overrules default language
+			if ($this->getSetting('localeaccept') && isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) && count($this->config->get('language:locales')) > 0) {
 				$regex = '/'.implode('|',$this->config->get('language:locales')).'/';
-				if (preg_match_all($regex, $_SERVER['HTTP_ACCEPT_LANGUAGE'], $matches) > 0) {
+				$languageViaAccept = preg_match_all($regex, $_SERVER['HTTP_ACCEPT_LANGUAGE'], $matches);
+				if ($languageViaAccept > 0) {
 					$languageCode = $matches[0][0];
 				}
 			}
-	    	*/
-	    	//Get route language 
+			
+			//Get get language, Get-Language overrules Accept-Language
+	    	if ($this->getSetting('localeget') !== false) {
+	    		$languageViaGet = $this->getRequest()->get($this->getSetting('localeget'));
+	    		if ($languageViaGet !== null) {
+	    			$languageCode = $languageViaGet;
+	    		}
+	    	}
+		    		    	
+	    	//Get route language, Route-Language overrules Get-Language
 	    	if ($this->getRouter()->hasRoute()) {
 		    	$languageViaRequest = $this->getRouter()->getRoute()->get(Route::DATA_LANG);
 		    	if ($languageViaRequest !== false) {
@@ -510,7 +518,7 @@ class Main {
 	    	    $this->_lang = Language::validate($languageCode);
 	    	    //$this->getResponse()->saveCookie('language', $this->_lang);
 	    	}
-	    	
+	    		    	
 	    	//if (isset($cookie["language"]) && Language::validate($cookie["language"])) $this->_lang = $cookie["language"];
 	    	    	
 	    	$this->getDict()->loadLanguage($this->_lang, $this->getSetting('localetype'));
