@@ -105,7 +105,7 @@ class FileValidator {
                                    
                 }
             
-            }
+            } else unset($files[$label]);
             
         }
         
