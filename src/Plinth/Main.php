@@ -611,7 +611,7 @@ class Main {
 	 */
 	public static function getToken($label, $expires = true) {
 				
-		if (ctype_alpha($label)) {
+		if (ctype_alnum($label)) {
 		
 			if (session_status() !== PHP_SESSION_ACTIVE) session_start();
 			
@@ -632,7 +632,7 @@ class Main {
 			
 		} else {
 			
-			throw new PlinthException('getToken, the label can only contain alphabetic characters');
+			throw new PlinthException('getToken, the label can only contain alphanumeric characters');
 			
 		}
 		
