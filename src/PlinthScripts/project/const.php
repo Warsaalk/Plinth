@@ -15,18 +15,19 @@
 	define( '__APP_CONFIG_PATH'	, __APP_PATH 	. 'config' 	. DIRECTORY_SEPARATOR );
 	
 	//Config files 
-	define( '__APP_CONFIG_PROD'		, __APP_CONFIG_PATH . 'config.ini'		);
-	define( '__APP_CONFIG_ROUTING'	, __APP_CONFIG_PATH . 'routing.json'	);
+	define( '__APP_CONFIG_PROD'			, __APP_CONFIG_PATH . 'config.ini'		);
+	define( '__APP_CONFIG_ROUTING'		, __APP_CONFIG_PATH . 'routing.json'	);
+	define( '__APP_CONFIG_COMPONENTS'	, __APP_CONFIG_PATH . 'components.json'	);
 	
 	//Logging
 	define( '__LOGGING_PATH'   , __APP_PATH . 'log'. DIRECTORY_SEPARATOR );
 	
 	//Templates
-	define( '__TEMPLATE' 		, __APP_PATH . 'tpl' 	. DIRECTORY_SEPARATOR );
-	define( '__TEMPLATE_PAGE' 	, __TEMPLATE . 'page' 	. DIRECTORY_SEPARATOR );
-	define( '__TEMPLATE_JSON' 	, __TEMPLATE . 'json' 	. DIRECTORY_SEPARATOR );
-	define( '__TEMPLATE_HTML' 	, __TEMPLATE . 'html' 	. DIRECTORY_SEPARATOR );
-	define( '__TEMPLATE_FILE' 	, __TEMPLATE . 'file' 	. DIRECTORY_SEPARATOR );
+	define( '__TEMPLATE' 		, __APP_PATH . 'tpl' . DIRECTORY_SEPARATOR );
+	define( '__TEMPLATE_PAGE' 	, 'page' . DIRECTORY_SEPARATOR );
+	define( '__TEMPLATE_JSON' 	, 'json' . DIRECTORY_SEPARATOR );
+	define( '__TEMPLATE_HTML' 	, 'html' . DIRECTORY_SEPARATOR );
+	define( '__TEMPLATE_FILE' 	, 'file' . DIRECTORY_SEPARATOR );
 	
 	//Extensions 
 	define( '__EXTENSION_PHP'		, '.php' );

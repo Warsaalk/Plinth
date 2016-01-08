@@ -4,6 +4,7 @@ namespace Plinth\Response;
 
 use Plinth\Connector;
 use Plinth\Routing\Route;
+use Plinth\Main;
 
 class Response extends Connector {
 	
@@ -27,6 +28,16 @@ class Response extends Connector {
 	/**
 	 * @var string
 	 */
+	private $_base;
+	
+	/**
+	 * @var string
+	 */
+	private $_path;
+	
+	/**
+	 * @var string
+	 */
 	public $content;
 	
 	/**
@@ -39,6 +50,9 @@ class Response extends Connector {
 		$this->_assetVersion = $this->Main()->config->get('assets:version');
 		$this->_data = array();
 	
+		$this->_base = $main->getSetting('templatebase');
+		$this->_path = $main->getSetting('templatepath');
+		
 	}
     
     /**
@@ -145,7 +159,9 @@ class Response extends Connector {
 	 * @param string $path
 	 * @return string
 	 */
-	public function getTemplate($tpl, $path = __TEMPLATE) {
+	public function getTemplate($tpl, $path = '') {
+		
+		$path = $this->_path . $path;
 		
 		return Parser::parse($this,	$tpl, $path, __EXTENSION_TEMPLATE, $this->getDict());
 	
@@ -199,7 +215,7 @@ class Response extends Connector {
 			 
 		} else {
 	
-			return $this->getTemplate('base');
+			return $this->getTemplate($this->_base);
 	
 		}
 			

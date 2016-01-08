@@ -107,7 +107,9 @@ class Main {
     	'localeaccept' => false,
     	'localecookie' => false,
     	'tokenexpire' => 300,
-    	'sessionregenerate' => 300
+    	'sessionregenerate' => 300,
+    	'templatebase' => 'base',
+    	'templatepath' => __TEMPLATE
     );
     
     /**
