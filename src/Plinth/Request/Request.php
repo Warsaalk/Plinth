@@ -365,6 +365,18 @@ class Request extends Connector {
 		
 	}
 	
+	/**
+	 * @param string $base
+	 * @return string
+	 */
+	public static function getRequestPath ($base) {
+		
+		$regex	= '/^'. str_replace('/', '\/', $base) .'/';
+		$path	= preg_replace($regex, '', $_SERVER['REQUEST_URI']);
+		return	preg_replace('/\?(.*)$/', '', $path); //Strip GET path from URI
+		
+	}
+	
 	public function get($var) {
 		
 		return isset($this->_getData[$var]) ? $this->_getData[$var] : null;

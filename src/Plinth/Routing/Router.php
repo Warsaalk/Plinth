@@ -5,6 +5,7 @@ namespace Plinth\Routing;
 use Plinth\Connector;
 use Plinth\Common\Debug;
 use Plinth\Exception\PlinthException;
+use Plinth\Request\Request;
 
 class Router extends Connector {
 	
@@ -114,11 +115,7 @@ class Router extends Connector {
 	 */
 	public function handleRoute($base) {
 	    
-		$regex    = '/^'. str_replace('/', '\/', $base) .'/';
-		$path     = preg_replace($regex, '', $_SERVER['REQUEST_URI']);
-		$path     = preg_replace('/\?(.*)$/', '', $path); //Strip GET path from URI
-		
-		$this->_path = $path;
+		$this->_path = Request::getRequestPath($base);
 		
 		$this->findRoute();
 		
