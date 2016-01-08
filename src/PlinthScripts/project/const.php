@@ -16,7 +16,6 @@
 	
 	//Config files 
 	define( '__APP_CONFIG_PROD'		, __APP_CONFIG_PATH . 'config.ini'		);
-	define( '__APP_CONFIG_DEV'		, __APP_CONFIG_PATH . 'config_dev.ini'	);
 	define( '__APP_CONFIG_ROUTING'	, __APP_CONFIG_PATH . 'routing.json'	);
 	
 	//Logging

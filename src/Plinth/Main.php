@@ -115,15 +115,7 @@ class Main {
      */
     public $settings;
     
-    /**
-     * @var boolean
-     */
-    private $_devEnvironment;
-    
-    /**
-     * @param boolean $inProduction
-     */
-    public function __construct($devEnvironment=false) { 
+    public function __construct() { 
     	
     	$this->loadConfig();
         $this->loadSettings();
@@ -131,9 +123,7 @@ class Main {
         if (($timezone = $this->config->get('date:timezone')) !== false) {
         	date_default_timezone_set($timezone);
         }
-        
-    	$this->_devEnvironment = $devEnvironment;
-        
+                
         $this->registerLogger();
                 
     	$this->loadDatabase();
@@ -146,10 +136,8 @@ class Main {
     }
     
     private function loadConfig() {
-    	
-    	$configFile = $this->_devEnvironment ? __APP_CONFIG_DEV : __APP_CONFIG_PROD;
-    	 
-    	$this->config = new Config($configFile);
+    	    	 
+    	$this->config = new Config(__APP_CONFIG_PROD);
     	
     }
     
@@ -242,11 +230,9 @@ class Main {
     private function executeHandlers() {
     	
     	$this->getRequest()->initRequest($_GET);
-    	
-    	$baseRoute = __BASE . ($this->_devEnvironment ? 'dev/' : '');
-    	
+    	    	
     	$this->getRouter()->loadRoutes(__APP_CONFIG_ROUTING, !$this->getSetting('forcelogin'));
-    	$this->getRouter()->handleRoute($baseRoute);
+    	$this->getRouter()->handleRoute(__BASE);
 
     	$this->handleSessions();
     	$this->handleLogout();
