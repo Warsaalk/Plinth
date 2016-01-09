@@ -9,14 +9,14 @@ class Config {
         /**
          * @var array
          */
-		private $_config;
+		private $config;
 		
 		/**
 		 * @param string $file
 		 */
 		public function __construct($file) {
 			
-			$this->_config = $this->parse(parse_ini_file($file, true, INI_SCANNER_RAW));
+			$this->config = $this->parse(parse_ini_file($file, true, INI_SCANNER_RAW));
 				
 		}
 		
@@ -127,6 +127,15 @@ class Config {
 			}	
 			
 		}
+		
+		/**
+		 * @return array
+		 */
+		public function getAll() {
+			
+			return $this->config;
+			
+		}
 
 		/**
 		 * @param string $key
@@ -134,7 +143,7 @@ class Config {
 		 */
 		public function get($key) { 
 						
-			return $this->walk(explode(':', $key), $this->_config);
+			return $this->walk(explode(':', $key), $this->config);
 		
 		}
 		
@@ -143,8 +152,20 @@ class Config {
 		 */
 		public function destroy($firstKey) {
 			
-            if (isset($this->_config[$firstKey])) 
-                unset($this->_config[$firstKey]);
+            if (isset($this->config[$firstKey])) 
+                unset($this->config[$firstKey]);
+			
+		}
+		
+		/**
+		 * @param Config $config
+		 * @return Config
+		 */
+		public function merge(Config $config) {
+			
+			$this->config = array_replace_recursive($this->config, $config->getAll());
+			
+			return $this;
 			
 		}
 
