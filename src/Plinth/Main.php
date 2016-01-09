@@ -275,13 +275,30 @@ class Main {
     private function executeHandlers() {
     	
     	$this->getRequest()->initRequest($_GET);
-    	    	
-    	$this->getRouter()->loadRoutes(__APP_CONFIG_ROUTING, !$this->getSetting('forcelogin'));
-    	$this->getRouter()->handleRoute(__BASE);
+    	    
+    	$this->handleRouter();
 
     	$this->handleSessions();
     	$this->handleLogout();
     	$this->handleDictionary($_COOKIE, $this->getSetting('fallbacklocale')); //Handle Dictionary
+    	
+    }
+    
+    private function handleRouter() {
+    	
+    	$public = !$this->getSetting('forcelogin');
+    	
+    	if ($this->component === false || $this->component->getMergeDefaultRouting()) {
+    		$this->getRouter()->loadRoutes(__APP_CONFIG_ROUTING, $public);
+    	}
+    	
+    	if ($this->component !== false) {
+    		$this->getRouter()->loadRoutes($this->component->getRoutingPath(), $public);
+    	}
+    	
+    	Debug::dump($this->getRouter());
+    	
+    	$this->getRouter()->handleRoute(__BASE);
     	
     }
     
