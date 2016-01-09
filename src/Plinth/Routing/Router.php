@@ -22,7 +22,7 @@ class Router extends Connector {
 	/**
 	 * @var Route[]
 	 */
-	private $_routes;
+	private $_routes = array();
 	
 	/**
 	 * @var Route|boolean
@@ -46,8 +46,6 @@ class Router extends Connector {
 		$routes = json_decode(file_get_contents($routesFile), true);
 		
 		if (!is_array($routes)) throw new PlinthException('Cannot parse routing.json config');
-		
-		$this->_routes = array();
 		
 		foreach ($routes as $routeName => $routeInfo) {
 			
