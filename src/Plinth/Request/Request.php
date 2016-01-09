@@ -352,7 +352,7 @@ class Request extends Connector {
 	 */
 	public function isLoginRequest() {
 		
-		return $this->_action === self::ACTION_LOGIN;
+		return preg_match('/^'. self::ACTION_LOGIN . '/', $this->_action) === 1;
 		
 	}
 	
