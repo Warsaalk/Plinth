@@ -295,9 +295,7 @@ class Main {
     	if ($this->component !== false) {
     		$this->getRouter()->loadRoutes($this->component->getRoutingPath(), $public);
     	}
-    	
-    	Debug::dump($this->getRouter());
-    	
+    	    	
     	$this->getRouter()->handleRoute(__BASE);
     	
     }
