@@ -90,6 +90,11 @@ class Main {
     private $_logger;
     
     /**
+     * @var Component|boolean
+     */
+    private $component;
+    
+    /**
      * @var Config
      */
     public $config;
@@ -119,6 +124,7 @@ class Main {
     
     public function __construct() { 
     	
+    	$this->loadComponent();
     	$this->loadConfig();
         $this->loadSettings();
         
@@ -137,9 +143,46 @@ class Main {
     			
     }
     
+    private function loadComponent() {
+			
+    	$component = false;
+    	$currentPath = Request::getRequestPath(__BASE);
+    	
+    	if (file_exists(__APP_CONFIG_COMPONENTS)) {
+    	
+	    	$componentsData = json_decode(file_get_contents(__APP_CONFIG_COMPONENTS), true);
+	    	
+	    	if (!is_array($componentsData)) throw new PlinthException('Cannot parse components.json config');
+	    	
+	    	foreach ($componentsData as $label => $data) {
+	    		$loadedComponent = Component::loadFromArray(__APP_CONFIG_PATH, $label, $data);
+	    		if ($loadedComponent->matchesCurrentPath($currentPath)) {
+	    			if ($component === false || $loadedComponent->getDepth() > $component->getDepth()) $component = $loadedComponent;
+	    		}
+	    	}
+    		    	
+    	}
+    	    	
+    	$this->component = $component;
+    	
+    }
+    
     private function loadConfig() {
     	    	 
-    	$this->config = new Config(__APP_CONFIG_PROD);
+    	$defaultconfig = new Config(__APP_CONFIG_PROD);
+    	
+    	if ($this->component !== false) {
+    		$componentconfig = new Config($this->component->getConfigPath());
+    		if ($this->component->getMergeDefaultConfig()) {
+    			$config = $defaultconfig->merge($componentconfig);
+    		} else {
+    			$config = $componentconfig;
+    		}
+    	} else {
+    		$config = $defaultconfig;
+    	}
+    	    	
+    	$this->config = $config;
     	
     }
     
