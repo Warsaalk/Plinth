@@ -516,6 +516,15 @@ class Main {
     	
     }
     
+    /**
+     * @return Component|boolean
+     */
+    public function getComponent() {
+    	
+    	return $this->component;
+    	
+    }
+    
     public function handleLogout() {
         
         if ($this->getRequest()->get('logout') !== null) {
