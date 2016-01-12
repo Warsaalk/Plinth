@@ -147,6 +147,7 @@ class Main {
 			
     	$component = false;
     	$currentPath = Request::getRequestPath(__BASE);
+    	$defaultPath = false;
     	
     	if (file_exists(__APP_CONFIG_COMPONENTS)) {
     	
@@ -156,6 +157,10 @@ class Main {
 	    	
 	    	foreach ($componentsData as $label => $data) {
 	    		$loadedComponent = Component::loadFromArray(__APP_CONFIG_PATH, $label, $data);
+	    		if ($loadedComponent->getPath() === false) {
+	    			if ($defaultPath === false) $defaultPath = true;
+	    			else						throw new PlinthException('Their can only be one default path in components.json config');
+	    		}
 	    		if ($loadedComponent->matchesCurrentPath($currentPath)) {
 	    			if ($component === false || $loadedComponent->getDepth() > $component->getDepth()) $component = $loadedComponent;
 	    		}

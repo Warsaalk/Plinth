@@ -89,7 +89,7 @@ class Component {
 		
 		$regex = '/^' . str_replace('/', '\/', $this->path). '($|\/)/';
 				
-		if (preg_match($regex, $currentPath) === 1) return true;
+		if ($this->path === false || preg_match($regex, $currentPath) === 1) return true;
 		
 		return false;
 		
@@ -201,6 +201,8 @@ class Component {
 	 * @return integer
 	 */
 	public function getDepth() {
+		
+		if ($this->path === false) return -1;
 		
 		return substr_count($this->path, '/');
 		
