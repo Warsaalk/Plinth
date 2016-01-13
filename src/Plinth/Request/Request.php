@@ -367,13 +367,14 @@ class Request extends Connector {
 	
 	/**
 	 * @param string $base
+	 * @param boolean $stripGET (optional)
 	 * @return string
 	 */
-	public static function getRequestPath ($base) {
+	public static function getRequestPath ($base, $stripGET = true) {
 		
 		$regex	= '/^'. str_replace('/', '\/', $base) .'/';
 		$path	= preg_replace($regex, '', $_SERVER['REQUEST_URI']);
-		return	preg_replace('/\?(.*)$/', '', $path); //Strip GET path from URI
+		return	$stripGET === true ? preg_replace('/\?(.*)$/', '', $path) : $path; //Strip GET path from URI
 		
 	}
 	
