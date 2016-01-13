@@ -536,6 +536,10 @@ class Main {
             
             $this->getUserService()->logout();
             
+            //Strip the logout parameter & redirect to the original destination page
+            header('Location: ' . __BASE_URL . preg_replace('/(logout&|\?logout$|&logout$)/', '', Request::getRequestPath(__BASE, false)));
+            exit;
+            
         }
     
     }
