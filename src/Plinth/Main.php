@@ -139,7 +139,6 @@ class Main {
         $this->initDictionaries($this->config->get('language:locales')?: array(), $this->getSetting('defaultlocale'));
         
         $this->registerClasses();
-        $this->executeHandlers();
     			
     }
     
@@ -309,6 +308,8 @@ class Main {
      * @param string $redirected (optional)
      */
     public function handleRequest($redirected=false) {
+    	
+        $this->executeHandlers();
     	
     	if ($this->getRouter()->hasRoute()) {
     		 
