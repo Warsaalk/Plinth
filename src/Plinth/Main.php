@@ -29,6 +29,11 @@ use Plinth\Exception\PlinthException;
 */
 class Main {
 
+	const 	STATE_INIT = 0,
+			STATE_HANDLING = 1,
+			STATE_REQUEST = 2,
+			STATE_DONE = 3;
+	
 	/**
 	 * @var string
 	 */
@@ -95,6 +100,11 @@ class Main {
     private $component;
     
     /**
+     * @var integer
+     */
+    private $state;
+    
+    /**
      * @var Config
      */
     public $config;
@@ -123,6 +133,8 @@ class Main {
     public $settings;
     
     public function __construct() { 
+        
+        $this->state = self::STATE_INIT;
     	
     	$this->loadComponent();
     	$this->loadConfig();
@@ -277,6 +289,8 @@ class Main {
     }
     
     private function executeHandlers() {
+        
+        $this->state = self::STATE_HANDLING;
     	
     	$this->getRequest()->initRequest($_GET);
     	    
@@ -309,7 +323,10 @@ class Main {
      */
     public function handleRequest($redirected=false) {
     	
-        $this->executeHandlers();
+    	if ($this->state < self::STATE_HANDLING) {
+        	$this->executeHandlers();
+        	$this->state = self::STATE_REQUEST;
+    	}
     	
     	if ($this->getRouter()->hasRoute()) {
     		 
@@ -331,6 +348,10 @@ class Main {
     			 
     		}
     		 
+    	}
+    	
+    	if ($this->state < self::STATE_DONE) {
+    		$this->state = self::STATE_DONE;
     	}
     	
     }
