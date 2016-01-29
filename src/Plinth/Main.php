@@ -664,11 +664,20 @@ class Main {
     }
     
     /**
+     * @param boolean $asArray (optional)
      * @return Info[]
      */
-    public function getInfo() { 
+    public function getInfo($asArray = false) { 
     	
-    	return $this->_info;       
+    	if ($asArray === true) {
+    		$infos = array();
+    		foreach ($this->_info as $info) {
+    			$infos[] = $info->getArray();
+    		}
+    		return $infos;
+    	}
+    	
+    	return $this->_info;
     
     }
     
