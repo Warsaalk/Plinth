@@ -117,6 +117,7 @@ class Main {
     	'loginpage' => 'page_login',
     	'defaultlocale' => false,
     	'fallbacklocale' => false,
+    	'autoroutelocale' => true,
     	'localetype' => 'php',
     	'localeget' => false,
     	'localeaccept' => false,

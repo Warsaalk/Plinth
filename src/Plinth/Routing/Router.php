@@ -49,7 +49,7 @@ class Router extends Connector {
 		
 		foreach ($routes as $routeName => $routeInfo) {
 			
-			$newroute = new Route(array('name' => $routeName) + $routeInfo, $public);
+			$newroute = new Route(array('name' => $routeName) + $routeInfo, $this->Main(), $public);
 			$this->_routes[$routeName] = $newroute;
 			
 			if ($newroute->isDefault()) {

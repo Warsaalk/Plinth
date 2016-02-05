@@ -5,8 +5,10 @@ namespace Plinth\Routing;
 use Translate;
 use Plinth\Common\Language;
 use Plinth\Exception\PlinthException;
+use Plinth\Connector;
+use Plinth\Main;
 
-class Route {
+class Route extends Connector {
 
 	const DATA_LANG = 'lang';
 	
@@ -92,8 +94,10 @@ class Route {
 	 * @param boolean $public Default public setting
 	 * @throws PlinthException
 	 */
-	public function __construct($args, $public=false) {
+	public function __construct($args, Main $main, $public=false) {
 
+		parent::__construct($main);
+		
 		$this->_name = $args['name'];
 		$this->_public    = $public;
 				
@@ -175,9 +179,7 @@ class Route {
 	 * @return string
 	 */
 	public function getPath(array $data = array()) {
-		
-		if (empty($data)) return $this->_path;
-		
+				
 		return $this->translatePath($this->_path, $data);
 		
 	}
@@ -187,9 +189,7 @@ class Route {
 	 * @return string
 	 */
 	public function getDefaultLangPath(array $data = array()) {
-		
-		if (empty($data)) return $this->_pathDefaultLang;
-		
+				
 		return $this->translatePath($this->_pathDefaultLang, $data);
 		
 	}
@@ -202,7 +202,12 @@ class Route {
 	 */
 	private function translatePath($path, array $data) {
 		
-		$callb = function($match) use($data) { return isset($data[$match[1]]) ? $data[$match[1]] : $match[1]; };
+		if ($this->Main()->getSetting('autoroutelocale') === true && $this->getPathData('lang') === true && !isset($data['lang'])) {
+			$lang = $this->Main()->getLang();
+			if ($lang) $data['lang'] = $lang;
+		}
+		
+		$callb = function($match) use($data) { return isset($data[$match[1]]) ? $data[$match[1]] : '{'.$match[1].'}'; };
 		return preg_replace_callback('/{([\w]+)}/', $callb, $path);
 		
 	}
