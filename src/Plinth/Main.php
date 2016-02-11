@@ -311,7 +311,7 @@ class Main {
     		$this->getRouter()->loadRoutes(__APP_CONFIG_ROUTING, $public);
     	}
     	
-    	if ($this->component !== false) {
+    	if ($this->component !== false && $this->component->getRouting() !== false) {
     		$this->getRouter()->loadRoutes($this->component->getRoutingPath(), $public);
     	}
     	    	
