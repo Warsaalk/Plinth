@@ -45,19 +45,4 @@ class ResponseHelper {
     	
     }
     
-    public static function getTemplatePath($type) {
-    	
-    	switch ($type) {
-    	
-    		case Route::TYPE_FILE 	: return __TEMPLATE_FILE;
-    		case Route::TYPE_JSON 	: return __TEMPLATE_JSON;
-    		case Route::TYPE_PAGE 	: return __TEMPLATE_PAGE;
-    		case Route::TYPE_HTML 	: return __TEMPLATE_HTML;
-    		case Route::TYPE_XML 	: return __TEMPLATE_HTML;
-    		default					: return false;
-    	
-    	}
-    	
-    }
-    
 }

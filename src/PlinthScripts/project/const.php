@@ -24,10 +24,6 @@
 	
 	//Templates
 	define( '__TEMPLATE' 		, __APP_PATH . 'tpl' . DIRECTORY_SEPARATOR );
-	define( '__TEMPLATE_PAGE' 	, 'page' . DIRECTORY_SEPARATOR );
-	define( '__TEMPLATE_JSON' 	, 'json' . DIRECTORY_SEPARATOR );
-	define( '__TEMPLATE_HTML' 	, 'html' . DIRECTORY_SEPARATOR );
-	define( '__TEMPLATE_FILE' 	, 'file' . DIRECTORY_SEPARATOR );
 	
 	//Extensions 
 	define( '__EXTENSION_PHP'		, '.php' );

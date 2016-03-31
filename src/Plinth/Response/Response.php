@@ -202,12 +202,11 @@ class Response extends Connector {
 			}
 		}
 		 
-		$contentType= ResponseHelper::getContentType($route->getType());
-		$location 	= ResponseHelper::getTemplatePath($route->getType());
+		$contentType = ResponseHelper::getContentType($route->getType());
 	
 		if ($contentType !== false) header('Content-type: '. $contentType .'; charset=UTF-8');
 	
-		$this->content = $this->getTemplate($route->getTemplate(), $location);
+		$this->content = $this->getTemplate($route->getTemplate());
 	
 		if ($route->getType() !== Route::TYPE_PAGE && $route->getType() !== Route::TYPE_ERROR) {
 	
