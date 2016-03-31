@@ -1,4 +1,5 @@
 /.buildpath
 /.project
+/.idea
 /composer.phar
 /vendor/
