@@ -49,7 +49,7 @@ class Route extends Connector {
 	/**
 	 * @var string
 	 */
-	private	$_type;
+	private	$_type = false;
 	
 	/**
 	 * @var string
@@ -100,17 +100,16 @@ class Route extends Connector {
 		$this->_name = $args['name'];
 		$this->_public    = $public;
 				
-		if (!isset($args['path']) || 
-			!isset($args['type']) || 
+		if (!isset($args['path']) ||
 			!isset($args['template']) || 
 			!isset($args['methods'])) 
-			throw new PlinthException('A route needs to have these parameters: path, type, template, methods');
+			throw new PlinthException('A route needs to have these parameters: path, template, methods');
 				
 		$this->_path = $args['path'];
-		$this->_type = $args['type'];
 		$this->_template = $args['template'];
 		$this->_methods = $args['methods'];
 
+		if (isset($args['type'])) $this->_type = $args['type'];
 		if (isset($args['pathData'])) $this->_pathData = $args['pathData'];
 		if (isset($args['pathDefaultLang'])) $this->_pathDefaultLang = $args['pathDefaultLang'];
 		if (isset($args['default'])) $this->_default = $args['default'];
@@ -262,7 +261,7 @@ class Route extends Connector {
 	}
 	
 	/**
-	 * @return string
+	 * @return string|boolean
 	 */
 	public function getType() {
 		

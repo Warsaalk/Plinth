@@ -20,6 +20,11 @@ class ResponseHelper {
      * @var string
      */
     const XML		= "application/xml";
+
+	/**
+	 * @var string
+	 */
+	const DEF		= "application/octet-stream";
     
     public static function getContentType($type) {
     	
@@ -29,7 +34,7 @@ class ResponseHelper {
     		case Route::TYPE_XML 	: return self::XML;
     		case Route::TYPE_PAGE 	: 
     		case Route::TYPE_HTML 	: return self::HTML;
-    		default					: false;
+    		default					: return self::DEF;
     		
     	}
     	
