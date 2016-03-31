@@ -19,7 +19,6 @@ class Route extends Connector {
 			TYPE_PAGE = 'page',
 			TYPE_HTML = 'html',
 			TYPE_XML  = 'xml',
-			TYPE_FILE = 'file',
 			TYPE_ERROR= 'error';
 	
 	/**

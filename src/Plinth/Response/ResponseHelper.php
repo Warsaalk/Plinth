@@ -14,16 +14,6 @@ class ResponseHelper {
     /**
      * @var string
      */
-    const Excel     = "application/vnd.ms-excel";
-    
-    /**
-     * @var string
-     */
-    const Excel2007 = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-    
-    /**
-     * @var string
-     */
     const JSON		= "application/json";
     
     /**
