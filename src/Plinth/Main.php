@@ -125,7 +125,8 @@ class Main {
     	'tokenexpire' => 300,
     	'sessionregenerate' => 300,
     	'templatebase' => 'base',
-    	'templatepath' => __TEMPLATE
+    	'templatepath' => __TEMPLATE,
+		'assetpath' => false
     );
     
     /**

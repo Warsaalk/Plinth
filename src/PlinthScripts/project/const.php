@@ -44,12 +44,6 @@
 	define( '__APP_ACTION'	, __APP_PATH . 'action' . DIRECTORY_SEPARATOR );
 	
 	define( '__PUBLIC', __BASE_ROOT . 'public' . DIRECTORY_SEPARATOR);
-	//Assets
-	define( '__ASSETS'          , 'assets/'     ); //Assets will be accessed via browser via relative path
-	define( '__IMAGES'			, __ASSETS . 'img/'		);
-	define( '__JAVASCRIPT'		, __ASSETS . 'js/'		);
-	define( '__CSS'				, __ASSETS . 'css/'		);
-	define( '__FONTS'			, __ASSETS . 'fonts/'	);
 	
 /**
  * Autoloading for App directory

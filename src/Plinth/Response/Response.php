@@ -18,7 +18,12 @@ class Response extends Connector {
 	/**
 	 * @var string|boolean
 	 */
-	private $_assetVersion = false;
+	private $assetVersion = false;
+
+	/**
+	 * @var string|boolean
+	 */
+	private $assetPath;
 	
 	/**
 	 * @var array
@@ -47,7 +52,8 @@ class Response extends Connector {
 	
 		parent::__construct($main);
 		
-		$this->_assetVersion = $this->Main()->config->get('assets:version');
+		$this->assetVersion = $main->config->get('assets:version');
+		$this->assetPath = $main->getSetting('assetpath');
 		$this->_data = array();
 	
 		$this->_base = $main->getSetting('templatebase');
@@ -74,44 +80,38 @@ class Response extends Connector {
 	 * @return string
 	 */
 	public function getAsset($asset) {
-	
-		if ($this->_assetVersion) $asset .= '?v=' . $this->_assetVersion;
-	
+
+		$external = preg_match('/^https?:\/\//', $asset) === 1;
+
+		if ($this->assetVersion) $asset .= '?v=' . $this->assetVersion;
+
+		if ($this->assetPath !== false && $external !== true) {
+			$asset = $this->assetPath . $asset;
+		}
+
 		return $asset;
 	
 	}
 	
 	/**
-	 * @param string $image
-	 * @return string
-	 */
-	public function getImageUrl($image) {
-	    
-	    return __IMAGES . $this->getAsset($image);
-	    
-	}
-	
-	/**
 	 * @param string $script
-	 * @param string $media
 	 * @return string
 	 */
-	public function getScripts($script, $media='screen') {
-	
-		$external = preg_match('/^https?:\/\//', $script) === 1;
-		
-		return '<script type="text/javascript" src="' . ($external ? '' : __JAVASCRIPT) . $this->getAsset($script) . '" media="' . $media . '"></script>';
+	public function getScriptTag($script) {
+
+		return '<script type="text/javascript" src="' . $this->getAsset($script) . '"></script>';
 	
 	}
 	
 	/**
 	 * @param string $css
-	 * @param string $cond
+	 * @param string|boolean $cond
+	 * @param array $media
 	 * @return string
 	 */
-	public function getCSS($css, $cond=false, $media=array('screen')) {
+	public function getCssTag($css, $cond=false, $media=array('screen')) {
 	
-		$cssTag = '<link rel="stylesheet" type="text/css" href="'. __CSS . $this->getAsset( $css ) .'" media="'. implode(',', $media) .'" />';
+		$cssTag = '<link rel="stylesheet" type="text/css" href="' . $this->getAsset( $css ) . '" media="' . implode(',', $media) . '" />';
 	
 		return $cond !== false ? '<!--[if '. $cond .']>' . $cssTag . '<![endif]-->' : $cssTag;
 	
