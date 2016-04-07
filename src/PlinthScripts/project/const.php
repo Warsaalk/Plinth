@@ -5,7 +5,7 @@
 	//Main paths
 	define( '__BASE'			, (isset($_SERVER['APP_BASE']) && $_SERVER['APP_BASE'] !== NULL ? $_SERVER['APP_BASE'] : "") . '/'		);
 	define( '__BASE_SCHEME'		, !empty($_SERVER['HTTPS']) && stristr($_SERVER['HTTPS'], 'off') === false ? 'https:' : 'http:' );
-	define( '__BASE_URL'		, '//'.$_SERVER['HTTP_HOST'].__BASE 	);
+	define( '__BASE_URL'		, '//'. (isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : '127.0.0.1') .__BASE);
 	define( '__BASE_ROOT'		, __DIR__ . DIRECTORY_SEPARATOR			);
 	define( '__APP_URL'			, 'https:' . __BASE_URL 			);
 		

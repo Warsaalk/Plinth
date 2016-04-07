@@ -21,7 +21,8 @@ class Request extends Connector {
 	const	HTTP_GET 	= "GET",
 			HTTP_PUT 	= "PUT",
 			HTTP_POST 	= "POST",
-			HTTP_DELETE = "DELETE";
+			HTTP_DELETE = "DELETE",
+			HTTP_NOTSET	= NULL;
 	
 	const	ACTION_LOGIN = "login";
 	
@@ -98,7 +99,7 @@ class Request extends Connector {
 		
 		$this->_data = array();
 		$this->_files = array();
-		$this->_method = $_SERVER['REQUEST_METHOD'];
+		$this->_method = isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : self::HTTP_NOTSET;
 		
 	}
 	
@@ -254,7 +255,8 @@ class Request extends Connector {
 
 		if ($validator->isValid()) {
 			
-			if ($token !== false && $token['required'] === true && !$this->Main()->validateToken($validator->getVariable('token'))) {				if ($token['message']) $this->addError($token['message']);
+			if ($token !== false && $token['required'] === true && !$this->Main()->validateToken($validator->getVariable('token'))) {
+				if ($token['message']) $this->addError($token['message']);
 				$invalid = true;
 			}
 			
@@ -371,9 +373,11 @@ class Request extends Connector {
 	 * @return string
 	 */
 	public static function getRequestPath ($base, $stripGET = true) {
-		
+
+		$request_uri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
+
 		$regex	= '/^'. str_replace('/', '\/', $base) .'/';
-		$path	= preg_replace($regex, '', $_SERVER['REQUEST_URI']);
+		$path	= preg_replace($regex, '', $request_uri);
 		return	$stripGET === true ? preg_replace('/\?(.*)$/', '', $path) : $path; //Strip GET path from URI
 		
 	}
