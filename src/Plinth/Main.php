@@ -114,6 +114,7 @@ class Main {
         'userservice' => false,
     	'usersession' => false,
     	'userclass' => false,
+		'userrehash' => false,
     	'loginpage' => 'page_login',
     	'defaultlocale' => false,
     	'fallbacklocale' => false,

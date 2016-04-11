@@ -42,6 +42,21 @@ abstract class UserRepository extends EntityRepository {
 		throw new PlinthException('Please implement the findUserWithToken method in your UserRepository');
 		
 	}
+
+	/**
+	 * This function will be called when you have enabled the userrehash option in you application config.
+	 * It will be called when the user password needs to be updated with a stronger algorithm.
+	 * http://php.net/manual/en/function.password-needs-rehash.php
+	 *
+	 * @param $userID
+	 * @param $newToken
+	 * @throws PlinthException
+	 */
+	public function updateUserToken($userID, $newToken) {
+
+		throw new PlinthException('Please implement the updateUserToken method in your UserRepository');
+
+	}
 	
 	/**
 	 * @param mixed $ID

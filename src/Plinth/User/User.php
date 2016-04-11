@@ -14,6 +14,13 @@ abstract class User {
 	 * @return mixed
 	 */
 	public abstract function getToken();
+
+	/**
+	 * This function should clear the token, it will be called after the users login is checked
+	 *
+	 * @return mixed
+	 */
+	public abstract function clearToken();
 	
 	/**
 	 * @return mixed|boolean

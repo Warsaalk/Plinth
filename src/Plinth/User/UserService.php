@@ -4,6 +4,7 @@ namespace Plinth\User;
 
 use Plinth\Database\Connection;
 use Plinth\Connector;
+use Plinth\Exception\PlinthException;
 use Plinth\Validation\Validator;
 use Plinth\Common\Debug;
 
@@ -73,6 +74,21 @@ class UserService extends Connector {
 		return $this->loggedOut;
 		
 	}
+
+	/**
+	 * This function will used the recommended way in PHP of hashing passwords.
+	 * The length of the hashed token may change over time as PHP may release newer versions with better and stronger algorithms.
+	 * Therefore it is recommended to use a width of 255 characters.
+	 * http://php.net/manual/en/function.password-hash.php
+	 *
+	 * @param $token
+	 * @return $string
+	 */
+	public function getHashForToken($token) {
+
+		return password_hash($token, PASSWORD_DEFAULT);
+
+	}
 	
 	/**
 	 * @param string $token
@@ -127,14 +143,28 @@ class UserService extends Connector {
 	 */
 	private function checkCreds($login, $token) {
 
-	    $salt = $this->Main()->config->get('keys:tokensalt');
-	    
 	    if ($login === NULL) {
-	    	
-	    	$usertoken = crypt($token, $salt);
-	    	$userlogin = $this->userrepository->findUserWithToken($usertoken);
-	    	
-	    	if ($userlogin && $userlogin->canLogin()) return $userlogin;
+
+			$tokensalt = $this->Main()->config->get('keys:tokensalt');
+
+			if ($tokensalt !== false) {
+
+				$usertoken = crypt($token, $tokensalt);
+				$userlogin = $this->userrepository->findUserWithToken($usertoken);
+
+				if ($userlogin && $userlogin->canLogin()) {
+
+					$userlogin->clearToken();
+
+					return $userlogin;
+
+				}
+
+			} else {
+
+				throw new PlinthException('Please define a token salt in your config if you want to use the token only authentication.');
+
+			}
 	    	
 		} else {
 	    	
@@ -142,10 +172,16 @@ class UserService extends Connector {
 
 			if ($userlogin && $userlogin->canLogin()) {
 			
-				$usertoken = crypt($token, $salt);
-			
-				if (strcmp($usertoken, $userlogin->getToken()) === 0) {
-	
+				if (password_verify($token, $userlogin->getToken())) {
+
+					if ($this->Main()->getSetting('userrehash') === true && password_needs_rehash($userlogin->getToken(), PASSWORD_DEFAULT)) {
+
+						$this->userrepository->updateUserToken($userlogin->getID(), $this->getHashForToken($token));
+
+					}
+
+					$userlogin->clearToken();
+
 					return $userlogin;
 					
 				}
