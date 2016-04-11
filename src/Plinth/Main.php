@@ -153,6 +153,7 @@ class Main {
         $this->initDictionaries($this->config->get('language:locales')?: array(), $this->getSetting('defaultlocale'));
         
         $this->registerClasses();
+		$this->registerSessionPath();
     			
     }
     
@@ -233,8 +234,7 @@ class Main {
 					if ($this->getSetting('userclass') === false) throw new PlinthException('Please define a user class and user repository');
 						
 					$this->getUserService()->setUserRepository($this->getEntityRepository()->getRepository($this->getSetting('userclass')));
-					
-			    	session_set_cookie_params(0, __BASE);
+
 			    	session_start();
 		    	
 				} catch (PlinthException $e) {
@@ -289,6 +289,21 @@ class Main {
     	$this->setRouter(new Router($this));
     	
     }
+
+	/**
+	 * Register different session paths for the different components 
+	 */
+	private function registerSessionPath() {
+
+		$cookiePath = __BASE;
+
+		if ($this->component !== false) {
+			$cookiePath .= $this->component->getPath();
+		}
+
+		session_set_cookie_params(0, $cookiePath);
+
+	}
     
     private function executeHandlers() {
         
