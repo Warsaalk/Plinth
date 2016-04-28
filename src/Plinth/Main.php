@@ -226,7 +226,7 @@ class Main {
     
     private function handleSessions() {
     	
-		if ($this->getSetting('userservice')) {
+		if ($this->getSetting('userservice') && $this->getRouter()->hasRoute()) {
 			//TODO:: Add option to allow sessions on public pages
 			if (!$this->getRouter()->getRoute()->isPublic()) {
 			
