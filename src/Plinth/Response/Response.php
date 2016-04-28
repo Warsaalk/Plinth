@@ -188,6 +188,7 @@ class Response extends Connector {
 
 		switch ($code) {
 			case self::CODE_404: $exitRoute = $this->Main()->getSetting('route404'); break;
+			case self::CODE_405: $exitRoute = $this->Main()->getSetting('route405'); break;
 		}
 
 		header($code);
@@ -205,9 +206,6 @@ class Response extends Connector {
 	public function render() {
 	
 		$router = $this->Main()->getRouter();
-	
-		if (!$router->isRouteAllowed()) $router->redirect('error_405');
-		 
 		$route = $router->getRoute();
 		 
 		if ($route->hasCacheSettings()) {

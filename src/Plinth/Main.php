@@ -128,7 +128,8 @@ class Main {
     	'templatebase' => 'base',
     	'templatepath' => __TEMPLATE,
 		'assetpath' => false,
-		'route404' => false
+		'route404' => false,
+		'route405' => false
     );
     
     /**
@@ -348,29 +349,29 @@ class Main {
     	}
     	
     	if ($this->getRouter()->hasRoute()) {
-    		 
-    	    $route = $this->getRouter()->getRoute();
-    	    
-    		$this->getRequest()->loadRequest($route, $redirected);
-    		 
-    		//On a login request first handle the request and afterwards the user
-    		if ($this->getRequest()->isLoginRequest()) {
-    	
-    			$this->getRequest()->handleRequest();
-    			$this->handleUser();
-    			$this->getRequest()->isRouteAuthorized($route);
-    			 
-    		} else {
-    	
-    			$this->handleUser();
-				$this->getRequest()->isRouteAuthorized($route);
-    			$this->getRequest()->handleRequest();
-    			 
-    		}
-    		 
-    	} else {
-			$this->getResponse()->hardExit(Response::CODE_404);
-		}
+			if ($this->getRouter()->isRouteAllowed()) {
+
+				$route = $this->getRouter()->getRoute();
+
+				$this->getRequest()->loadRequest($route, $redirected);
+
+				//On a login request first handle the request and afterwards the user
+				if ($this->getRequest()->isLoginRequest()) {
+
+					$this->getRequest()->handleRequest();
+					$this->handleUser();
+					$this->getRequest()->isRouteAuthorized($route);
+
+				} else {
+
+					$this->handleUser();
+					$this->getRequest()->isRouteAuthorized($route);
+					$this->getRequest()->handleRequest();
+
+				}
+
+			} else $this->getResponse()->hardExit(Response::CODE_405);
+    	} else $this->getResponse()->hardExit(Response::CODE_404);
     	
     	if ($this->state < self::STATE_DONE) {
     		$this->state = self::STATE_DONE;
