@@ -323,23 +323,15 @@ class Request extends Connector {
 	    if (!$route->isPublic() && !$this->Main()->getUserService()->isSessionValid()) {
 	         
 	        if ($route->getName() === $loginpage) throw new PlinthException('Please set your login page to public');
-	         
+
+			$this->_action = false; // Reset actions
 	        $this->Main()->getRouter()->redirect($loginpage);
 	        $this->Main()->handleRequest(true);
 	    }
 	    
 	}
-	
-	/**
-	 * @param Route $route
-	 */
-	public function handleRequest(Route $route) {
-		
-	    if (!$this->isLoginRequest()) {
-	        
-	        $this->isRouteAuthorized($route);
-	        
-	    }
+
+	public function handleRequest() {
 		
 		if ($this->_action !== false) {
 														

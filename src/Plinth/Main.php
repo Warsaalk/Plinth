@@ -355,14 +355,15 @@ class Main {
     		//On a login request first handle the request and afterwards the user
     		if ($this->getRequest()->isLoginRequest()) {
     	
-    			$this->getRequest()->handleRequest($route);
+    			$this->getRequest()->handleRequest();
     			$this->handleUser();
     			$this->getRequest()->isRouteAuthorized($route);
     			 
     		} else {
     	
     			$this->handleUser();
-    			$this->getRequest()->handleRequest($route);
+				$this->getRequest()->isRouteAuthorized($route);
+    			$this->getRequest()->handleRequest();
     			 
     		}
     		 
