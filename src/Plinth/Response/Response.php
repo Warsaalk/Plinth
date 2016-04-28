@@ -177,6 +177,27 @@ class Response extends Connector {
 	    exit;
 	    
 	}
+
+	/**
+	 * @param string $code This is a HTTP response code
+	 */
+	public function hardExit($code) {
+
+		$router = $this->Main()->getRouter();
+		$exitRoute = false;
+
+		switch ($code) {
+			case self::CODE_404: $exitRoute = $this->Main()->getSetting('route404'); break;
+		}
+
+		header($code);
+		if ($exitRoute !== false && $router->hasRoute($exitRoute)) {
+			$router->redirect($exitRoute);
+		} else {
+			exit;
+		}
+
+	}
 	
 	/**
 	 * @return string
@@ -185,7 +206,6 @@ class Response extends Connector {
 	
 		$router = $this->Main()->getRouter();
 	
-		if (!$router->hasRoute()) 		$router->redirect('error_404');
 		if (!$router->isRouteAllowed()) $router->redirect('error_405');
 		 
 		$route = $router->getRoute();

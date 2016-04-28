@@ -127,7 +127,8 @@ class Main {
     	'sessionregenerate' => 300,
     	'templatebase' => 'base',
     	'templatepath' => __TEMPLATE,
-		'assetpath' => false
+		'assetpath' => false,
+		'route404' => false
     );
     
     /**
@@ -367,7 +368,9 @@ class Main {
     			 
     		}
     		 
-    	}
+    	} else {
+			$this->getResponse()->hardExit(Response::CODE_404);
+		}
     	
     	if ($this->state < self::STATE_DONE) {
     		$this->state = self::STATE_DONE;
