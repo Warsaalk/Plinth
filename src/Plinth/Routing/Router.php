@@ -136,10 +136,13 @@ class Router extends Connector {
 	}
 	
 	/**
+	 * @param string|boolean $name
 	 * @return boolean
 	 */
-	public function hasRoute() {
-		
+	public function hasRoute($name=false) {
+
+		if ($name !== false) return isset($this->_routes[$name]);
+
 		return $this->_route !== null;
 		
 	}
