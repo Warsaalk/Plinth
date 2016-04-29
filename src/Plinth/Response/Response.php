@@ -187,6 +187,7 @@ class Response extends Connector {
 		$exitRoute = false;
 
 		switch ($code) {
+			case self::CODE_403: $exitRoute = $this->Main()->getSetting('route403'); break;
 			case self::CODE_404: $exitRoute = $this->Main()->getSetting('route404'); break;
 			case self::CODE_405: $exitRoute = $this->Main()->getSetting('route405'); break;
 		}

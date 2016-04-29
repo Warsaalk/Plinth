@@ -128,6 +128,7 @@ class Main {
     	'templatebase' => 'base',
     	'templatepath' => __TEMPLATE,
 		'assetpath' => false,
+		'route403' => false,
 		'route404' => false,
 		'route405' => false
     );
