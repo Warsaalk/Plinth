@@ -77,6 +77,16 @@ class Route extends Connector {
 	 * @var string[]
 	 */
 	private $_actions;
+
+	/**
+	 * @var boolean|array
+	 */
+	private $_roles = false;
+
+	/**
+	 * @var boolean
+	 */
+	private $_rolesAllowed = true;
 	
 	/**
 	 * @var boolean
@@ -116,6 +126,8 @@ class Route extends Connector {
 		if (isset($args['headers'])) $this->_headers = $args['headers'];
 		if (isset($args['actions'])) $this->_actions = $args['actions'];
 		if (isset($args['public']))	$this->_public = $args['public'];
+		if (isset($args['roles'])) $this->_roles = $args['roles'];
+		if (isset($args['rolesAllowed'])) $this->_rolesAllowed = $args['rolesAllowed'];
 		
 		$this->_cacheSettings = new CacheSettings();
 		
@@ -357,6 +369,33 @@ class Route extends Connector {
 		
 		return $this->_cacheSettings;
 		
+	}
+
+	/**
+	 * @return boolean
+	 */
+	public function hasRoles() {
+
+		return $this->_roles !== false && is_array($this->_roles);
+
+	}
+
+	/**
+	 * @return boolean|array
+	 */
+	public function getRoles() {
+
+		return $this->_roles;
+
+	}
+
+	/**
+	 * @return boolean|array
+	 */
+	public function areRolesAllowed() {
+
+		return $this->_rolesAllowed;
+
 	}
 	
 }

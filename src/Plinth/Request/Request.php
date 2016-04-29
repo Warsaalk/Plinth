@@ -320,15 +320,31 @@ class Request extends Connector {
 	    
 		$loginpage = $this->Main()->getSetting('loginpage');
 		
-	    if (!$route->isPublic() && !$this->Main()->getUserService()->isSessionValid()) {
-	         
-	        if ($route->getName() === $loginpage) throw new PlinthException('Please set your login page to public');
+	    if (!$route->isPublic()) {
+			if (!$this->Main()->getUserService()->isSessionValid()) {
+				if ($route->getName() === $loginpage) throw new PlinthException('Please set your login page to public');
 
-			$this->_action = false; // Reset actions
-	        $this->Main()->getRouter()->redirect($loginpage);
-	        $this->Main()->handleRequest(true);
+				$this->disableAction();
+				$this->Main()->getRouter()->redirect($loginpage);
+				$this->Main()->handleRequest(true);
+			} else {
+				if ($route->hasRoles()) {
+					$roles = $this->Main()->getUserService()->getUser()->getRouteRoles();
+
+					if (!is_array($roles)) throw new PlinthException('The route roles for a user needs to return a array of scalar values.');
+					if (!$this->Main()->getRouter()->isUserRoleAllowed($roles)) {
+						$this->Main()->getResponse()->hardExit(Response::CODE_403);
+					}
+				}
+			}
 	    }
 	    
+	}
+
+	private function disableAction() {
+
+		$this->_action = false;
+
 	}
 
 	public function handleRequest() {

@@ -199,6 +199,30 @@ class Router extends Connector {
 		return $this->_redirected || in_array($this->Main()->getRequest()->getRequestMethod(), $this->getRoute()->getMethods()) === true;
 		
 	}
+
+	/**
+	 * @param array $roles
+	 * @return bool
+	 */
+	public function isUserRoleAllowed(array $roles) {
+
+		$route = $this->getRoute();
+		if ($route->hasRoles()) {
+			$routeRoles = $route->getRoles();
+
+			if (is_array($routeRoles)) {
+				foreach ($roles as $role) {
+					if (in_array($role, $routeRoles, true)) return $route->areRolesAllowed();
+				}
+			}
+
+			return !$route->areRolesAllowed();
+
+		}
+
+		return true;
+
+	}
 	
 	/**
 	 * @return string

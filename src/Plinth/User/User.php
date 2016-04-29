@@ -48,6 +48,15 @@ abstract class User {
 		return false;
 		
 	}
+
+	/**
+	 * @return mixed
+	 */
+	public function getRouteRoles() {
+
+		throw new PlinthException('Please implement the getRouteRoles method in your User class');
+
+	}
 	
 	/**
 	 * @return mixed|boolean
