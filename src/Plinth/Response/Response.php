@@ -222,8 +222,8 @@ class Response extends Connector {
 		}
 		 
 		$contentType = ResponseHelper::getContentType($route->getType());
-	
-		if ($contentType !== false) header('Content-type: '. $contentType .'; charset=UTF-8');
+
+		if ($contentType !== false) header('Content-type: '. $contentType .'; charset=' . $this->Main()->getSetting('characterencoding'));
 	
 		$this->content = $this->getTemplate($route->getTemplate());
 	
