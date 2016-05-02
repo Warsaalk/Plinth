@@ -130,7 +130,8 @@ class Main {
 		'assetpath' => false,
 		'route403' => false,
 		'route404' => false,
-		'route405' => false
+		'route405' => false,
+		'characterencoding' => 'UTF-8'
     );
     
     /**
@@ -145,11 +146,14 @@ class Main {
     	$this->loadComponent();
     	$this->loadConfig();
         $this->loadSettings();
-        
+
         if (($timezone = $this->config->get('date:timezone')) !== false) {
         	date_default_timezone_set($timezone);
         }
-                
+
+		// Set Character encoding
+		mb_internal_encoding($this->getSetting('characterencoding'));
+
         $this->registerLogger();
                 
     	$this->loadDatabase();
