@@ -425,11 +425,11 @@ class Validator extends Connector {
 	
 	        switch ($rule) {
 	             
-	            case self::RULE_MAX_LENGTH 	: if (strlen($value) > $ruleValue)				return $value = false;
+	            case self::RULE_MAX_LENGTH 	: if (mb_strlen($value) > $ruleValue)				return $value = false;
 	               break;
-	            case self::RULE_MIN_LENGTH 	: if (!$value || strlen($value) < $ruleValue)	return $value = false;
+	            case self::RULE_MIN_LENGTH 	: if (!$value || mb_strlen($value) < $ruleValue)	return $value = false;
 	               break;
-	            case self::RULE_SELECT  	: if (strlen($value) < $ruleValue)          	return $value = false;
+	            case self::RULE_SELECT  	: if (mb_strlen($value) < $ruleValue)          	return $value = false;
 	               break;
 	            case self::RULE_REGEX   	: if (!preg_match($ruleValue, $value))			return $value = false;
 	               break;
