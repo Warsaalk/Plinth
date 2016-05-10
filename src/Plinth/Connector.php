@@ -7,14 +7,14 @@ abstract class Connector {
     /**
      * @var Main
      */
-	private $_main;
+	protected $main;
 
 	/**
 	 * @param Main $main
 	 */
 	public function __construct(Main $main) { 
 		
-		$this->_main = $main; 
+		$this->main = $main;
 	
 	}
 	
@@ -23,7 +23,7 @@ abstract class Connector {
      */
 	public function Main() { 
 		
-		return $this->_main;	
+		return $this->main;
 	
 	}
 			
