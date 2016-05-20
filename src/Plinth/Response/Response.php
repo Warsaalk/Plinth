@@ -244,12 +244,12 @@ class Response extends Connector {
 	 * @param bool $exit
 	 * @return bool
 	 */
-	public function renderFile($filePath, $exit = true) {
+	public function renderFile($filePath, $fileName, $exit = true) {
 
 		if (file_exists($filePath)) {
 			header('Content-Description: File Transfer');
 			header('Content-Type: application/octet-stream');
-			header('Content-Disposition: attachment; filename=' . basename($filePath));
+			header('Content-Disposition: attachment; filename=' . basename($fileName));
 			header('Content-Transfer-Encoding: binary');
 			header('Expires: 0');
 			header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
