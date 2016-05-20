@@ -198,7 +198,7 @@ class Main {
     	    	 
     	$defaultconfig = new Config(__APP_CONFIG_PROD);
     	
-    	if ($this->component !== false) {
+    	if ($this->component !== false && $this->component->hasConfig()) {
     		$componentconfig = new Config($this->component->getConfigPath());
     		if ($this->component->getMergeDefaultConfig()) {
     			$config = $defaultconfig->merge($componentconfig);
@@ -335,7 +335,7 @@ class Main {
     		$this->getRouter()->loadRoutes(__APP_CONFIG_ROUTING, $public);
     	}
     	
-    	if ($this->component !== false && $this->component->getRouting() !== false) {
+    	if ($this->component !== false && $this->component->hasRouting()) {
     		$this->getRouter()->loadRoutes($this->component->getRoutingPath(), $public);
     	}
     	    	

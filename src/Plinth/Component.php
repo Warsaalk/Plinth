@@ -130,6 +130,15 @@ class Component {
 		return $this->config;
 		
 	}
+
+	/**
+	 * @return bool
+	 */
+	public function hasConfig() {
+
+		return $this->config !== false;
+
+	}
 	
 	/**
 	 * @return boolean|string
@@ -156,6 +165,15 @@ class Component {
 		
 		return $this->routing;
 		
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function hasRouting() {
+
+		return $this->routing !== false;
+
 	}
 	
 	/**
