@@ -144,7 +144,7 @@ class SelectQuery extends WhereQuery implements OrderByQuery {
 	{
 		$table = parent::getTable();
 
-		if ($table instanceof SelectQuery) return "(" . $table->get() . ")";
+		if ($table instanceof SelectQuery) return "(" . $table->get(false) . ")";
 
 		return $table;
 	}
