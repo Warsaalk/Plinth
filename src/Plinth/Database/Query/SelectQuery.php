@@ -133,7 +133,7 @@ class SelectQuery extends WhereQuery implements OrderByQuery {
 	/**
 	 * @return string
 	 */
-	private function getFrom()		{ return " FROM" . $this->getTable();					}
+	private function getFrom()		{ return " FROM " . $this->getTable();					}
 
 	/**
 	 * Allow the table to be a SelectQuery

@@ -61,7 +61,7 @@ class UpdateQuery extends WhereQuery {
 	 */
 	public function get($end=true) {
 
-		$return = $this->getUpdate() . $this->getTable();
+		$return = $this->getUpdate() . " " . $this->getTable();
 								
 		if ($this->hasAs()) 	$return .= $this->getAs();
 		

@@ -102,7 +102,7 @@ abstract class BaseQuery implements IQuery {
 	/**
 	 * @return string
 	 */
-	protected function getTable()	{ return " " . $this->table; 		}
+	protected function getTable()	{ return $this->table; 				}
 	
 	/**
 	 * @return string

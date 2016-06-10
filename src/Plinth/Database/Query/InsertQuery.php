@@ -179,7 +179,7 @@ class InsertQuery extends BaseQuery {
 	 */
 	public function get($end=true) {
 
-		return  $this->getInsert() . $this->getTable() . $this->getData() . $this->getEnd($end);
+		return  $this->getInsert() . " " . $this->getTable() . $this->getData() . $this->getEnd($end);
 
 	}
 

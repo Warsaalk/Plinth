@@ -12,7 +12,7 @@ class DeleteQuery extends WhereQuery {
 	/**
 	 * @return string
 	 */
-	private function getFrom()		{ return " FROM" . $this->getTable();	}
+	private function getFrom()		{ return " FROM " . $this->getTable();	}
 
 	/**
 	 * (non-PHPdoc)
