@@ -25,7 +25,7 @@ class SelectQuery extends WhereQuery implements OrderByQuery {
 	private $orderby;
 	
 	/**
-	 * @param string $table
+	 * @param string|SelectQuery $table
 	 * @param string $as
 	 */
 	public function __construct($table, $as=false) {
@@ -134,7 +134,21 @@ class SelectQuery extends WhereQuery implements OrderByQuery {
 	 * @return string
 	 */
 	private function getFrom()		{ return " FROM" . $this->getTable();					}
-	
+
+	/**
+	 * Allow the table to be a SelectQuery
+	 *
+	 * @return string
+	 */
+	protected function getTable()
+	{
+		$table = parent::getTable();
+
+		if ($table instanceof SelectQuery) return "(" . $table->get() . ")";
+
+		return $table;
+	}
+
 	/** 
 	 * (non-PHPdoc)
 	 * @see IQuery::get()
