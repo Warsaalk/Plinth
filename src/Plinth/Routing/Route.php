@@ -50,6 +50,11 @@ class Route extends Connector {
 	 * @var string
 	 */
 	private	$_type = false;
+
+	/**
+	 * @var string
+	 */
+	private	$_contentType = false;
 	
 	/**
 	 * @var string
@@ -120,6 +125,7 @@ class Route extends Connector {
 		$this->_methods = $args['methods'];
 
 		if (isset($args['type'])) $this->_type = $args['type'];
+		if (isset($args['contentType'])) $this->_contentType = $args['contentType'];
 		if (isset($args['pathData'])) $this->_pathData = $args['pathData'];
 		if (isset($args['pathDefaultLang'])) $this->_pathDefaultLang = $args['pathDefaultLang'];
 		if (isset($args['default'])) $this->_default = $args['default'];
@@ -279,6 +285,24 @@ class Route extends Connector {
 		
 		return $this->_type;
 		
+	}
+
+	/**
+	 * @return string|boolean
+	 */
+	public function getContentType() {
+
+		return $this->_contentType;
+
+	}
+
+	/**
+	 * @return boolean
+	 */
+	public function hasContentType() {
+
+		return $this->_contentType !== false;
+
 	}
 	
 	/**

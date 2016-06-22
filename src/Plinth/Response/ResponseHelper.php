@@ -26,9 +26,11 @@ class ResponseHelper {
 	 */
 	const DEF		= "application/octet-stream";
     
-    public static function getContentType($type) {
+    public static function getContentType(Route $route) {
     	
-    	switch ($type) {
+		if ($route->hasContentType()) return $route->getContentType();
+		
+    	switch ($route->getType()) {
     		
     		case Route::TYPE_JSON 	: return self::JSON;
     		case Route::TYPE_XML 	: return self::XML;
