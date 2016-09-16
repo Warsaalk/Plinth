@@ -12,6 +12,7 @@ use Plinth\Common\Info;
 use Plinth\Common\Language;
 use Plinth\Request\Request;
 use Plinth\Routing\Router;
+use Plinth\Settings\Settings;
 use Plinth\Validation\Validator;
 use Plinth\Store;
 use Plinth\Dictionary;
@@ -109,33 +110,8 @@ class Main {
      */
     public $config;
     
-    private $_defaultSettings = array(
-        'forcelogin' => false,
-        'userservice' => false,
-    	'usersession' => false,
-    	'userclass' => false,
-		'userrehash' => false,
-    	'loginpage' => 'page_login',
-    	'defaultlocale' => false,
-    	'fallbacklocale' => false,
-    	'autoroutelocale' => true,
-    	'localetype' => 'php',
-    	'localeget' => false,
-    	'localeaccept' => false,
-    	'localecookie' => false,
-    	'tokenexpire' => 300,
-    	'sessionregenerate' => 300,
-    	'templatebase' => 'base',
-    	'templatepath' => __TEMPLATE,
-		'assetpath' => false,
-		'route403' => false,
-		'route404' => false,
-		'route405' => false,
-		'characterencoding' => 'UTF-8'
-    );
-    
     /**
-     * @var array
+     * @var Settings
      */
     public $settings;
     
@@ -215,9 +191,10 @@ class Main {
     
     private function loadSettings() {
         
-        $settings = $this->config->get('settings')?: array();
-        
-        $this->settings = array_merge($this->_defaultSettings, $settings);
+        $userdefinedsettings = $this->config->get('settings')?: array();
+
+		$this->settings = new Settings();
+		$this->settings->loadSettings($userdefinedsettings);
                 
     }
     
@@ -227,9 +204,17 @@ class Main {
      */
     public function getSetting($label) {
         
-        return isset($this->settings[$label]) ? $this->settings[$label] : false;
+        return $this->settings->getSetting($label);
         
     }
+
+	/**
+	 * @return Settings
+	 */
+    public function getSettings()
+	{
+		return $this->settings;
+	}
     
     private function handleSessions() {
     	
