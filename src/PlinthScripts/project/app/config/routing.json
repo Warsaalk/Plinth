@@ -3,7 +3,7 @@
 	{
 		"path" : "",
 		"type" : "page",
-		"template" : "home",
+		"template" : "page/home",
 		"methods" : ["GET"],
 		"public" : true,
 		"default" : true
