@@ -86,9 +86,9 @@ class Main {
     private $_store;
     
     /**
-     * @var Connection
+     * @var Connection[]
      */
-    private $_connection;
+    private $_connections;
     
     /**
      * @var KLogger
@@ -132,7 +132,7 @@ class Main {
 
         $this->registerLogger();
                 
-    	$this->loadDatabase();
+    	$this->loadDatabases();
                 
         $this->initDictionaries($this->config->get('language:locales')?: array(), $this->getSetting('defaultlocale'));
         
@@ -261,12 +261,18 @@ class Main {
         
     }
     
-    private function loadDatabase() {
-    	
-    	$db = $this->config->get('database');
-    	if ($db !== false) $this->initConnection($db);
-    	$this->config->destroy('database');
-    	unset($db);
+    private function loadDatabases() {
+
+		$databaseKeys = $this->config->get('databases:keys')?: array();
+
+		if (!isset($databaseKeys['database'])) $databaseKeys[] = 'database'; // Default database config key
+
+		foreach ($databaseKeys as $databaseKey) {
+			$database = $this->config->get($databaseKey);
+			if ($database !== false) $this->initConnection($database, $databaseKey);
+			$this->config->destroy($databaseKey);
+			unset($database);
+		}
     	
     }
     
@@ -378,28 +384,43 @@ class Main {
     	Language::init($locales, $default);             
     
     }
-    
-    /**
-     * @param array $c
-     */
-    public function initConnection($c) { 
+
+	/**
+	 * @param $connectionData
+	 * @param string $name
+	 */
+    public function initConnection($connectionData, $name = "database") {
     	
-    	$this->_connection = new Connection($c['type'], $c['db'], $c['host'], $c['name'], $c['pass'], $c['charset'], $c['port']); 
+    	$this->_connections[$name] = new Connection(
+    		$connectionData['type'],
+			$connectionData['db'],
+			$connectionData['host'],
+			$connectionData['name'],
+			$connectionData['pass'],
+			$connectionData['charset'],
+			$connectionData['port']
+		);
     
     }
-    
-    public function closeConnection() { 
-    	
-    	$this->_connection->close();
+
+	/**
+	 * @param string $name
+	 */
+    public function closeConnection($name = "database") {
+
+    	if (isset($this->_connections[$name])) $this->_connections[$name]->close();
     
     }
-    
-    /**
-     * @return Connection
-     */
-    public function getConnection()	{ 
-    	
-    	return $this->_connection;									
+
+	/**
+	 * @param string $name
+	 * @return null|Connection
+	 */
+    public function getConnection($name = "database")	{
+
+		if (isset($this->_connections[$name])) return $this->_connections[$name];
+
+		return null;
     
     }
     
