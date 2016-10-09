@@ -50,6 +50,6 @@ final class SettingsDefaults
 
 	CONST CHARACTER_ENCODING = 'UTF-8';
 
-	private function __CONSTruct() {}
+	private function __construct() {}
 
 }
