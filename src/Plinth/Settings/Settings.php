@@ -15,6 +15,7 @@ class Settings
 	{
 		$this->settings = array(
 			'forcelogin' 		=> SettingsDefaults::FORCE_LOGIN,
+			'forcesession' 		=> SettingsDefaults::FORCE_SESSION,
 			'userservice' 		=> SettingsDefaults::USER_SERVICE,
 			'usersession' 		=> SettingsDefaults::USER_SESSION,
 			'userclass' 		=> SettingsDefaults::USER_CLASS,

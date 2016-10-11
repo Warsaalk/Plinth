@@ -218,26 +218,27 @@ class Main {
     
     private function handleSessions() {
     	
-		if ($this->getSetting('userservice') && $this->getRouter()->hasRoute()) {
+		if ($this->getRouter()->hasRoute()) {
 			//TODO:: Add option to allow sessions on public pages
-			if (!$this->getRouter()->getRoute()->isPublic()) {
-			
-				try {
-				
-					if ($this->getSetting('userclass') === false) throw new PlinthException('Please define a user class and user repository');
-						
-					$this->getUserService()->setUserRepository($this->getEntityRepository()->getRepository($this->getSetting('userclass')));
+			if (!$this->getRouter()->getRoute()->isPublic() || $this->getSetting('forcesession')) {
 
-			    	session_start();
-		    	
-				} catch (PlinthException $e) {
-					
-					throw $e;
-					
+				if ($this->getSetting('userservice')) {
+					try
+					{
+						if ($this->getSetting('userclass') === false) throw new PlinthException('Please define a user class and user repository');
+
+						$this->getUserService()->setUserRepository($this->getEntityRepository()->getRepository($this->getSetting('userclass')));
+
+						session_start();
+					}
+					catch (PlinthException $e)
+					{
+						throw $e;
+					}
+				} else {
+					session_start();
 				}
-	    	
 			}
-    	
 		}
     	
     }

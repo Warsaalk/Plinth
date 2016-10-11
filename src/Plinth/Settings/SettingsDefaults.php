@@ -8,6 +8,8 @@ final class SettingsDefaults
 
 	CONST FORCE_LOGIN = false;
 
+	CONST FORCE_SESSION = false;
+
 	CONST USER_SERVICE = false;
 
 	CONST USER_SESSION = false;
