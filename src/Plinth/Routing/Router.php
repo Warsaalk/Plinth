@@ -37,9 +37,10 @@ class Router extends Connector {
 	/**
 	 * @param string $routesFile
 	 * @param boolean $public Default public setting
+	 * @param boolean $sessions Default sessions setting
 	 * @throws PlinthException
 	 */
-	public function loadRoutes($routesFile, $public) {
+	public function loadRoutes($routesFile, $public, $sessions) {
 		
 		if (!file_exists($routesFile)) throw new PlinthException('Add routing.json to your application config');
 		
@@ -49,7 +50,7 @@ class Router extends Connector {
 		
 		foreach ($routes as $routeName => $routeInfo) {
 			
-			$newroute = new Route(array('name' => $routeName) + $routeInfo, $this->Main(), $public);
+			$newroute = new Route(array('name' => $routeName) + $routeInfo, $this->Main(), $public, $sessions);
 			$this->_routes[$routeName] = $newroute;
 			
 			if ($newroute->isDefault()) {

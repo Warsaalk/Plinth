@@ -92,11 +92,16 @@ class Route extends Connector {
 	 * @var boolean
 	 */
 	private $_rolesAllowed = true;
-	
+
 	/**
 	 * @var boolean
 	 */
 	private $_public;
+
+	/**
+	 * @var boolean
+	 */
+	private $_sessions;
 	
 	/**
 	 * @var CacheSettings
@@ -104,16 +109,19 @@ class Route extends Connector {
 	private $_cacheSettings;
 	
 	/**
-	 * @param array $routeArray
+	 * @param array $args
+	 * @param Main $main
 	 * @param boolean $public Default public setting
+	 * @param boolean $sessions Default sessions setting
 	 * @throws PlinthException
 	 */
-	public function __construct($args, Main $main, $public=false) {
+	public function __construct($args, Main $main, $public = false, $sessions = false) {
 
 		parent::__construct($main);
 		
 		$this->_name = $args['name'];
-		$this->_public    = $public;
+		$this->_public = $public;
+		$this->_sessions = $sessions;
 				
 		if (!isset($args['path']) ||
 			!isset($args['template']) || 
@@ -132,6 +140,7 @@ class Route extends Connector {
 		if (isset($args['headers'])) $this->_headers = $args['headers'];
 		if (isset($args['actions'])) $this->_actions = $args['actions'];
 		if (isset($args['public']))	$this->_public = $args['public'];
+		if (isset($args['sessions'])) $this->_sessions = $args['sessions'];
 		if (isset($args['roles'])) $this->_roles = $args['roles'];
 		if (isset($args['rolesAllowed'])) $this->_rolesAllowed = $args['rolesAllowed'];
 		
@@ -375,6 +384,14 @@ class Route extends Connector {
 	    
 	    return $this->_public;
 	    
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function allowSessions()
+	{
+		return $this->_sessions;
 	}
 	
 	/**

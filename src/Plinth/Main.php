@@ -216,12 +216,10 @@ class Main {
 		return $this->settings;
 	}
     
-    private function handleSessions() {
-    	
+    private function handleSessions()
+	{
 		if ($this->getRouter()->hasRoute()) {
-			//TODO:: Add option to allow sessions on public pages
-			if (!$this->getRouter()->getRoute()->isPublic() || $this->getSetting('forcesession')) {
-
+			if (!$this->getRouter()->getRoute()->isPublic() || $this->getRouter()->getRoute()->allowSessions()) {
 				if ($this->getSetting('userservice')) {
 					try
 					{
@@ -240,7 +238,6 @@ class Main {
 				}
 			}
 		}
-    	
     }
     
     private function registerLogger() {
@@ -322,13 +319,14 @@ class Main {
     private function handleRouter() {
     	
     	$public = !$this->getSetting('forcelogin');
+		$sessions = $this->getSetting('forcesession');
     	
     	if ($this->component === false || $this->component->getMergeDefaultRouting()) {
-    		$this->getRouter()->loadRoutes(__APP_CONFIG_ROUTING, $public);
+    		$this->getRouter()->loadRoutes(__APP_CONFIG_ROUTING, $public, $sessions);
     	}
     	
     	if ($this->component !== false && $this->component->hasRouting()) {
-    		$this->getRouter()->loadRoutes($this->component->getRoutingPath(), $public);
+    		$this->getRouter()->loadRoutes($this->component->getRoutingPath(), $public, $sessions);
     	}
     	    	
     	$this->getRouter()->handleRoute(__BASE);
