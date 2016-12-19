@@ -2,7 +2,7 @@
 
 namespace Plinth\Common;
 
-class Info{
+class Info implements \JsonSerializable {
 	
 	const	INFORMATION = 'information',
 			SUCCESS		= 'success',
@@ -107,9 +107,9 @@ class Info{
 		return __IMAGES . $this->_types[$this->_type]['img'];
 		
 	}
-	
+
 	/**
-	 * @return string
+	 * @return array
 	 */
 	public function getArray() {
 	    
@@ -121,5 +121,12 @@ class Info{
 	    );
 	    
 	}
-	
+
+	/**
+	 * @return array
+	 */
+	public function jsonSerialize()
+	{
+		return $this->getArray();
+	}
 }
