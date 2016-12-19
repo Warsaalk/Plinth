@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace Plinth\Request;
 
@@ -7,15 +7,40 @@ use Plinth\Common\Info;
 use Plinth\Connector;
 
 abstract class ActionType extends Connector {
-	
+
 	/**
-	 * Example: 
+	 * @var \Closure
+	 */
+	private $requestErrorCallback;
+
+	/**
+	 * ActionType constructor.
+	 * @param Main $main
+	 * @param $errorCallback
+	 */
+	public function __construct(Main $main, \Closure $errorCallback)
+	{
+		parent::__construct($main);
+
+		$this->requestErrorCallback = $errorCallback;
+	}
+
+	/**
+	 * @param Info $error
+	 */
+	protected function addError(Info $error)
+	{
+		$this->requestErrorCallback->__invoke($error);
+	}
+
+	/**
+	 * Example:
 	 * array(
 	 * 		'variable' => array(
 	 * 			'[name]' => array(
 	 * 				'rules' => array( {optional}
 	 * 					Validator::RULE_* => mixed
-	 * 				) 
+	 * 				)
 	 * 				'type' => Validator::PARAM_* {optional}
 	 * 				'required' => boolean {optional}
 	 * 				'default' => mixed {optional}
@@ -25,22 +50,22 @@ abstract class ActionType extends Connector {
 	 *		'userlevel' => User::[name] {optional}
 	 *		'token' => boolean {optional}
 	 * )
-	 * 
+	 *
 	 * @return array
 	 */
 	abstract public function getSettings();
-	
+
 	/**
-	 * @param Main $main
+	 * Method called when a request is valid and has no errors (yet)
+	 *
 	 * @param array $variables
 	 * @param array $files
 	 */
 	abstract public function onFinish(array $variables, array $files);
-	
+
 	/**
-	 * @param Main $main
-	 * @param Info $error
+	 * Method called when a request is invalid or has errors
 	 */
 	abstract public function onError();
-	
+
 }
