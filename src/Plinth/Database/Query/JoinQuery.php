@@ -6,7 +6,7 @@ class JoinQuery implements IQuery {
 
 		/* Join types */
 		const JOIN 				= " JOIN";
-		//const JOIN_FROM 		= ", ";
+		const JOIN_FROM 		= ", ";
 		const JOIN_INNER 		= " INNER JOIN";
 		const JOIN_CROSS 		= " CROSS JOIN";
 		const JOIN_LEFT 		= " LEFT JOIN";
@@ -40,13 +40,14 @@ class JoinQuery implements IQuery {
 		 * @param string $condition
 		 * @param string $as
 		 */
-		public function __construct($tojoin, $type=self::JOIN, $condition=false, $as=false) {
+		public function __construct($tojoin, $type=self::JOIN, $condition=false, $as=false)
+		{
+			if ($type === self::JOIN_FROM && $condition !== false) $condition = false; // The from "join" can't have a condition
 		
 			$this->tojoin = $tojoin;
 			$this->type = $type;
 			$this->condition = $condition;
 			$this->joinAs = $as;
-		
 		}
 		
 		/**
