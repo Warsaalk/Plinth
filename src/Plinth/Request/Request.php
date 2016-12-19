@@ -282,13 +282,13 @@ class Request extends Connector {
 		}
 		
 		if ($this->hasErrors() || $invalid) {
-		
+
+			$action->onError();
 		    foreach ($this->_errors as $i => $error) {
 		    	if ($error !== null) {
 		        	$this->Main()->addInfo($error);
 		    	}
 		    }
-		    $action->onError();
 		    
 		}
 		
