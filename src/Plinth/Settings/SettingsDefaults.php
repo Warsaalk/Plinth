@@ -52,6 +52,8 @@ final class SettingsDefaults
 
 	CONST CHARACTER_ENCODING = 'UTF-8';
 
+	CONST REQUEST_ERRORS_TO_MAIN = false;
+
 	private function __construct() {}
 
 }

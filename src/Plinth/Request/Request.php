@@ -205,7 +205,7 @@ class Request extends Connector {
 
 		$self = $this;
 
-		return new $actionClassName($this->Main(), function (Info $error) use ($self) {
+		return new $actionClassName($this->main, function (Info $error) use ($self) {
 			$self->addError($error);
 		});
 
@@ -220,8 +220,8 @@ class Request extends Connector {
 
 		//if (!isset($actionSettings['variables'])) throw new PlinthException("Please defined your action variables");
 
-		$validator 	= $this->Main()->getValidator();
-		$userservice= $this->Main()->getUserService();
+		$validator 	= $this->main->getValidator();
+		$userservice= $this->main->getUserService();
 		$variables 	= isset($actionSettings['variables']) ? $actionSettings['variables'] : false;
 		$uploadfiles= isset($actionSettings['files']) ? $actionSettings['files'] : false;
 		$token		= isset($actionSettings['token']) ? array_merge(self::$defaultTokenSettings, $actionSettings['token']) : false;
@@ -259,7 +259,7 @@ class Request extends Connector {
 
 		if ($validator->isValid()) {
 
-			if ($token !== false && $token['required'] === true && !$this->Main()->validateToken($validator->getVariable('token'))) {
+			if ($token !== false && $token['required'] === true && !$this->main->validateToken($validator->getVariable('token'))) {
 				if ($token['message']) $this->addError($token['message']);
 				$invalid = true;
 			}
@@ -288,12 +288,14 @@ class Request extends Connector {
 		if ($this->hasErrors() || $invalid) {
 
 			$action->onError();
-			foreach ($this->_errors as $i => $error) {
-				if ($error !== null) {
-					$this->Main()->addInfo($error);
+
+			if ($this->main->getSetting('requesterrorstomain')) {
+				foreach ($this->_errors as $i => $error) {
+					if ($error !== null) {
+						$this->main->addInfo($error);
+					}
 				}
 			}
-
 		}
 
 	}
@@ -330,22 +332,22 @@ class Request extends Connector {
 	 */
 	public function isRouteAuthorized(Route $route) {
 
-		$loginpage = $this->Main()->getSetting('loginpage');
+		$loginpage = $this->main->getSetting('loginpage');
 
 		if (!$route->isPublic()) {
-			if (!$this->Main()->getUserService()->isSessionValid()) {
+			if (!$this->main->getUserService()->isSessionValid()) {
 				if ($route->getName() === $loginpage) throw new PlinthException('Please set your login page to public');
 
 				$this->disableAction();
-				$this->Main()->getRouter()->redirect($loginpage);
-				$this->Main()->handleRequest(true);
+				$this->main->getRouter()->redirect($loginpage);
+				$this->main->handleRequest(true);
 			} else {
 				if ($route->hasRoles()) {
-					$roles = $this->Main()->getUserService()->getUser()->getRouteRoles();
+					$roles = $this->main->getUserService()->getUser()->getRouteRoles();
 
 					if (!is_array($roles)) throw new PlinthException('The route roles for a user needs to return a array of scalar values.');
-					if (!$this->Main()->getRouter()->isUserRoleAllowed($roles)) {
-						$this->Main()->getResponse()->hardExit(Response::CODE_403);
+					if (!$this->main->getRouter()->isUserRoleAllowed($roles)) {
+						$this->main->getResponse()->hardExit(Response::CODE_403);
 					}
 				}
 			}
