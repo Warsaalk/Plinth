@@ -23,6 +23,7 @@ abstract class WhereQuery extends BaseQuery {
 	
 	/* Private operator constants */
 	private static $OPERATOR_IN = " IN ";
+	private static $OPERATOR_NOT_IN = " NOT IN ";
 	private static $OPERATOR_BETWEEN = " BETWEEN ";	
 	
 	/**
@@ -127,17 +128,19 @@ abstract class WhereQuery extends BaseQuery {
 		return $this;
 		
 	}
-	
+
 	/**
-	 * @param string $where
-	 * @param string $seperator
-	 * @param mixed ...$values
+	 * @param $where
+	 * @param bool $seperator
+	 * @param array $values
+	 * @param bool $operator
+	 * @return $this
 	 */
-	public function whereIn($where, $seperator=false, $values = array()) {
+	public function whereIn($where, $seperator=false, $values = array(), $operator = false) {
 		
 		$this->addSeperator($seperator);
 		
-		$this->where .= $where . self::$OPERATOR_IN . "(";
+		$this->where .= $where . ($operator === false ? self::$OPERATOR_IN : $operator) . "(";
 		
 		foreach ($values as $i => $value) {
 			if ($i > 0) $this->where .= ",";
