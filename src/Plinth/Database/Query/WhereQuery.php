@@ -136,11 +136,11 @@ abstract class WhereQuery extends BaseQuery {
 	 * @param bool $operator
 	 * @return $this
 	 */
-	public function whereIn($where, $seperator=false, $values = array(), $operator = false) {
+	public function whereIn($where, $seperator=false, $values = array(), $not = false) {
 		
 		$this->addSeperator($seperator);
 		
-		$this->where .= $where . ($operator === false ? self::$OPERATOR_IN : $operator) . "(";
+		$this->where .= $where . ($not === true ? self::$OPERATOR_NOT_IN : self::$OPERATOR_IN) . "(";
 		
 		foreach ($values as $i => $value) {
 			if ($i > 0) $this->where .= ",";
