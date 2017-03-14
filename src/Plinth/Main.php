@@ -310,7 +310,7 @@ class Main {
 
 		$cookiePath = __BASE;
 
-		if ($this->component !== false) {
+		if ($this->component !== false && !$this->component->usesRootCookiePath()) {
 			$cookiePath .= $this->component->getPath();
 		}
 

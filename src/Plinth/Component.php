@@ -41,11 +41,17 @@ class Component {
 	 * @var boolean
 	 */
 	private $mergeDefaultRouting = false;
-		
+
 	/**
-	 * @param string $base
-	 * @param string $label
-	 * @param array $properties
+	 * @var bool
+	 */
+	private $useRootCookiePath = false;
+
+	/**
+	 * @param $base
+	 * @param $label
+	 * @param $properties
+	 * @return Component
 	 * @throws PlinthException
 	 */
 	public static function loadFromArray($base, $label, $properties) {
@@ -67,6 +73,7 @@ class Component {
 		
 		if (isset($properties['configMergeDefault']) && $properties['configMergeDefault']) $self->enableDefaultConfigMerge();
 		if (isset($properties['routingMergeDefault']) && $properties['routingMergeDefault']) $self->enableDefaultRoutingMerge();
+		if (isset($properties['useRootCookiePath']) && $properties['useRootCookiePath']) $self->enableRootCookiePath();
 		
 		return $self;
 		
@@ -225,5 +232,17 @@ class Component {
 		return substr_count($this->path, '/');
 		
 	}
-		
+
+	public function enableRootCookiePath()
+	{
+		$this->useRootCookiePath = true;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function usesRootCookiePath()
+	{
+		return $this->useRootCookiePath;
+	}
 }
