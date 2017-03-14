@@ -178,25 +178,21 @@ class Main {
     	    	
     	$this->component = $component;
     }
-    
-    private function loadConfig()
+
+	private function loadConfig()
 	{
-    	$defaultconfig = new Config(__APP_CONFIG_PROD);
-    	
-    	if ($this->component !== false && $this->component->hasConfig()) {
-    		$componentconfig = new Config($this->component->getConfigPath());
-    		if ($this->component->getMergeDefaultConfig()) {
-    			$config = $defaultconfig->merge($componentconfig);
-    		} else {
-    			$config = $componentconfig;
-    		}
-    	} else {
-    		$config = $defaultconfig;
-    	}
-    	    	
-    	$this->config = $config;
-    	$this->initialConfig = $defaultconfig;
-    }
+		$this->initialConfig = new Config(__APP_CONFIG_PROD);
+		$this->config = clone $this->initialConfig;
+
+		if ($this->component !== false && $this->component->hasConfig()) {
+			$componentconfig = new Config($this->component->getConfigPath());
+			if ($this->component->getMergeDefaultConfig()) {
+				$this->config->merge($componentconfig);
+			} else {
+				$this->config = $componentconfig;
+			}
+		}
+	}
     
     private function loadSettings()
 	{
