@@ -3,6 +3,7 @@
 namespace Plinth\Response;
 
 use Plinth\Connector;
+use Plinth\Dictionary;
 use Plinth\Routing\Route;
 use Plinth\Main;
 
@@ -33,11 +34,6 @@ class Response extends Connector {
 	/**
 	 * @var string
 	 */
-	private $_base;
-	
-	/**
-	 * @var string
-	 */
 	private $_path;
 	
 	/**
@@ -55,8 +51,7 @@ class Response extends Connector {
 		$this->assetVersion = $main->config->get('assets:version');
 		$this->assetPath = $main->getSetting('assetpath');
 		$this->_data = array();
-	
-		$this->_base = $main->getSetting('templatebase');
+
 		$this->_path = $main->getSetting('templatepath');
 		
 	}
@@ -122,7 +117,7 @@ class Response extends Connector {
 	 */
 	public function getDict() {
 	
-		return $this->Main()->getDict();
+		return $this->main->getDict();
 	
 	}
 	
@@ -156,15 +151,32 @@ class Response extends Connector {
 	
 	/**
 	 * @param string $tpl
-	 * @param string $path
+	 * @param string|boolean $templatePath
 	 * @return string
 	 */
-	public function getTemplate($tpl, $path = '') {
-		
-		$path = $this->_path . $path;
+	public function getTemplate($tpl, $templatePath = false)
+	{
+		$path = $templatePath !== false ? $templatePath : $this->_path;
 		
 		return Parser::parse($this,	$tpl, $path, __EXTENSION_TEMPLATE, $this->getDict());
-	
+	}
+
+	/**
+	 * @param Route $route
+	 * @return string
+	 */
+	public function getTemplateByRoute(Route $route)
+	{
+		return $this->getTemplate($route->getTemplate(), $route->getTemplatePath());
+	}
+
+	/**
+	 * @param string $routeName
+	 * @return string
+	 */
+	public function getTemplateByRouteName($routeName)
+	{
+		return $this->getTemplateByRoute($this->main->getRouter()->getRoute($routeName));
 	}
 	
 	/**
@@ -225,7 +237,7 @@ class Response extends Connector {
 
 		if ($contentType !== false) header('Content-type: '. $contentType .'; charset=' . $this->Main()->getSetting('characterencoding'));
 	
-		$this->content = $this->getTemplate($route->getTemplate());
+		$this->content = $this->getTemplateByRoute($route);
 	
 		if ($route->getType() !== Route::TYPE_PAGE && $route->getType() !== Route::TYPE_ERROR) {
 	
@@ -233,7 +245,7 @@ class Response extends Connector {
 			 
 		} else {
 	
-			return $this->getTemplate($this->_base);
+			return $this->getTemplate($route->getTemplateBase(), $route->getTemplatePath());
 	
 		}
 			

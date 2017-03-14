@@ -2,6 +2,7 @@
 
 namespace Plinth\Routing;
 
+use Plinth\Settings\SettingsDefaults;
 use Translate;
 use Plinth\Common\Language;
 use Plinth\Exception\PlinthException;
@@ -102,6 +103,16 @@ class Route extends Connector {
 	 * @var boolean
 	 */
 	private $_sessions;
+
+	/**
+	 * @var string
+	 */
+	private $_templateBase;
+
+	/**
+	 * @var string
+	 */
+	private $_templatePath;
 	
 	/**
 	 * @var CacheSettings
@@ -113,15 +124,19 @@ class Route extends Connector {
 	 * @param Main $main
 	 * @param boolean $public Default public setting
 	 * @param boolean $sessions Default sessions setting
+	 * @param string $templateBase Template base setting
+	 * @param string $templatePath Template base setting
 	 * @throws PlinthException
 	 */
-	public function __construct($args, Main $main, $public = false, $sessions = false) {
+	public function __construct($args, Main $main, $public = false, $sessions = false, $templateBase = SettingsDefaults::TEMPLATE_BASE, $templatePath = SettingsDefaults::TEMPLATE_PATH) {
 
 		parent::__construct($main);
 		
 		$this->_name = $args['name'];
 		$this->_public = $public;
 		$this->_sessions = $sessions;
+		$this->_templateBase = $templateBase;
+		$this->_templatePath = $templatePath;
 				
 		if (!isset($args['path']) ||
 			!isset($args['template']) || 
@@ -392,6 +407,22 @@ class Route extends Connector {
 	public function allowSessions()
 	{
 		return $this->_sessions;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getTemplateBase()
+	{
+		return $this->_templateBase;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getTemplatePath()
+	{
+		return $this->_templatePath;
 	}
 	
 	/**

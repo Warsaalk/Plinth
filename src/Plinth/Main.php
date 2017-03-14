@@ -109,11 +109,21 @@ class Main {
      * @var Config
      */
     public $config;
+
+	/**
+	 * @var Config
+	 */
+    public $initialConfig;
     
     /**
      * @var Settings
      */
     public $settings;
+
+	/**
+	 * @var Settings
+	 */
+    public $initialSettings;
     
     public function __construct() { 
         
@@ -141,8 +151,8 @@ class Main {
     			
     }
     
-    private function loadComponent() {
-			
+    private function loadComponent()
+	{
     	$component = false;
     	$currentPath = Request::getRequestPath(__BASE);
     	$defaultPath = false;
@@ -167,11 +177,10 @@ class Main {
     	}
     	    	
     	$this->component = $component;
-    	
     }
     
-    private function loadConfig() {
-    	    	 
+    private function loadConfig()
+	{
     	$defaultconfig = new Config(__APP_CONFIG_PROD);
     	
     	if ($this->component !== false && $this->component->hasConfig()) {
@@ -186,34 +195,45 @@ class Main {
     	}
     	    	
     	$this->config = $config;
-    	
+    	$this->initialConfig = $defaultconfig;
     }
     
-    private function loadSettings() {
-        
+    private function loadSettings()
+	{
+    	// Set initial settings base on the initial config
+		$userdefinedsettings = $this->initialConfig->get('settings')?: array();
+
+		$this->initialSettings = new Settings();
+		$this->initialSettings->loadSettings($userdefinedsettings);
+
+    	// Set settings
         $userdefinedsettings = $this->config->get('settings')?: array();
 
 		$this->settings = new Settings();
 		$this->settings->loadSettings($userdefinedsettings);
-                
     }
     
     /**
      * @param string $label
+	 * @param boolean $useInitialSettings
      * @return boolean|string|integer
      */
-    public function getSetting($label) {
-        
-        return $this->settings->getSetting($label);
-        
+    public function getSetting($label, $useInitialSettings = false)
+	{
+        return 	$useInitialSettings === true
+				? $this->initialSettings->getSetting($label)
+				: $this->settings->getSetting($label);
     }
 
 	/**
+	 * @param boolean $useInitialSettings
 	 * @return Settings
 	 */
-    public function getSettings()
+    public function getSettings($useInitialSettings = false)
 	{
-		return $this->settings;
+		return 	$useInitialSettings === true
+				? $this->initialSettings
+				: $this->settings;
 	}
     
     private function handleSessions()
@@ -316,21 +336,31 @@ class Main {
     	
     }
     
-    private function handleRouter() {
-    	
-    	$public = !$this->getSetting('forcelogin');
-		$sessions = $this->getSetting('forcesession');
-    	
+    private function handleRouter()
+	{
+		// Load initial/default routes if there're no components or the component wants to merge them
     	if ($this->component === false || $this->component->getMergeDefaultRouting()) {
-    		$this->getRouter()->loadRoutes(__APP_CONFIG_ROUTING, $public, $sessions);
+    		$this->getRouter()->loadRoutes(
+    			__APP_CONFIG_ROUTING,
+				!$this->getSetting('forcelogin', true),
+				$this->getSetting('forcesession', true),
+				$this->getSetting('templatebase', true),
+				$this->getSetting('templatepath', true)
+			);
     	}
-    	
+
+    	// If there's a component and it has routings, load them
     	if ($this->component !== false && $this->component->hasRouting()) {
-    		$this->getRouter()->loadRoutes($this->component->getRoutingPath(), $public, $sessions);
+    		$this->getRouter()->loadRoutes(
+    			$this->component->getRoutingPath(),
+				!$this->getSetting('forcelogin'),
+				$this->getSetting('forcesession'),
+				$this->getSetting('templatebase'),
+				$this->getSetting('templatepath')
+			);
     	}
     	    	
     	$this->getRouter()->handleRoute(__BASE);
-    	
     }
     
     /**
