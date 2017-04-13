@@ -34,6 +34,10 @@ final class SettingsDefaults
 
 	CONST LOCALE_COOKIE = false;
 
+	CONST LOCALE_SUBDOMAIN = false;
+
+	CONST LOCALE_DOMAIN = false;
+
 	CONST TOKEN_EXPIRE = 300;
 
 	CONST SESSION_REGENERATE = 300;

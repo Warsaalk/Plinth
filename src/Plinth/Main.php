@@ -647,8 +647,37 @@ class Main {
 					$languageCode = $matches[0][0];
 				}
 			}
-			
-			//Get get language, Get-Language overrules Accept-Language
+
+			//Get language for domain, Domain-Language overrules Accept-Language
+			if ($this->getSetting('localedomain') && isset($_SERVER['HTTP_HOST']) && count($this->config->get('locale:domains')) > 0) {
+				$domains = $this->config->get('locale:domains');
+				$regex = '/('.implode('|', array_keys($domains)).')$/';
+				$languageViaDomain = preg_match_all($regex, $_SERVER['HTTP_HOST'], $matches);
+				if ($languageViaDomain > 0) {
+					$languageCode = $domains[$matches[1][0]];
+				}
+			}
+
+			//Get language for custom subdomain, Custom-Subdomain-Language overrules Domain-Language
+			if ($this->getSetting('localesubdomain') && isset($_SERVER['HTTP_HOST']) && count($this->config->get('locale:subdomains')) > 0) {
+				$subdomains = $this->config->get('locale:subdomains');
+				$regex = '/(?:\.|^)('.implode('|', array_keys($subdomains)).')\./';
+				$languageViaCustomSubDomain = preg_match_all($regex, $_SERVER['HTTP_HOST'], $matches);
+				if ($languageViaCustomSubDomain > 0) {
+					$languageCode = $subdomains[$matches[1][0]];
+				}
+			}
+
+			//Get subdomain language, Subdomain-Language overrules Custom-Subdomain-Language
+			if ($this->getSetting('localesubdomain') && isset($_SERVER['HTTP_HOST']) && count($this->config->get('language:locales')) > 0) {
+				$regex = '/(?:\.|^)('.implode('|',$this->config->get('language:locales')).')\./';
+				$languageViaSubdomain = preg_match_all($regex, $_SERVER['HTTP_HOST'], $matches);
+				if ($languageViaSubdomain > 0) {
+					$languageCode = $matches[1][0];
+				}
+			}
+
+			//Get get language, Get-Language overrules Custom-Subdomain-Language
 	    	if ($this->getSetting('localeget') !== false) {
 	    		$languageViaGet = $this->getRequest()->get($this->getSetting('localeget'));
 	    		if ($languageViaGet !== null) {

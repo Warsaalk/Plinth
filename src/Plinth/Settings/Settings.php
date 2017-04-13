@@ -28,6 +28,8 @@ class Settings
 			'localeget' 			=> SettingsDefaults::LOCALE_GET,
 			'localeaccept' 			=> SettingsDefaults::LOCALE_ACCEPT,
 			'localecookie'			=> SettingsDefaults::LOCALE_COOKIE,
+			'localesubdomain'		=> SettingsDefaults::LOCALE_SUBDOMAIN,
+			'localedomain'			=> SettingsDefaults::LOCALE_DOMAIN,
 			'tokenexpire' 			=> SettingsDefaults::TOKEN_EXPIRE,
 			'sessionregenerate' 	=> SettingsDefaults::SESSION_REGENERATE,
 			'templatebase' 			=> SettingsDefaults::TEMPLATE_BASE,
