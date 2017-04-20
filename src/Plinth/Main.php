@@ -332,7 +332,7 @@ class Main {
     	
     }
     
-    private function handleRouter()
+    public function handleRouter()
 	{
 		// Load initial/default routes if there're no components or the component wants to merge them
     	if ($this->component === false || $this->component->getMergeDefaultRouting()) {
@@ -777,14 +777,23 @@ class Main {
     	return count($this->_info) > 0;
     	
     }
+
+	/**
+	 * @param $lang
+	 */
+	public function setLang($lang)
+	{
+		if (Language::validate($lang)) {
+			$this->_lang = $lang;
+		}
+	}
     
     /**
      * @return string
      */
-    public function getLang() { 
-    	
-    	return $this->_lang;       
-    
+    public function getLang()
+	{
+    	return $this->_lang;
     }
 	
 	/**
