@@ -87,29 +87,42 @@ class Response extends Connector {
 		return $asset;
 	
 	}
+
+	/**
+	 * @param array $attributes
+	 * @return string
+	 */
+	public function createHTMLAttributes ($attributes = array())
+	{
+		$copy = $attributes;
+		array_walk($copy, function (&$value, $key) {
+			$value = $key . '="' . addcslashes($value, '"') . '"';
+		});
+		return implode(" ", $copy);
+	}
 	
 	/**
 	 * @param string $script
+	 * @param array $attributes
 	 * @return string
 	 */
-	public function getScriptTag($script) {
-
-		return '<script type="text/javascript" src="' . $this->getAsset($script) . '"></script>';
-	
+	public function getScriptTag($script, $attributes = array())
+	{
+		return '<script type="text/javascript" src="' . $this->getAsset($script) . '" ' . $this->createHTMLAttributes($attributes) . '></script>';
 	}
 	
 	/**
 	 * @param string $css
 	 * @param string|boolean $cond
 	 * @param array $media
+	 * @param array $attributes
 	 * @return string
 	 */
-	public function getCssTag($css, $cond=false, $media=array('screen')) {
-	
-		$cssTag = '<link rel="stylesheet" type="text/css" href="' . $this->getAsset( $css ) . '" media="' . implode(',', $media) . '" />';
+	public function getCssTag($css, $cond=false, $media=array('screen'), $attributes = array())
+	{
+		$cssTag = '<link rel="stylesheet" type="text/css" href="' . $this->getAsset( $css ) . '" media="' . implode(',', $media) . '" ' . $this->createHTMLAttributes($attributes) . ' />';
 	
 		return $cond !== false ? '<!--[if '. $cond .']>' . $cssTag . '<![endif]-->' : $cssTag;
-	
 	}
 	
 	/**
