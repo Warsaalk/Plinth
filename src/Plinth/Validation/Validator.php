@@ -319,7 +319,10 @@ class Validator extends Connector {
 		    if ($props['preCallback'] !== false && is_callable($props['preCallback']) && isset($form[$name])) {
 		    	$form[$name] = $this->callbackAction($form[$name], $props['preCallback']);
 		    }
-				
+
+			if ($props['req'] === false && isset($form[$name]) && is_scalar($form[$name]) && strlen($form[$name]) === 0) {
+				unset($form[$name]); // If the variable is not required and empty unset it!
+			}
 		}
 		
 		$this->_vars = filter_var_array($form, $varArguments);
