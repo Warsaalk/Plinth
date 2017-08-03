@@ -42,7 +42,7 @@ class Bin extends Connector
 	 * @return mixed
 	 * @throws PlinthException
 	 */
-	public function run($scriptType, $scriptName, $parameters = array())
+	public function run($scriptType, $scriptName, $parameters = array(), $inBackground = false)
 	{
 		$executable = false;
 
@@ -53,8 +53,13 @@ class Bin extends Connector
 		if ($executable === false) throw new PlinthException("Please use an existing script type");
 
 		$command = "$executable {$this->path}$scriptName " . implode(" ", $parameters);
-		exec('bash -c "exec nohup setsid ' . $command . ' 2>/dev/null &"', $output);
-		return $output;
+
+		if ($inBackground === true) {
+			exec('bash -c "exec nohup setsid ' . $command . ' > /dev/null 2>/dev/null &"');
+		} else {
+			exec('bash -c "exec nohup setsid ' . $command . ' 2>/dev/null &"', $output);
+			return $output;
+		}
 	}
 
 	/**
@@ -63,8 +68,8 @@ class Bin extends Connector
 	 * @return mixed
 	 * @throws PlinthException
 	 */
-	public function runPHPScript($scriptName, $parameters = array())
+	public function runPHPScript($scriptName, $parameters = array(), $inBackground = false)
 	{
-		return $this->run(self::SCRIPT_TYPE_PHP, $scriptName, $parameters);
+		return $this->run(self::SCRIPT_TYPE_PHP, $scriptName, $parameters, $inBackground);
 	}
 }
