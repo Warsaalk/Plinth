@@ -84,6 +84,11 @@ class Main {
      * @var Store
      */
     private $_store;
+
+	/**
+	 * @var Bin
+	 */
+    private $_bin;
     
     /**
      * @var Connection[]
@@ -298,6 +303,7 @@ class Main {
     	$this->setResponse(new Response($this));
     	$this->setDict(new Dictionary($this)); //Connect dictionary
     	$this->setStore(new Store($this)); //Connect Store
+		$this->setBin(new Bin($this)); // Connect Bin
     	$this->setUserService(new UserService($this));
     	$this->setRouter(new Router($this));
     	
@@ -592,6 +598,22 @@ class Main {
     	return $this->_store;											
     
     }
+
+	/**
+	 * @param Bin $bin
+	 */
+	public function setBin(Bin $bin)
+	{
+		$this->_bin = $bin;
+	}
+
+	/**
+	 * @return Bin
+	 */
+	public function getBin()
+	{
+		return $this->_bin;
+	}
     
     /**
      * @return KLogger

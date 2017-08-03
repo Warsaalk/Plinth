@@ -58,6 +58,10 @@ final class SettingsDefaults
 
 	CONST REQUEST_ERRORS_TO_MAIN = false;
 
+	CONST EXECUTABLE_DIRECTORY = 'bin';
+
+	CONST EXECUTABLE_PHP = 'php';
+
 	private function __construct() {}
 
 }

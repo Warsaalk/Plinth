@@ -39,7 +39,9 @@ class Settings
 			'route404' 				=> SettingsDefaults::ROUTE_404,
 			'route405' 				=> SettingsDefaults::ROUTE_405,
 			'characterencoding' 	=> SettingsDefaults::CHARACTER_ENCODING,
-			'requesterrorstomain'	=> SettingsDefaults::REQUEST_ERRORS_TO_MAIN
+			'requesterrorstomain'	=> SettingsDefaults::REQUEST_ERRORS_TO_MAIN,
+			'executabledirectory'	=> SettingsDefaults::EXECUTABLE_DIRECTORY,
+			'executablephp'			=> SettingsDefaults::EXECUTABLE_PHP
 		);
 	}
 
