@@ -21,7 +21,9 @@ class Route extends Connector {
 			TYPE_HTML = 'html',
 			TYPE_XML  = 'xml',
 			TYPE_ERROR= 'error';
-	
+
+	const	TPL_EMPTY = null;
+
 	/**
 	 * @var string
 	 */
@@ -60,7 +62,7 @@ class Route extends Connector {
 	/**
 	 * @var string
 	 */
-	private	$_template;
+	private	$_template = self::TPL_EMPTY;
 	
 	/**
 	 * @var boolean
@@ -77,7 +79,7 @@ class Route extends Connector {
 	 * 
 	 * @var string[]
 	 */
-	private $_methods;
+	private $_methods = array("GET");
 	
 	/**
 	 * @var string[]
@@ -138,15 +140,13 @@ class Route extends Connector {
 		$this->_templateBase = $templateBase;
 		$this->_templatePath = $templatePath;
 				
-		if (!isset($args['path']) ||
-			!isset($args['template']) || 
-			!isset($args['methods'])) 
-			throw new PlinthException('A route needs to have these parameters: path, template, methods');
+		if (!isset($args['path']))
+			throw new PlinthException('A route needs to have a path');
 				
 		$this->_path = $args['path'];
-		$this->_template = $args['template'];
-		$this->_methods = $args['methods'];
 
+		if (isset($args['template'])) $this->_template = $args['template'];
+		if (isset($args['methods'])) $this->_methods = $args['methods'];
 		if (isset($args['type'])) $this->_type = $args['type'];
 		if (isset($args['contentType'])) $this->_contentType = $args['contentType'];
 		if (isset($args['pathData'])) $this->_pathData = $args['pathData'];

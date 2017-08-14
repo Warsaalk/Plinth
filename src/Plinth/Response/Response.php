@@ -169,6 +169,8 @@ class Response extends Connector {
 	 */
 	public function getTemplate($tpl, $templatePath = false)
 	{
+		if ($tpl === Route::TPL_EMPTY) return ""; // If there's no template return an empty string
+
 		$path = $templatePath !== false ? $templatePath : $this->_path;
 		
 		return Parser::parse($this,	$tpl, $path, __EXTENSION_TEMPLATE, $this->getDict());
