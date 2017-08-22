@@ -351,10 +351,10 @@ class Main {
 			);
     	}
 
-    	// If there's a component and it has routings, load them
-    	if ($this->component !== false && $this->component->hasRouting()) {
-    		$this->getRouter()->loadRoutes(
-    			$this->component->getRoutingPath(),
+		// If there's a component
+		if ($this->component !== false) {
+			$this->getRouter()->loadRoutes(
+				$this->component->hasRouting() ? $this->component->getRoutingPath() : __APP_CONFIG_ROUTING,
 				!$this->getSetting('forcelogin'),
 				$this->getSetting('forcesession'),
 				$this->getSetting('templatebase'),
