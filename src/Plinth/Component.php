@@ -70,9 +70,17 @@ class Component {
 			if (!file_exists(__APP_CONFIG_PATH . $properties['routing'])) throw new PlinthException('The routing you defined does not exist.');
 			$self->setRouting($properties['routing']);
 		}
-		
-		if (isset($properties['configMergeDefault']) && $properties['configMergeDefault']) $self->enableDefaultConfigMerge();
-		if (isset($properties['routingMergeDefault']) && $properties['routingMergeDefault']) $self->enableDefaultRoutingMerge();
+
+		if (isset($properties['configMergeDefault']) && $properties['configMergeDefault']) {
+			if ($self->config === false) throw new PlinthException('You need to define a config if you want to merge it with the default one.');
+			$self->enableDefaultConfigMerge();
+		}
+
+		if (isset($properties['routingMergeDefault']) && $properties['routingMergeDefault']) {
+			if ($self->routing === false) throw new PlinthException('You need to define a routing if you want to merge it with the default one.');
+			$self->enableDefaultRoutingMerge();
+		}
+
 		if (isset($properties['useRootCookiePath']) && $properties['useRootCookiePath']) $self->enableRootCookiePath();
 		
 		return $self;
