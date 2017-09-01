@@ -69,6 +69,7 @@ class DeleteQuery extends WhereQuery
 		$return .= $this->getFrom();
 			
 		if ($this->hasAs()) 	$return .= $this->getAs();
+		if ($this->hasJoins())  $return .= $this->getJoins();
 		if ($this->hasWhere()) 	$return .= $this->getWhere();
 		if ($this->hasLimit()) 	$return .= $this->getLimit();
 			
