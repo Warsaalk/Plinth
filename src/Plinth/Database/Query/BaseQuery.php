@@ -3,8 +3,9 @@
 namespace Plinth\Database\Query;
 
 use Plinth\Exception\PlinthException;
-abstract class BaseQuery implements IQuery {
 
+abstract class BaseQuery implements IQuery
+{
 	/* Limit types */
 	const LIMIT_MYSQL = 0;
 	const LIMIT_POSTGRESQL = 1;
@@ -34,26 +35,24 @@ abstract class BaseQuery implements IQuery {
 	private $limit;
 
 	/**
-	 * @param string $table
-	 * @param string $as
+	 * @param $table
+	 * @param bool $as
 	 */
-	public function __construct($table, $as=false) {
-
+	public function __construct($table, $as = false)
+	{
 		$this->joins 	= array();
 		$this->table 	= $table;
-		$this->tableAs 	= $as;		
-		
-		return $this;	
-		
+		$this->tableAs 	= $as;
 	}
 
 	/**
-	 * @param integer $limit
-	 * @param string $offset
-	 * @param integer $notation
+	 * @param $limit
+	 * @param bool $offset
+	 * @param int $notation
+	 * @return $this
 	 */
-	public function limit($limit, $offset=false, $notation=self::LIMIT_MYSQL) {
-
+	public function limit($limit, $offset = false, $notation = self::LIMIT_MYSQL)
+	{
 		if (!$this->hasLimit()) $this->limit = "";
 			
 		if ($offset !== false && $notation === self::LIMIT_MYSQL) $this->limit .= " $offset,";
@@ -63,17 +62,18 @@ abstract class BaseQuery implements IQuery {
 		if ($offset !== false && $notation === self::LIMIT_POSTGRESQL) $this->limit .= " OFFSET $offset";		
 		
 		return $this;
-
 	}
 
 	/**
 	 * @param SelectQuery|string $tojoin
 	 * @param string $type
-	 * @param string $condition
-	 * @param string $as
+	 * @param bool $condition
+	 * @param bool $as
+	 * @return $this
 	 * @throws PlinthException
 	 */
-	public function join( $tojoin, $type=JoinQuery::Join, $condition=false, $as=false ) {
+	public function join($tojoin, $type = JoinQuery::JOIN, $condition = false, $as = false)
+	{
 
 		if ($tojoin instanceof SelectQuery || $tojoin instanceof UnionQuery || is_string($tojoin))
 			$this->joins[] = new JoinQuery($tojoin, $type, $condition, $as);
@@ -81,66 +81,78 @@ abstract class BaseQuery implements IQuery {
 			throw new PlinthException("It's only possible to join a SelectQuery instance or a string");
 		
 		return $this;
-
 	}
 
 	/**
 	 * @return boolean
 	 */
-	protected function hasAs()		{ return $this->tableAs !== false;     }
+	protected function hasAs()
+	{
+		return $this->tableAs !== false;
+	}
 	
 	/**
 	 * @return boolean
 	 */
-	protected function hasLimit()	{ return !is_null($this->limit);     }
+	protected function hasLimit()
+	{
+		return !is_null($this->limit);
+	}
 	
 	/**
 	 * @return boolean
 	 */
-	protected function hasJoins()	{ return count($this->joins) > 0;    }
+	protected function hasJoins()
+	{
+		return count($this->joins) > 0;
+	}
 
 	/**
 	 * @return string
 	 */
-	protected function getTable()	{ return $this->table; 				}
+	protected function getTable()
+	{
+		return $this->table;
+	}
 	
 	/**
 	 * @return string
 	 */
-	protected function getAs()		{ return " AS " . $this->tableAs; 	}
+	protected function getAs()
+	{
+		return " AS " . $this->tableAs;
+	}
 	
 	/**
 	 * @return string
 	 */
-	protected function getLimit()	{ return " LIMIT" . $this->limit; 	}
+	protected function getLimit()
+	{
+		return " LIMIT" . $this->limit;
+	}
 	
 	/**
 	 * @return string
 	 */
-	protected function getJoins() {
-		
+	protected function getJoins()
+	{
 		$query = "";
 		
 		foreach ($this->joins as $join) {
-		
 			$query .= $join->get();
-		
 		}
 		
 		return $query;
-		
 	}
 	
-	protected function getEnd($end) {
-		
+	protected function getEnd($end)
+	{
 		return $end ? self::END : self::NO_END;
-		
 	}
-	
-	/** 
-	 * (non-PHPdoc)
-	 * @see IQuery::get()
-	 */
-	public abstract function get($end=true);
 
+	/**
+	 * @param bool $end
+	 * @return string
+	 */
+	public abstract function get($end = true);
 }

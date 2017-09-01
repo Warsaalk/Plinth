@@ -2,8 +2,8 @@
 
 namespace Plinth\Database\Query;
 
-class DeleteQuery extends WhereQuery {
-
+class DeleteQuery extends WhereQuery
+{
 	/**
 	 * @var array
 	 */
@@ -57,10 +57,10 @@ class DeleteQuery extends WhereQuery {
 	}
 
 	/**
-	 * (non-PHPdoc)
-	 * @see IQuery::get()
+	 * @param bool $end
+	 * @return string
 	 */
-	public function get($end=true)
+	public function get($end = true)
 	{
 		$return = $this->getDelete();
 
@@ -72,6 +72,6 @@ class DeleteQuery extends WhereQuery {
 		if ($this->hasWhere()) 	$return .= $this->getWhere();
 		if ($this->hasLimit()) 	$return .= $this->getLimit();
 			
-		return  $return . $this->getEnd($end);
+		return $return . $this->getEnd($end);
 	}
 }

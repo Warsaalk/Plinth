@@ -5,8 +5,8 @@ namespace Plinth\Database\Query;
 /**
  * IQuery interface
  */
-interface IQuery {
-	
+interface IQuery
+{
     const END = " ;";
     const NO_END = "";
         
@@ -16,5 +16,4 @@ interface IQuery {
 	 * @return string 
 	 */
 	public function get();
-
 }

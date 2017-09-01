@@ -39,7 +39,8 @@ class InsertQuery extends BaseQuery
 	private $_selectQuery;
 
 	/**
-	 * @param integer $useType
+	 * @param $useType
+	 * @return $this
 	 * @throws PlinthException
 	 */
 	private function setType ($useType)
@@ -53,6 +54,8 @@ class InsertQuery extends BaseQuery
 			&&	($this->_type === self::VALUES_ONLY && $useType !== false))
 			throw new PlinthException('Please only use values or a value-column combination for all your inserts.');
 		}
+
+		return $this;
 	}
 
 	/**
@@ -61,7 +64,7 @@ class InsertQuery extends BaseQuery
 	 * @return $this
 	 * @throws PlinthException
 	 */
-	public function insert ($value, $column=self::VALUES_ONLY)
+	public function insert ($value, $column = self::VALUES_ONLY)
 	{
 		if ($this->_type === self::VALUES_MULTIPLE) {
 			if (!is_array($value)) throw new PlinthException('Please use an array for the column values');
@@ -83,14 +86,15 @@ class InsertQuery extends BaseQuery
 	 * @return $this
 	 * @throws PlinthException
 	 */
-	public function insertSelectQuery(SelectQuery $query, $columns=array())
+	public function insertSelectQuery(SelectQuery $query, $columns = array())
 	{
 	    if ($this->_type === NULL) {
     	    $this->setType(self::SELECT_ONLY);
 
     	    $this->_columns = $columns;
     	    $this->_selectQuery = $query;
-	    } else throw new PlinthException('insertSelectQuery can only be use once and cannot be combined with other inserts.');
+	    } else
+	    	throw new PlinthException('insertSelectQuery can only be use once and cannot be combined with other inserts.');
 	    
 	    return $this;
 	}
@@ -100,13 +104,14 @@ class InsertQuery extends BaseQuery
 	 * @throws PlinthException
 	 * @return InsertQuery
 	 */
-	public function setColumns($columns=array())
+	public function setColumns($columns = array())
 	{
 		if ($this->_type === NULL) {
     	    $this->setType(self::VALUES_MULTIPLE);
     	    
     	    $this->_columns = $columns;
-	    } else throw new PlinthException('setColumns can only be use once and cannot be combined with other inserts.');
+	    } else
+	    	throw new PlinthException('setColumns can only be use once and cannot be combined with other inserts.');
 	    
 	    return $this;
 	}
@@ -114,7 +119,10 @@ class InsertQuery extends BaseQuery
 	/**
 	 * @return boolean
 	 */
-	private function hasData() { return count($this->_values) > 0; }
+	private function hasData()
+	{
+		return count($this->_values) > 0;
+	}
 	
 	/**
 	 * @throws PlinthException
@@ -125,9 +133,10 @@ class InsertQuery extends BaseQuery
 		$data = false;
 		
 		if ($this->_type === self::VALUES_COLUMNS) {
-			if (count($this->_columns) === count($this->_values)) {
+			if (count($this->_columns) === count($this->_values))
 				$data = " (" . implode(',', $this->_columns) . ") VALUES (" . implode(',', $this->_values) . ")";
-			} else throw new PlinthException('Your columns and values must match');
+			else
+				throw new PlinthException('Your columns and values must match');
 		} elseif ($this->_type === self::VALUES_MULTIPLE) {
 			$columns = count($this->_columns);
 			$data = " (" . implode(',', $this->_columns) . ") VALUES ";
@@ -136,8 +145,10 @@ class InsertQuery extends BaseQuery
 			if (!$this->hasData()) throw new PlinthException('Please insert values');
 						
 			foreach ($this->_values as $i => $row) {
-				if (count($row) === $columns) $dataValues[] = "(" . implode(',', $row) . ")";
-				else throw new PlinthException('Your values must match the number of columns');
+				if (count($row) === $columns)
+					$dataValues[] = "(" . implode(',', $row) . ")";
+				else
+					throw new PlinthException('Your values must match the number of columns');
 			}
 			
 			$data .= implode(', ', $dataValues);
@@ -153,12 +164,18 @@ class InsertQuery extends BaseQuery
 	/**
 	 * @return string
 	 */
-	private function getInsert() { return "INSERT INTO "; }
+	private function getInsert()
+	{
+		return "INSERT INTO ";
+	}
 
 	/**
 	 * @return string
 	 */
-	private function getOnDuplicateKeyUpdate() { return " ON DUPLICATE KEY UPDATE "; }
+	private function getOnDuplicateKeyUpdate()
+	{
+		return " ON DUPLICATE KEY UPDATE ";
+	}
 
 	/**
 	 * @param $column
@@ -175,7 +192,10 @@ class InsertQuery extends BaseQuery
 	/**
 	 * @return bool
 	 */
-	private function hasUpdateData() { return count($this->_update) > 0; }
+	private function hasUpdateData()
+	{
+		return count($this->_update) > 0;
+	}
 
 	/**
 	 * @return string
@@ -190,9 +210,9 @@ class InsertQuery extends BaseQuery
 		return implode(', ', $updateData);
 	}
 
-	/** 
-	 * (non-PHPdoc)
-	 * @see IQuery::get()
+	/**
+	 * @param bool $end
+	 * @return string
 	 */
 	public function get($end = true)
 	{

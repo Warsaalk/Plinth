@@ -2,8 +2,8 @@
 
 namespace Plinth\Database\Query;
 
-class SelectQuery extends WhereQuery implements OrderByQuery {
-
+class SelectQuery extends WhereQuery implements OrderByQuery
+{
 	/**
 	 * @var array
 	 */
@@ -23,117 +23,142 @@ class SelectQuery extends WhereQuery implements OrderByQuery {
 	 * @var array
 	 */
 	private $orderby;
-	
+
 	/**
+	 * SelectQuery constructor.
 	 * @param string|SelectQuery $table
-	 * @param string $as
+	 * @param bool $as
 	 */
-	public function __construct($table, $as=false) {
-	
+	public function __construct($table, $as = false)
+	{
 		parent::__construct($table, $as);
 	
 		$this->select = array();
-		$this->orderby= array();		
-		
-		return $this;
-		
+		$this->orderby= array();
 	}
-	
+
 	/**
-	 * @param string $select
-	 * @param string $selectAs
+	 * @param $select
+	 * @param bool $selectAs
+	 * @return $this
 	 */
-	public function select ($select, $selectAs=false) {
-		
+	public function select ($select, $selectAs = false)
+	{
 		if ($selectAs !== false) $select .= ' AS ' . $selectAs;
 
 		$this->select[] = $select;		
 		
 		return $this;
-		
 	}
-	
+
 	/**
-	 * @param string $column
+	 * @param $column
+	 * @return $this
 	 */
-	public function groupBy($column) {
-		
+	public function groupBy($column)
+	{
 		$this->groupBy[] = $column;		
 		
 		return $this;
-		
 	}
-	
+
 	/**
-	 * @param string $statement
+	 * @param $statement
+	 * @return $this
 	 */
-	public function having ($statement) {
-		
+	public function having ($statement)
+	{
 		$this->having[] = $statement;		
 		
 		return $this;
-		
 	}
-	
-     /**
-	 * (non-PHPdoc)
-	 * @see OrderByQuery::orderBy()
+
+	/**
+	 * @param string $column
+	 * @param int $order
+	 * @return $this
 	 */
-	public function orderBy($column, $order=self::ORDER_DEFAULT) {
-			
+	public function orderBy($column, $order = self::ORDER_DEFAULT)
+	{
 		if ($order === self::ORDER_DESC)	$column .= " DESC";
 		elseif ($order === self::ORDER_ASC)	$column .= " ASC";
 		
 		$this->orderby[] = $column;		
 		
 		return $this;
-
 	}
 	
 	/**
 	 * @return boolean
 	 */
-	private function hasSelect()	{ return count($this->select) > 0; 	}
+	private function hasSelect()
+	{
+		return count($this->select) > 0;
+	}
 
 	/**
 	 * @return boolean
 	 */
-	protected function hasGroupBy()	{ return count($this->groupBy) > 0; }
+	protected function hasGroupBy()
+	{
+		return count($this->groupBy) > 0;
+	}
 
 	/**
 	 * @return boolean
 	 */
-	protected function hasHaving()	{ return count($this->having) > 0; 	}
+	protected function hasHaving()
+	{
+		return count($this->having) > 0;
+	}
 	
 	/**
 	 * @return boolean
 	 */
-	private function hasOrderBy()	{ return count($this->orderby) > 0;	}
+	private function hasOrderBy()
+	{
+		return count($this->orderby) > 0;
+	}
 	
 	/**
 	 * @return string
 	 */
-	private function getSelect()	{ return "SELECT " . implode(',', $this->select);		}
+	private function getSelect()
+	{
+		return "SELECT " . implode(',', $this->select);
+	}
 
 	/**
 	 * @return string
 	 */
-	protected function getGroupBy()	{ return  " GROUP BY " . implode(',', $this->groupBy);	}
+	protected function getGroupBy()
+	{
+		return  " GROUP BY " . implode(',', $this->groupBy);
+	}
 
 	/**
 	 * @return string
 	 */
-	protected function getHaving()	{ return  " HAVING " . implode(' AND', $this->having);	}
+	protected function getHaving()
+	{
+		return  " HAVING " . implode(' AND', $this->having);
+	}
 	
 	/**
 	 * @return string
 	 */
-	private function getOrderBy() 	{ return " ORDER BY " . implode(',', $this->orderby); 	}
+	private function getOrderBy()
+	{
+		return " ORDER BY " . implode(',', $this->orderby);
+	}
 	
 	/**
 	 * @return string
 	 */
-	private function getFrom()		{ return " FROM " . $this->getTable();					}
+	private function getFrom()
+	{
+		return " FROM " . $this->getTable();
+	}
 
 	/**
 	 * Allow the table to be a SelectQuery
@@ -149,12 +174,12 @@ class SelectQuery extends WhereQuery implements OrderByQuery {
 		return $table;
 	}
 
-	/** 
-	 * (non-PHPdoc)
-	 * @see IQuery::get()
+	/**
+	 * @param bool $end
+	 * @return string
 	 */
-	public function get($end=true) {
-	
+	public function get($end = true)
+	{
 		$return = $this->getSelect() . $this->getFrom();
 						
 		if ($this->hasAs())       $return .= $this->getAs();
@@ -166,8 +191,6 @@ class SelectQuery extends WhereQuery implements OrderByQuery {
 		if ($this->hasOrderBy())  $return .= $this->getOrderBy();
 		if ($this->hasLimit()) 	  $return .= $this->getLimit();
 		
-		return  $return . $this->getEnd($end);
-	
+		return $return . $this->getEnd($end);
 	}
-
 }
