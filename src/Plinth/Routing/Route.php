@@ -37,7 +37,7 @@ class Route extends Connector {
 	/**
 	 * @var array
 	 */
-	private	$_pathData;
+	private	$_pathData = array();
 	
 	/**
 	 * @var string
