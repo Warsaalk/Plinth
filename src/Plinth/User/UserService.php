@@ -110,7 +110,7 @@ class UserService extends Connector
 				session_regenerate_id(true); //Always generate new id on login
 								
 				if ($this->Main()->getSetting('usersession')) {
-					$session = $this->encrypt_session();
+					$session = $this->hashSession();
 					$this->user->setSession($session);
 					$this->userrepository->updateUserSession($this->user->getID(), $session);
 				}
