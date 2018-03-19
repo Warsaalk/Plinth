@@ -23,7 +23,12 @@ class UserService extends Connector
 	/**
 	 * @var boolean
 	 */
-	private $validSession = false;
+	private $sessionValid = false;
+
+	/**
+	 * @var bool
+	 */
+	private $sessionUpdated = false;
 
 	/**
 	 * @var boolean
@@ -59,9 +64,17 @@ class UserService extends Connector
 	 */
 	public function isSessionValid()
 	{
-		return $this->validSession;
+		return $this->sessionValid;
 	}
-	
+
+	/**
+	 * @return bool
+	 */
+	public function isSessionUpdated()
+	{
+		return $this->sessionUpdated;
+	}
+
 	/**
 	 * @return boolean
 	 */
@@ -110,7 +123,7 @@ class UserService extends Connector
 				session_regenerate_id(true); //Always generate new id on login
 								
 				if ($this->Main()->getSetting('usersession')) {
-					$session = $this->hashSession();
+					$session = $this->getHashForToken($this->getSessionToken());
 					$this->user->setSession($session);
 					$this->userrepository->updateUserSession($this->user->getID(), $session);
 				}
@@ -176,32 +189,33 @@ class UserService extends Connector
 			if ($this->user !== NULL) {
 				//If application uses usersessions
 				if ($this->Main()->getSetting('usersession')) {
-					$current_session = $this->user->getSession();
+					$sessionHash = $this->user->getSession();
 					
 					//Check if User::getSession is implemented
-					if ($current_session !== false) {
-						$check_session = $this->hashSession();
+					if ($sessionHash !== false) {
+						$sessionToken = $this->getSessionToken();
 						
 						//Compare current session against the session generator
-						if (strcmp($current_session, $check_session) === 0) {
+						if (password_verify($sessionToken, $sessionHash)) {
 								
 							//Regenerate session id after a while
 							if ($this->Main()->getSetting('sessionregenerate') !== false) {
 								$now = time();
 								if ($now > $_SESSION['plinth_user_generated'] + $this->Main()->getSetting('sessionregenerate')) {
 									session_regenerate_id(); //Don't use true as it'll delete the old session
-									$this->userrepository->updateUserSession($this->user->getID(), $this->hashSession());
+									$this->userrepository->updateUserSession($this->user->getID(), $this->getHashForToken($sessionToken));
+									$this->sessionUpdated = true;
 									$_SESSION['plinth_user_generated'] = $now;
 								}
 							}
 								
-							return $this->validSession = true;
+							return $this->sessionValid = true;
 						} else {
 							$this->logout();
 						}
 					}				
 				} else {
-					return $this->validSession = true;
+					return $this->sessionValid = true;
 				}			
 			}
 		}
@@ -211,9 +225,9 @@ class UserService extends Connector
 	/**
 	 * @return string
 	 */
-	private function hashSession()
+	private function getSessionToken()
 	{
-		return $this->getHashForToken(session_id() . "." . $_SERVER['REMOTE_ADDR'] . "." . $_SERVER['HTTP_USER_AGENT']);
+		return session_id() . "." . $_SERVER['REMOTE_ADDR'] . "." . $_SERVER['HTTP_USER_AGENT'];
 	}
 	
 	/**
