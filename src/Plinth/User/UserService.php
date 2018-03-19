@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace Plinth\User;
 
@@ -14,12 +14,12 @@ class UserService extends Connector
 	 * @var User
 	 */
 	private $user = NULL;
-	
+
 	/**
 	 * @var UserRepository
 	 */
 	private $userrepository;
-	
+
 	/**
 	 * @var boolean
 	 */
@@ -34,7 +34,7 @@ class UserService extends Connector
 	 * @var boolean
 	 */
 	private $loggedOut = false;
-	
+
 	/**
 	 * @return User
 	 */
@@ -42,7 +42,7 @@ class UserService extends Connector
 	{
 		return $this->user;
 	}
-	
+
 	/**
 	 * @return boolean
 	 */
@@ -50,7 +50,7 @@ class UserService extends Connector
 	{
 		return $this->user !== NULL;
 	}
-	
+
 	/**
 	 * @param UserRepository $userrepository
 	 */
@@ -58,7 +58,7 @@ class UserService extends Connector
 	{
 		$this->userrepository = $userrepository;
 	}
-	
+
 	/**
 	 * @return boolean
 	 */
@@ -117,20 +117,19 @@ class UserService extends Connector
 	 */
 	public function login($login, $token, $validationCallback = NULL)
 	{
-	    $this->user = $this->checkCreds($login, $token);
+		$this->user = $this->checkCreds($login, $token);
 		if($this->user !== NULL) {
 			if ($validationCallback === NULL || $validationCallback($this->user)) {
 				session_regenerate_id(true); //Always generate new id on login
-								
+
 				if ($this->Main()->getSetting('usersession')) {
-					$session = $this->getHashForToken($this->getSessionToken());
-					$this->user->setSession($session);
-					$this->userrepository->updateUserSession($this->user->getID(), $session);
+					$this->user->setSession($this->getHashForToken($this->getSessionToken()));
+					$this->userrepository->updateUserSession($this->user->getID(), $this->user->getSession());
 				}
-					
+
 				$_SESSION['plinth_user_id'] = $this->user->getID();
 				$_SESSION['plinth_user_generated'] = time();
-				
+
 				return true;
 			}
 		}
@@ -145,7 +144,7 @@ class UserService extends Connector
 	 */
 	private function checkCreds($login, $token)
 	{
-	    if ($login === NULL) {
+		if ($login === NULL) {
 			$tokensalt = $this->Main()->config->get('keys:tokensalt');
 			if ($tokensalt !== false) {
 				$usertoken = crypt($token, $tokensalt);
@@ -159,7 +158,7 @@ class UserService extends Connector
 				throw new PlinthException('Please define a token salt in your config if you want to use the token only authentication.');
 			}
 		} else {
-	    	$userlogin = $this->userrepository->findUserWithLogin($login);
+			$userlogin = $this->userrepository->findUserWithLogin($login);
 			if ($userlogin && $userlogin->canLogin()) {
 				if (password_verify($token, $userlogin->getToken())) {
 					if ($this->Main()->getSetting('userrehash') === true && password_needs_rehash($userlogin->getToken(), PASSWORD_DEFAULT)) {
@@ -190,38 +189,39 @@ class UserService extends Connector
 				//If application uses usersessions
 				if ($this->Main()->getSetting('usersession')) {
 					$sessionHash = $this->user->getSession();
-					
+
 					//Check if User::getSession is implemented
 					if ($sessionHash !== false) {
 						$sessionToken = $this->getSessionToken();
-						
+
 						//Compare current session against the session generator
 						if (password_verify($sessionToken, $sessionHash)) {
-								
+
 							//Regenerate session id after a while
 							if ($this->Main()->getSetting('sessionregenerate') !== false) {
 								$now = time();
 								if ($now > $_SESSION['plinth_user_generated'] + $this->Main()->getSetting('sessionregenerate')) {
 									session_regenerate_id(); //Don't use true as it'll delete the old session
-									$this->userrepository->updateUserSession($this->user->getID(), $this->getHashForToken($sessionToken));
+									$this->user->setSession($this->getHashForToken($this->getSessionToken())); // Get a new session token as we updated session_id
+									$this->userrepository->updateUserSession($this->user->getID(), $this->user->getSession());
 									$this->sessionUpdated = true;
 									$_SESSION['plinth_user_generated'] = $now;
 								}
 							}
-								
+
 							return $this->sessionValid = true;
 						} else {
 							$this->logout();
 						}
-					}				
+					}
 				} else {
 					return $this->sessionValid = true;
-				}			
+				}
 			}
 		}
 		return false;
 	}
-	
+
 	/**
 	 * @return string
 	 */
@@ -229,7 +229,7 @@ class UserService extends Connector
 	{
 		return session_id() . "." . $_SERVER['REMOTE_ADDR'] . "." . $_SERVER['HTTP_USER_AGENT'];
 	}
-	
+
 	/**
 	 * @return boolean
 	 */
@@ -237,17 +237,17 @@ class UserService extends Connector
 	{
 		$this->user = NULL;
 		$this->loggedOut = true;
-		
+
 		if (session_status() !== PHP_SESSION_ACTIVE) session_start();
-		
+
 		//Destory session
 		session_unset();
 		session_destroy();
-		//Start new session 
+		//Start new session
 		session_start();
 		//Regenerate session id, else the session will continue with the old id
-		session_regenerate_id(true); 
-		
+		session_regenerate_id(true);
+
 		return true;
 	}
 }
