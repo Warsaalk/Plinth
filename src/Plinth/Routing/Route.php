@@ -419,12 +419,14 @@ class Route extends Connector
 	}
 
 	/**
-	 * @param $templateData
+	 * @param array $templateData
+	 * @param bool $merge
 	 * @return $this
 	 */
-	public function setTemplateData($templateData = array())
+	public function setTemplateData($templateData = array(), $merge = true)
 	{
-		$this->_templateData = array_merge($this->_templateData, $templateData);
+		if ($merge)	$this->_templateData = array_merge($this->_templateData, $templateData);
+		else		$this->_templateData = $templateData;
 
 		return $this;
 	}
