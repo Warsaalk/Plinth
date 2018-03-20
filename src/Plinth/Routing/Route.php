@@ -9,8 +9,8 @@ use Plinth\Exception\PlinthException;
 use Plinth\Connector;
 use Plinth\Main;
 
-class Route extends Connector {
-
+class Route extends Connector
+{
 	const DATA_LANG = 'lang';
 	
 	/**
@@ -115,6 +115,11 @@ class Route extends Connector {
 	 * @var string
 	 */
 	private $_templatePath;
+
+	/**
+	 * @var array
+	 */
+	private $_templateData;
 	
 	/**
 	 * @var CacheSettings
@@ -130,8 +135,8 @@ class Route extends Connector {
 	 * @param string $templatePath Template base setting
 	 * @throws PlinthException
 	 */
-	public function __construct($args, Main $main, $public = false, $sessions = false, $templateBase = SettingsDefaults::TEMPLATE_BASE, $templatePath = SettingsDefaults::TEMPLATE_PATH) {
-
+	public function __construct($args, Main $main, $public = false, $sessions = false, $templateBase = SettingsDefaults::TEMPLATE_BASE, $templatePath = SettingsDefaults::TEMPLATE_PATH)
+	{
 		parent::__construct($main);
 		
 		$this->_name = $args['name'];
@@ -139,9 +144,9 @@ class Route extends Connector {
 		$this->_sessions = $sessions;
 		$this->_templateBase = $templateBase;
 		$this->_templatePath = $templatePath;
+		$this->_templateData = array();
 				
-		if (!isset($args['path']))
-			throw new PlinthException('A route needs to have a path');
+		if (!isset($args['path'])) throw new PlinthException('A route needs to have a path');
 				
 		$this->_path = $args['path'];
 
@@ -164,84 +169,78 @@ class Route extends Connector {
 		if (isset($args['caching'])) $this->_cacheSettings->load($args['caching']);
 		
 		$this->_data = array();
-		
 	}
-	
+
 	/**
-	 * @param string $label
-	 * @param mixed $value
+	 * @param $label
+	 * @param $value
+	 * @return $this
 	 */
-	public function addData($label, $value) {
-		
+	public function addData($label, $value)
+	{
 		$this->_data[$label] = $value;
-		
+
+		return $this;
 	}
 	
 	/**
 	 * @param string $label
 	 * @return mixed|boolean
 	 */
-	public function get($label) {
-		
+	public function get($label)
+	{
 		return isset($this->_data[$label]) ? $this->_data[$label] : false;
-		
 	}
 	
 	/**
 	 * @return number
 	 */
-	public function hasData() {
-		
+	public function hasData()
+	{
 		return count($this->_data);
-		
 	}
 	
 	/**
 	 * @return mixed[]
 	 */
-	public function getData() {
-		
+	public function getData()
+	{
 		return $this->_data;
-		
 	}
 	
 	/**
 	 * @return string
 	 */
-	public function getName() {
-		
+	public function getName()
+	{
 		return $this->_name;
-		
 	}
 	
 	/**
 	 * @param array $data (optional)
 	 * @return string
 	 */
-	public function getPath(array $data = array()) {
-				
+	public function getPath(array $data = array())
+	{
 		return $this->translatePath($this->_path, $data);
-		
 	}
 
 	/**
 	 * @param array $data (optional)
 	 * @return string
 	 */
-	public function getDefaultLangPath(array $data = array()) {
-				
+	public function getDefaultLangPath(array $data = array())
+	{
 		return $this->translatePath($this->_pathDefaultLang, $data);
-		
 	}
-
 
 	/**
 	 * @param string $path
 	 * @param array $data
 	 * @return string
 	 */
-	private function translatePath($path, array $data) {
-		
+	private function translatePath($path, array $data)
+	{
 		if ($this->Main()->getSetting('autoroutelocale') === true && $this->getPathData('lang') === true && !isset($data['lang'])) {
 			$lang = $this->Main()->getLang();
 			if ($lang) $data['lang'] = $lang;
@@ -249,20 +248,19 @@ class Route extends Connector {
 		
 		$callb = function($match) use($data) { return isset($data[$match[1]]) ? $data[$match[1]] : '{'.$match[1].'}'; };
 		return preg_replace_callback('/{([\w]+)}/', $callb, $path);
-		
 	}
 
 	/**
 	 * @return string
 	 */
-	public function getPathRegex() {
-	
+	public function getPathRegex()
+	{
 		$regex = $this->_path;
 		
 		if ($this->hasPathData() > 0) {
-
 			$data = $this->getPathData();
-			$replaceMatches = function ($match) use ($data) {
+			$replaceMatches = function ($match) use ($data)
+			{
 				if (isset($data[$match[1]])) {
 					if ($match[1] === self::DATA_LANG && $data[$match[1]] === true) {
 						return '(?<' . $match[1] . '>(' . implode('|', Language::getLanguages()) . '))';
@@ -279,126 +277,113 @@ class Route extends Connector {
 		}
 		
 		return $regex;
-	
 	}
-	
+
 	/**
-	 * @return array
+	 * @param bool $label
+	 * @return string|null
 	 */
-	public function getPathData($label = false) {
-		
+	public function getPathData($label = false)
+	{
 		if ($label !== false) return isset($this->_pathData[$label]) ? $this->_pathData[$label] : null;
 		
 		return $this->_pathData;
-		
 	}
 	
 	/**
 	 * @return number
 	 */
-	public function hasPathData() {
-		
+	public function hasPathData()
+	{
 		return count($this->_pathData);
-		
 	}
 	
 	/**
 	 * @return string|boolean
 	 */
-	public function getType() {
-		
+	public function getType()
+	{
 		return $this->_type;
-		
 	}
 
 	/**
 	 * @return string|boolean
 	 */
-	public function getContentType() {
-
+	public function getContentType()
+	{
 		return $this->_contentType;
-
 	}
 
 	/**
 	 * @return boolean
 	 */
-	public function hasContentType() {
-
+	public function hasContentType()
+	{
 		return $this->_contentType !== false;
-
 	}
 	
 	/**
 	 * @return string
 	 */
-	public function getTemplate() {
-		
+	public function getTemplate()
+	{
 		return $this->_template;
-		
 	}
 	
 	/**
 	 * @return boolean
 	 */
-	public function isDefault() {
-		
+	public function isDefault()
+	{
 		return $this->_default === true;
-		
 	}
 	
 	/**
 	 * @return string[]
 	 */
-	public function getHeaders() {
-		
+	public function getHeaders()
+	{
 		return $this->_headers;
-		
 	}
 	
 	/**
 	 * @return boolean
 	 */
-	public function hasHeaders() {
-		
+	public function hasHeaders()
+	{
 		return is_array($this->_headers);
-		
 	}
 	
 	/**
 	 * @return string[]
 	 */
-	public function getMethods() {
-		
+	public function getMethods()
+	{
 		return $this->_methods;
-		
 	}
 	
 	/**
 	 * @return boolean
 	 */
-	public function hasActions() {
-		
+	public function hasActions()
+	{
 		return is_array($this->_actions);
-		
 	}
 	
 	/**
 	 * @return string[]
 	 */
-	public function getActions() {
-		
+	public function getActions()
+	{
 		return $this->_actions;
-		
 	}
 	
 	/**
 	 * @return boolean
 	 */
-	public function isPublic() {
-	    
+	public function isPublic()
+	{
 	    return $this->_public;
-	    
 	}
 
 	/**
@@ -424,50 +409,75 @@ class Route extends Connector {
 	{
 		return $this->_templatePath;
 	}
+
+	/**
+	 * @return array
+	 */
+	public function getTemplateData()
+	{
+		return $this->_templateData;
+	}
+
+	/**
+	 * @param $templateData
+	 * @return $this
+	 */
+	public function setTemplateData($templateData = array())
+	{
+		$this->_templateData = array_merge($this->_templateData, $templateData);
+
+		return $this;
+	}
+
+	/**
+	 * @param $templateDataKey
+	 * @param mixed|null $templateDataValue
+	 * @return $this
+	 */
+	public function addTemplateData($templateDataKey, $templateDataValue = null)
+	{
+		$this->_templateData[$templateDataKey] = $templateDataValue;
+
+		return $this;
+	}
 	
 	/**
 	 * @return boolean
 	 */
-	public function hasCacheSettings() {
-		
+	public function hasCacheSettings()
+	{
 		return $this->_cacheSettings->hasHeaders();
-		
 	}
 	
 	/**
 	 * @return CacheSettings
 	 */
-	public function getCacheSettings() {
-		
+	public function getCacheSettings()
+	{
 		return $this->_cacheSettings;
-		
 	}
 
 	/**
 	 * @return boolean
 	 */
-	public function hasRoles() {
-
+	public function hasRoles()
+	{
 		return $this->_roles !== false && is_array($this->_roles);
-
 	}
 
 	/**
 	 * @return boolean|array
 	 */
-	public function getRoles() {
-
+	public function getRoles()
+	{
 		return $this->_roles;
-
 	}
 
 	/**
 	 * @return boolean|array
 	 */
-	public function areRolesAllowed() {
-
+	public function areRolesAllowed()
+	{
 		return $this->_rolesAllowed;
-
 	}
-	
 }

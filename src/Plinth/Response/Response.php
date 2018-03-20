@@ -7,15 +7,15 @@ use Plinth\Dictionary;
 use Plinth\Routing\Route;
 use Plinth\Main;
 
-class Response extends Connector {
-	
+class Response extends Connector
+{
 	const  CODE_201 = "HTTP/1.0 201 Created",
 	       CODE_204 = "HTTP/1.0 204 No Content",
 	       CODE_401 = "HTTP/1.0 401 Unauthorized",
 	       CODE_403 = "HTTP/1.0 403 Forbidden",
 	       CODE_404 = "HTTP/1.0 404 Not Found",
 	       CODE_405 = "HTTP/1.0 405 Method Not Allowed";
-	
+
 	/**
 	 * @var string|boolean
 	 */
@@ -44,38 +44,39 @@ class Response extends Connector {
 	/**
 	 * @param Main $main
 	 */
-	public function __construct($main) {
-	
+	public function __construct($main)
+	{
 		parent::__construct($main);
 		
 		$this->assetVersion = $main->config->get('assets:version');
 		$this->assetPath = $main->getSetting('assetpath');
-		$this->_data = array();
 
+		$this->_data = array();
 		$this->_path = $main->getSetting('templatepath');
-		
 	}
-    
-    /**
-     * @param string $name
-     * @param mixed $value
-     * @param string $time
-     */
-    public function saveCookie($name, $value, $time = NULL) {
-        		
+
+	/**
+	 * @param string $name
+	 * @param mixed $value
+	 * @param string $time
+	 * @return $this
+	 */
+    public function saveCookie($name, $value, $time = NULL)
+	{
     	if ($time !== NULL)	setcookie($name, $value, time() + $time);
     	else    			setcookie($name, $value);
     		
     	$_COOKIE[$name] = $value;
-    
+
+    	return $this;
     }
 	
 	/**
 	 * @param string $asset
 	 * @return string
 	 */
-	public function getAsset($asset) {
-
+	public function getAsset($asset)
+	{
 		$external = preg_match('/^https?:\/\//', $asset) === 1;
 
 		if ($this->assetVersion) $asset .= '?v=' . $this->assetVersion;
@@ -85,7 +86,6 @@ class Response extends Connector {
 		}
 
 		return $asset;
-	
 	}
 
 	/**
@@ -128,52 +128,52 @@ class Response extends Connector {
 	/**
 	 * @return Dictionary
 	 */
-	public function getDict() {
-	
+	public function getDict()
+	{
 		return $this->main->getDict();
-	
 	}
-	
+
 	/**
 	 * @param string $key
 	 * @param mixed $value
+	 * @return $this
 	 */
-	public function addData($key, $value) {
-		
+	public function addData($key, $value)
+	{
 		$this->_data[$key] = $value;
-		
+
+		return $this;
 	}
 	
 	/**
 	 * @return boolean
 	 */
-	public function hasData() {
-		
+	public function hasData()
+	{
 		return !empty($this->_data);
-		
 	}
 	
 	/**
 	 * @return array
 	 */
-	public function getData() {
-		
+	public function getData()
+	{
 		return $this->_data;
-		
 	}
-	
+
 	/**
-	 * @param string $tpl
-	 * @param string|boolean $templatePath
+	 * @param string $template
+	 * @param array $templateData
+	 * @param string|bool $templatePath
 	 * @return string
 	 */
-	public function getTemplate($tpl, $templatePath = false)
+	public function getTemplate($template, $templateData = array(), $templatePath = false)
 	{
-		if ($tpl === Route::TPL_EMPTY) return ""; // If there's no template return an empty string
+		if ($template === Route::TPL_EMPTY) return ""; // If there's no template return an empty string
 
 		$path = $templatePath !== false ? $templatePath : $this->_path;
 		
-		return Parser::parse($this,	$tpl, $path, __EXTENSION_TEMPLATE, $this->getDict());
+		return Parser::parse($this,	$template, $templateData, $path, __EXTENSION_TEMPLATE, $this->getDict());
 	}
 
 	/**
@@ -182,34 +182,36 @@ class Response extends Connector {
 	 */
 	public function getTemplateByRoute(Route $route)
 	{
-		return $this->getTemplate($route->getTemplate(), $route->getTemplatePath());
+		return $this->getTemplate($route->getTemplate(), $route->getTemplateData(), $route->getTemplatePath());
 	}
 
 	/**
-	 * @param string $routeName
+	 * @param $routeName
 	 * @return string
+	 * @throws \Plinth\Exception\PlinthException
 	 */
 	public function getTemplateByRouteName($routeName)
 	{
 		return $this->getTemplateByRoute($this->main->getRouter()->getRoute($routeName));
 	}
-	
+
 	/**
-	 * @param string $routeName
+	 * @param $routeName
 	 * @param array $data
+	 * @throws \Plinth\Exception\PlinthException
 	 */
-	public function hardRedirect($routeName, array $data = array()) {
-	    
+	public function hardRedirect($routeName, array $data = array())
+	{
 	    header('Location: ' . __BASE_URL . $this->Main()->getRouter()->getRoute($routeName)->getPath($data));
 	    exit;
-	    
 	}
 
 	/**
-	 * @param string $code This is a HTTP response code
+	 * @param $code This is a HTTP response code
+	 * @throws \Plinth\Exception\PlinthException
 	 */
-	public function hardExit($code) {
-
+	public function hardExit($code)
+	{
 		$router = $this->Main()->getRouter();
 		$exitRoute = false;
 
@@ -225,15 +227,15 @@ class Response extends Connector {
 		} else {
 			exit;
 		}
-
 	}
-	
+
 	/**
 	 * @return string
+	 * @throws \Plinth\Exception\PlinthException
 	 */
-	public function render() {
-	
-		$router = $this->Main()->getRouter();
+	public function render()
+	{
+		$router = $this->main->getRouter();
 		$route = $router->getRoute();
 		 
 		if ($route->hasCacheSettings()) {
@@ -255,24 +257,20 @@ class Response extends Connector {
 		$this->content = $this->getTemplateByRoute($route);
 	
 		if ($route->getType() !== Route::TYPE_PAGE && $route->getType() !== Route::TYPE_ERROR) {
-	
 			return $this->content;
-			 
 		} else {
-	
-			return $this->getTemplate($route->getTemplateBase(), $route->getTemplatePath());
-	
+			return $this->getTemplate($route->getTemplateBase(), $route->getTemplateData(), $route->getTemplatePath());
 		}
-			
 	}
 
 	/**
 	 * @param $filePath
+	 * @param $fileName
 	 * @param bool $exit
 	 * @return bool
 	 */
-	public function renderFile($filePath, $fileName, $exit = true) {
-
+	public function renderFile($filePath, $fileName, $exit = true)
+	{
 		if (file_exists($filePath)) {
 			header('Content-Description: File Transfer');
 			header('Content-Type: application/octet-stream');
@@ -286,10 +284,9 @@ class Response extends Connector {
 			flush();
 			readfile($filePath);
 			if ($exit) exit;
+			return true;
 		} else {
 			return false;
 		}
-
 	}
-	
 }

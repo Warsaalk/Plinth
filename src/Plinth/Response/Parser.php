@@ -3,17 +3,20 @@
 namespace Plinth\Response;
 
 use Plinth\Dictionary;
-class Parser {
 
+class Parser
+{
     /**
      * @param Response $self
      * @param string $template
+	 * @param array $templateData
      * @param string $path
      * @param string $tplExt
+	 * @param Dictionary $dictionary
      * @return string
      */
-	public static function parse($self, $template, $path, $tplExt, Dictionary $dictionary = null) {
-		
+	public static function parse($self, $template, $templateData = array(), $path = "", $tplExt = __EXTENSION_PHP, Dictionary $dictionary = null)
+	{
 		$fullPath = $path . $template . $tplExt;
 		
 		if (!file_exists($fullPath)) return false;
@@ -31,19 +34,19 @@ class Parser {
 		 * Push data into variables
 		 */
 		if (method_exists($self, 'hasData') && $self->hasData()) {
-			foreach ($self->getData() as $cantoverride_key => $cantoverride_value) {
-				${$cantoverride_key} = $cantoverride_value;
-			}
-			unset($cantoverride_key);
-			unset($cantoverride_value);
+			$templateData = array_merge($templateData, $self->getData());
 		}
+
+		foreach ($templateData as $cantoverride_key => $cantoverride_value) {
+			${$cantoverride_key} = $cantoverride_value;
+		}
+		unset($cantoverride_key);
+		unset($cantoverride_value);
 		
 		ob_start();
 		require $fullPath;
 		$content = ob_get_contents();
 		ob_end_clean();
 		return $content;
-	
 	}
-
 }
