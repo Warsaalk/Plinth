@@ -193,22 +193,30 @@ class Request extends Connector {
 	}
 
 	/**
-	 * @param string $action
+	 * @param string $actionClassName
 	 * @param string $method
 	 * @return ActionType
+	 * @throws PlinthException
 	 */
-	private function getActionClass($action, $method) {
+	private function getActionClass($actionClassName, $method)
+	{
+		$legacyActionClassName = ucfirst($actionClassName) . ucfirst(strtolower($method));
+		$legacyActionClassPath = __APP_ACTION . $legacyActionClassName . __EXTENSION_PHP;
+		if (file_exists($legacyActionClassPath)) {
+			$actionClassName = $legacyActionClassName;
 
-		$actionClassName = ucfirst($action) . ucfirst(strtolower($method));
-
-		require __APP_ACTION . $actionClassName . __EXTENSION_PHP;
+			require $legacyActionClassPath;
+		}
 
 		$self = $this;
 
-		return new $actionClassName($this->main, function (Info $error) use ($self) {
-			$self->addError($error);
-		});
-
+		if (class_exists($actionClassName, $legacyActionClassName !== $actionClassName)) {
+			return new $actionClassName($this->main, function (Info $error) use ($self) {
+				$self->addError($error);
+			});
+		} else {
+			throw new PlinthException("Your action class, $actionClassName, cannot be found.");
+		}
 	}
 
 	/**
