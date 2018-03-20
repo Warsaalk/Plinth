@@ -207,7 +207,7 @@ class Response extends Connector
 	}
 
 	/**
-	 * @param $code This is a HTTP response code
+	 * @param string $code This is a HTTP response code
 	 * @throws \Plinth\Exception\PlinthException
 	 */
 	public function hardExit($code)
