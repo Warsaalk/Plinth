@@ -6,8 +6,8 @@ use Plinth\Main;
 use Plinth\Common\Info;
 use Plinth\Connector;
 
-abstract class ActionType extends Connector {
-
+abstract class ActionType extends Connector
+{
 	/**
 	 * @var \Closure
 	 */
@@ -60,11 +60,14 @@ abstract class ActionType extends Connector {
 	 *
 	 * @param array $variables
 	 * @param array $files
+	 * @return array
 	 */
 	abstract public function onFinish(array $variables, array $files);
 
 	/**
 	 * Method called when a request is invalid or has errors
+	 *
+	 * @return array
 	 */
 	abstract public function onError();
 

@@ -202,10 +202,12 @@ class Request extends Connector
 	}
 
 	/**
+	 * @param Route $route
 	 * @param ActionType $action
 	 */
-	private function validateAction(ActionType $action)
+	private function validateAction(Route $route, ActionType $action)
 	{
+		$actionTemplateData = false;
 		$actionSettings = $action->getSettings();
 
 		//if (!isset($actionSettings['variables'])) throw new PlinthException("Please defined your action variables");
@@ -255,7 +257,7 @@ class Request extends Connector
 			}
 
 			if (!$this->hasErrors() && !$invalid) {
-				$action->onFinish($validator->getVariables(), $validator->getFiles());
+				$actionTemplateData = $action->onFinish($validator->getVariables(), $validator->getFiles());
 			}
 		} else {
 			foreach ($validator->getErrors() as $error) {
@@ -265,7 +267,7 @@ class Request extends Connector
 		}
 
 		if ($this->hasErrors() || $invalid) {
-			$action->onError();
+			$actionTemplateData = $action->onError();
 
 			if ($this->main->getSetting('requesterrorstomain')) {
 				foreach ($this->_errors as $i => $error) {
@@ -274,6 +276,10 @@ class Request extends Connector
 					}
 				}
 			}
+		}
+
+		if (is_array($actionTemplateData)) {
+			$route->setTemplateData($actionTemplateData);
 		}
 	}
 
@@ -335,12 +341,13 @@ class Request extends Connector
 	}
 
 	/**
+	 * @param Route $route
 	 * @throws PlinthException
 	 */
-	public function handleRequest()
+	public function handleRequest(Route $route)
 	{
 		if ($this->_action !== false) {
-			$this->validateAction($this->getActionClass($this->_action, $this->getRequestMethod()));
+			$this->validateAction($route, $this->getActionClass($this->_action, $this->getRequestMethod()));
 		}
 	}
 
