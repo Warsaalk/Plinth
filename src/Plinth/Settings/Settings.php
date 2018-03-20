@@ -2,10 +2,8 @@
 
 namespace Plinth\Settings;
 
-
 class Settings
 {
-
 	/**
 	 * @var array
 	 */
@@ -30,6 +28,8 @@ class Settings
 			'localecookie'			=> SettingsDefaults::LOCALE_COOKIE,
 			'localesubdomain'		=> SettingsDefaults::LOCALE_SUBDOMAIN,
 			'localedomain'			=> SettingsDefaults::LOCALE_DOMAIN,
+			'dictionaryservice'		=> SettingsDefaults::DICTIONARY_SERVICE,
+			'dictionarymerge'		=> SettingsDefaults::DICTIONARY_MERGE,
 			'tokenexpire' 			=> SettingsDefaults::TOKEN_EXPIRE,
 			'sessionregenerate' 	=> SettingsDefaults::SESSION_REGENERATE,
 			'templatebase' 			=> SettingsDefaults::TEMPLATE_BASE,
@@ -47,10 +47,13 @@ class Settings
 
 	/**
 	 * @param array $settings
+	 * @return $this
 	 */
-	public function loadSettings($settings)
+	public function loadSettings($settings = array())
 	{
 		$this->settings = array_merge($this->settings, $settings);
+
+		return $this;
 	}
 
 	/**
@@ -61,5 +64,4 @@ class Settings
 	{
 		return isset($this->settings[$label]) ? $this->settings[$label] : false;
 	}
-
 }

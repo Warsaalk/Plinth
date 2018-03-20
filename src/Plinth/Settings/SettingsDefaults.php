@@ -5,7 +5,6 @@ namespace Plinth\Settings;
 
 final class SettingsDefaults
 {
-
 	CONST FORCE_LOGIN = false;
 
 	CONST FORCE_SESSION = false;
@@ -38,6 +37,10 @@ final class SettingsDefaults
 
 	CONST LOCALE_DOMAIN = false;
 
+	CONST DICTIONARY_SERVICE = null;
+
+	CONST DICTIONARY_MERGE = true;
+
 	CONST TOKEN_EXPIRE = 300;
 
 	CONST SESSION_REGENERATE = 300;
@@ -63,5 +66,4 @@ final class SettingsDefaults
 	CONST EXECUTABLE_PHP = 'php';
 
 	private function __construct() {}
-
 }

@@ -646,15 +646,40 @@ class Main {
         }
     
     }
-    
-    /**
-     * @param array $cookie PHP $_COOKIE variable
-     * @param string|boolean $fallback (optional)
-     */
-    public function handleDictionary($cookie, $fallback = false) {
-    	
+
+	/**
+	 * @param bool $fallback
+	 * @return $this
+	 * @throws PlinthException
+	 */
+    private function handleDictionaryService($fallback = false)
+	{
+		$dictionaryServiceClass = $this->getSetting("dictionaryservice");
+		$dictionaryServiceMerge = $this->getSetting("dictionarymerge");
+
+		if (class_exists($dictionaryServiceClass)) {
+			/** @var Dictionary\DictionaryService $dictionaryService */
+			$dictionaryService = new $dictionaryServiceClass($this);
+
+			$this->getDict()->loadFromArray($dictionaryService->loadTranslations($this->getLang()), $dictionaryServiceMerge);
+			if (Language::validate($fallback) === $fallback) {
+				$this->getDict()->loadFromArray($dictionaryService->loadTranslations($fallback), $dictionaryServiceMerge, true);
+			}
+		} else {
+			throw new PlinthException("Your dictionary service implementation, $dictionaryServiceClass, cannot be found.");
+		}
+
+		return $this;
+	}
+
+	/**
+	 * @param array $cookie PHP $_COOKIE variable
+	 * @param string|boolean $fallback (optional)
+	 * @throws PlinthException
+	 */
+    public function handleDictionary($cookie, $fallback = false)
+	{
     	if (count(Language::getLanguages()) > 0) {
-    	
     		$languageCookieIndex = 'plinth-language';
     		$languageCookieAble = false;
     		$languageCode = null;
@@ -716,7 +741,8 @@ class Main {
 		    		$languageCookieAble = true;
 		    	}
 	    	}
-	    		    	
+
+	    	//Set the language code and save it to the cookie if needed
 	    	if ($languageCode !== null) {
     	    	$this->_lang = Language::validate($languageCode);
     	    	if ($this->getSetting('localecookie') && $languageCookieAble) {
@@ -727,23 +753,27 @@ class Main {
     	    		}
     	    	}
 	    	}
-	    		    	
+
+	    	//If the language cookie is present get it and override the existing language code
 	    	if ($this->getSetting('localecookie') && isset($cookie[$languageCookieIndex]) && Language::validate($cookie[$languageCookieIndex]) && $cookie[$languageCookieIndex] !== $this->_lang) {
 	    		$this->_lang = $cookie[$languageCookieIndex];
 	    	}
-	    	    	
+
+	    	//Load the translations into the dictionary
 	    	$this->getDict()->loadLanguage($this->_lang, $this->getSetting('localetype'));
-	    	
+
+			//If a fallback language is enabled load its translations into the dictionary
 	    	if ($fallback !== false) {
 	    		if (Language::validate($fallback) === $fallback) {
 	    			$this->getDict()->loadLanguage($fallback, $this->getSetting('localetype'), true);	    			
 	    		} else {
 	    			throw new PlinthException("Your fallback locale, $fallback, doesn't exist");	
 	    		}	    		
-	    	}
-    	
+			}
+
+			//If a user defined dictionary service is defined load its translations into the dictionary
+			$this->handleDictionaryService($fallback);
     	}
-    		
     }
     
     public function handleUser() {
