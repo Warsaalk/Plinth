@@ -33,7 +33,7 @@ class Parser
 		/*
 		 * Push data into variables
 		 */
-		if (method_exists($self, 'hasData') && $self->hasData()) {
+		if ($self instanceof Response && $self->hasData()) {
 			$templateData = array_merge($templateData, $self->getData());
 		}
 
