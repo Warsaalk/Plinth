@@ -37,7 +37,7 @@ final class SettingsDefaults
 
 	CONST LOCALE_DOMAIN = false;
 
-	CONST DICTIONARY_SERVICE = null;
+	CONST DICTIONARY_SERVICE = false;
 
 	CONST DICTIONARY_MERGE = true;
 
