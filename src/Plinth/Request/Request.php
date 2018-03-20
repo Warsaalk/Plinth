@@ -13,16 +13,17 @@ use Plinth\Common\Debug;
 use Plinth\Response\Response;
 use Plinth\Exception\PlinthException;
 
-class Request extends Connector {
+class Request extends Connector
+{
 
 	/**
 	 * HTTP request methods
 	 */
 	const	HTTP_GET 	= "GET",
-		HTTP_PUT 	= "PUT",
-		HTTP_POST 	= "POST",
-		HTTP_DELETE = "DELETE",
-		HTTP_NOTSET	= NULL;
+			HTTP_PUT 	= "PUT",
+			HTTP_POST 	= "POST",
+			HTTP_DELETE = "DELETE",
+			HTTP_NOTSET	= NULL;
 
 	const	ACTION_LOGIN = "login";
 
@@ -93,57 +94,48 @@ class Request extends Connector {
 	/**
 	 * @param Main $main
 	 */
-	public function __construct(Main $main) {
-
+	public function __construct(Main $main)
+	{
 		parent::__construct($main);
 
 		$this->_data = array();
 		$this->_files = array();
 		$this->_method = isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : self::HTTP_NOTSET;
-
 	}
 
 	/**
 	 * @param array $get
 	 */
-	public function initRequest($get) {
-
+	public function initRequest($get)
+	{
 		foreach ($get as $id => $val) {
-
 			$this->_getData[$id] = Validator::cleanInput($val);
-
 		}
-
 	}
 
-	private function loadFiles() {
-
+	private function loadFiles()
+	{
 		$files = array();
 
 		foreach ($_FILES as $label => $info) {
-
 			if (is_array($info['name'])) {
-
 				foreach ($info['name'] as $i => $name) {
 					$files[$label][] = new UploadedFile($info['name'][$i], $info['tmp_name'][$i], $info['type'][$i], $info['error'][$i], $info['size'][$i]);
 				}
-
 			} else {
 				$files[$label][] = new UploadedFile($info['name'], $info['tmp_name'], $info['type'], $info['error'], $info['size']);
 			}
-
 		}
 
 		return $files;
-
 	}
 
 	/**
 	 * @param string $method
 	 * @return array|string
 	 */
-	private function loadData($method) {
-
+	private function loadData($method)
+	{
 		$data	= array();
 
 		switch ($method) {
@@ -155,41 +147,31 @@ class Request extends Connector {
 		}
 
 		return $data;
-
 	}
 
 	/**
 	 * @param Route $route
 	 * @param boolean $redirected (optional)
 	 */
-	public function loadRequest(Route $route, $redirected=false) {
-
+	public function loadRequest(Route $route, $redirected=false)
+	{
 		if ($redirected === true) {
-
 			//Reset action when redirecting
 			$this->_action = false;
-
 		} else {
-
 			$method	= $this->getRequestMethod();
 
 			$this->_data = $this->loadData($method);
 			$this->_files = $this->loadFiles();
 
 			if ($route->hasActions()) {
-
 				$actions = $route->getActions();
 
 				if (array_key_exists($method, $actions)) {
-
 					$this->_action = $actions[$method];
-
 				}
-
 			}
-
 		}
-
 	}
 
 	/**
@@ -222,8 +204,8 @@ class Request extends Connector {
 	/**
 	 * @param ActionType $action
 	 */
-	private function validateAction(ActionType $action) {
-
+	private function validateAction(ActionType $action)
+	{
 		$actionSettings = $action->getSettings();
 
 		//if (!isset($actionSettings['variables'])) throw new PlinthException("Please defined your action variables");
@@ -237,25 +219,17 @@ class Request extends Connector {
 		$invalid	= false;
 
 		if ($variables !== false) {
-
 			foreach ($variables as $name => $settings) {
-
 				$settings = array_merge(self::$defaultVariableSettings, $settings);
 				$validator->addValidation($name, $settings['rules'], $settings['type'], $settings['required'], $settings['default'], $settings['multiple'], $settings['message'], $settings['preCallback'], $settings['postCallback']);
-
 			}
-
 		}
 
 		if ($uploadfiles !== false) {
-
 			foreach ($uploadfiles as $name => $settings) {
-
 				$settings = array_merge(self::$defaultFileSettings, $settings);
 				$validator->addValidation($name, $settings['rules'], $settings['type'], $settings['required'], false, $settings['multiple'], $settings['message'], false, false);
-
 			}
-
 		}
 
 		if ($token !== false) {
@@ -266,7 +240,6 @@ class Request extends Connector {
 		$validator->validate($this->_data, $this->_files);
 
 		if ($validator->isValid()) {
-
 			if ($token !== false && $token['required'] === true && !$this->main->validateToken($validator->getVariable('token'))) {
 				if ($token['message']) $this->addError($token['message']);
 				$invalid = true;
@@ -280,21 +253,18 @@ class Request extends Connector {
 					header(Response::CODE_401);
 				}
 			}
+
 			if (!$this->hasErrors() && !$invalid) {
 				$action->onFinish($validator->getVariables(), $validator->getFiles());
 			}
-
 		} else {
-
 			foreach ($validator->getErrors() as $error) {
 				$this->addError($error);
 			}
 			$invalid = true;
-
 		}
 
 		if ($this->hasErrors() || $invalid) {
-
 			$action->onError();
 
 			if ($this->main->getSetting('requesterrorstomain')) {
@@ -305,25 +275,22 @@ class Request extends Connector {
 				}
 			}
 		}
-
 	}
 
 	/**
 	 * @param Info $error
 	 */
-	private function addError(Info $error) {
-
+	private function addError(Info $error)
+	{
 		$this->_errors[] = $error;
-
 	}
 
 	/**
 	 * @return boolean
 	 */
-	public function hasErrors() {
-
+	public function hasErrors()
+	{
 		return !empty($this->_errors);
-
 	}
 
 	/**
@@ -338,8 +305,8 @@ class Request extends Connector {
 	 * @param Route $route
 	 * @throws PlinthException
 	 */
-	public function isRouteAuthorized(Route $route) {
-
+	public function isRouteAuthorized(Route $route)
+	{
 		$loginpage = $this->main->getSetting('loginpage');
 
 		if (!$route->isPublic()) {
@@ -360,41 +327,37 @@ class Request extends Connector {
 				}
 			}
 		}
-
 	}
 
-	private function disableAction() {
-
+	private function disableAction()
+	{
 		$this->_action = false;
-
 	}
 
-	public function handleRequest() {
-
+	/**
+	 * @throws PlinthException
+	 */
+	public function handleRequest()
+	{
 		if ($this->_action !== false) {
-
 			$this->validateAction($this->getActionClass($this->_action, $this->getRequestMethod()));
-
 		}
-
 	}
 
 	/**
 	 * @return boolean
 	 */
-	public function isLoginRequest() {
-
+	public function isLoginRequest()
+	{
 		return preg_match('/^'. self::ACTION_LOGIN . '/', $this->_action) === 1;
-
 	}
 
 	/**
 	 * @return string
 	 */
-	public function getRequestMethod() {
-
+	public function getRequestMethod()
+	{
 		return $this->_method;
-
 	}
 
 	/**
@@ -402,20 +365,21 @@ class Request extends Connector {
 	 * @param boolean $stripGET (optional)
 	 * @return string
 	 */
-	public static function getRequestPath ($base, $stripGET = true) {
-
+	public static function getRequestPath ($base, $stripGET = true)
+	{
 		$request_uri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
 
 		$regex	= '/^'. str_replace('/', '\/', $base) .'/';
 		$path	= preg_replace($regex, '', $request_uri);
 		return	$stripGET === true ? preg_replace('/\?(.*)$/', '', $path) : $path; //Strip GET path from URI
-
 	}
 
-	public function get($var) {
-
+	/**
+	 * @param string $var
+	 * @return mixed|null
+	 */
+	public function get($var)
+	{
 		return isset($this->_getData[$var]) ? $this->_getData[$var] : null;
-
 	}
-
 }
