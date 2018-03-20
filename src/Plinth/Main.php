@@ -14,10 +14,7 @@ use Plinth\Request\Request;
 use Plinth\Routing\Router;
 use Plinth\Settings\Settings;
 use Plinth\Validation\Validator;
-use Plinth\Store;
-use Plinth\Dictionary;
 use Plinth\User\UserService;
-use Plinth\Common\Debug;
 use Plinth\Response\Response;
 use Plinth\Entity\EntityRepository;
 use Plinth\Logging\KLogger;
@@ -28,8 +25,8 @@ use Plinth\Exception\PlinthException;
 * This is the main class which handles and provides all the data
 *
 */
-class Main {
-
+class Main
+{
 	const 	STATE_INIT = 0,
 			STATE_HANDLING = 1,
 			STATE_REQUEST = 2,
@@ -129,9 +126,12 @@ class Main {
 	 * @var Settings
 	 */
     public $initialSettings;
-    
-    public function __construct() { 
-        
+
+	/**
+	 * @throws PlinthException
+	 */
+    public function __construct()
+	{
         $this->state = self::STATE_INIT;
     	
     	$this->loadComponent();
@@ -153,17 +153,21 @@ class Main {
         
         $this->registerClasses();
 		$this->registerSessionPath();
-    			
     }
-    
+
+	/**
+	 * Load all components and activate the correct one
+	 *
+	 * @throws PlinthException
+	 */
     private function loadComponent()
 	{
+		/** @var Component $component */
     	$component = false;
     	$currentPath = Request::getRequestPath(__BASE);
     	$defaultPath = false;
     	
     	if (file_exists(__APP_CONFIG_COMPONENTS)) {
-    	
 	    	$componentsData = json_decode(file_get_contents(__APP_CONFIG_COMPONENTS), true);
 	    	
 	    	if (!is_array($componentsData)) throw new PlinthException('Cannot parse components.json config');
@@ -172,18 +176,22 @@ class Main {
 	    		$loadedComponent = Component::loadFromArray(__APP_CONFIG_PATH, $label, $data);
 	    		if ($loadedComponent->getPath() === false) {
 	    			if ($defaultPath === false) $defaultPath = true;
-	    			else						throw new PlinthException('Their can only be one default path in components.json config');
+	    			else throw new PlinthException('Their can only be one default path in components.json config');
 	    		}
 	    		if ($loadedComponent->matchesCurrentPath($currentPath)) {
 	    			if ($component === false || $loadedComponent->getDepth() > $component->getDepth()) $component = $loadedComponent;
 	    		}
 	    	}
-    		    	
     	}
     	    	
     	$this->component = $component;
     }
 
+	/**
+	 * Load the config(s)
+	 *
+	 * @throws PlinthException
+	 */
 	private function loadConfig()
 	{
 		$this->initialConfig = new Config(__APP_CONFIG_PROD);
@@ -198,7 +206,10 @@ class Main {
 			}
 		}
 	}
-    
+
+	/**
+	 * Load all application settings from the config file
+	 */
     private function loadSettings()
 	{
     	// Set initial settings base on the initial config
@@ -236,7 +247,12 @@ class Main {
 				? $this->initialSettings
 				: $this->settings;
 	}
-    
+
+	/**
+	 * Handle session_start when needed
+	 *
+	 * @throws PlinthException
+	 */
     private function handleSessions()
 	{
 		if ($this->getRouter()->hasRoute()) {
@@ -260,9 +276,14 @@ class Main {
 			}
 		}
     }
-    
-    private function registerLogger() {
-    	
+
+	/**
+	 * Register the logger service
+	 *
+	 * @throws PlinthException
+	 */
+    private function registerLogger()
+	{
         $path = $this->config->get('logger:path')?: __LOGGING_PATH;
                 
         if (!file_exists($path)) throw new PlinthException('Logging directory does not exist');
@@ -277,11 +298,15 @@ class Main {
         }
         
         register_shutdown_function(array(KLogger::class, 'handleShutdown'), $this->_logger);
-        
     }
-    
-    private function loadDatabases() {
 
+	/**
+	 * Load the different database connections
+	 *
+	 * @throws PlinthException
+	 */
+    private function loadDatabases()
+	{
 		$databaseKeys = $this->config->get('databases:keys')?: array();
 
 		if (!isset($databaseKeys['database'])) $databaseKeys[] = 'database'; // Default database config key
@@ -292,11 +317,13 @@ class Main {
 			$this->config->destroy($databaseKey);
 			unset($database);
 		}
-    	
     }
-    
-    private function registerClasses() {
-  
+
+	/**
+	 * Register the necessary connector classes
+	 */
+    private function registerClasses()
+	{
     	$this->setValidator(new Validator($this)); //Connect form validator
     	$this->setEntityRepository(new EntityRepository($this));
     	$this->setRequest(new Request($this)); //Connect Request
@@ -306,14 +333,13 @@ class Main {
 		$this->setBin(new Bin($this)); // Connect Bin
     	$this->setUserService(new UserService($this));
     	$this->setRouter(new Router($this));
-    	
     }
 
 	/**
 	 * Register different session paths for the different components 
 	 */
-	private function registerSessionPath() {
-
+	private function registerSessionPath()
+	{
 		$cookiePath = __BASE;
 
 		if ($this->component !== false && !$this->component->usesRootCookiePath()) {
@@ -321,23 +347,30 @@ class Main {
 		}
 
 		session_set_cookie_params(0, $cookiePath);
-
 	}
-    
-    private function executeHandlers() {
-        
+
+	/**
+	 * Handle the necessary services
+	 *
+	 * @throws PlinthException
+	 */
+	private function executeHandlers()
+	{
         $this->state = self::STATE_HANDLING;
     	
     	$this->getRequest()->initRequest($_GET);
     	    
     	$this->handleRouter();
-
     	$this->handleSessions();
     	$this->handleLogout();
     	$this->handleDictionary($_COOKIE, $this->getSetting('fallbacklocale')); //Handle Dictionary
-    	
     }
-    
+
+	/**
+	 * Load and handle the application routing
+	 *
+	 * @throws PlinthException
+	 */
     public function handleRouter()
 	{
 		// Load initial/default routes if there're no components or the component wants to merge them
@@ -364,12 +397,15 @@ class Main {
     	    	
     	$this->getRouter()->handleRoute(__BASE);
     }
-    
-    /**
-     * @param string $redirected (optional)
-     */
-    public function handleRequest($redirected=false) {
-    	
+
+	/**
+	 * Handle the current or redirected request
+	 *
+	 * @param boolean $redirected (optional)
+	 * @throws PlinthException
+	 */
+    public function handleRequest($redirected = false)
+	{
     	if ($this->state < self::STATE_HANDLING) {
         	$this->executeHandlers();
         	$this->state = self::STATE_REQUEST;
@@ -377,282 +413,50 @@ class Main {
     	
     	if ($this->getRouter()->hasRoute()) {
 			if ($this->getRouter()->isRouteAllowed()) {
-
 				$route = $this->getRouter()->getRoute();
 
 				$this->getRequest()->loadRequest($route, $redirected);
 
 				//On a login request first handle the request and afterwards the user
 				if ($this->getRequest()->isLoginRequest()) {
-
 					$this->getRequest()->handleRequest($route);
 					$this->handleUser();
 					$this->getRequest()->isRouteAuthorized($route);
-
 				} else {
-
 					$this->handleUser();
 					$this->getRequest()->isRouteAuthorized($route);
 					$this->getRequest()->handleRequest($route);
-
 				}
-
 			} else $this->getResponse()->hardExit(Response::CODE_405);
     	} else $this->getResponse()->hardExit(Response::CODE_404);
     	
     	if ($this->state < self::STATE_DONE) {
     		$this->state = self::STATE_DONE;
     	}
-    	
-    }
-    
-    /**
-     * @param string[] $dicts
-     * @param string $default
-     */
-    private function initDictionaries($locales, $default=false) { 
-    	
-    	Language::init($locales, $default);             
-    
     }
 
 	/**
-	 * @param $connectionData
-	 * @param string $name
+	 * Handle user logout
 	 */
-    public function initConnection($connectionData, $name = "database") {
-    	
-    	$this->_connections[$name] = new Connection(
-    		$connectionData['type'],
-			$connectionData['db'],
-			$connectionData['host'],
-			$connectionData['name'],
-			$connectionData['pass'],
-			$connectionData['charset'],
-			$connectionData['port']
-		);
-    
-    }
-
-	/**
-	 * @param string $name
-	 */
-    public function closeConnection($name = "database") {
-
-    	if (isset($this->_connections[$name])) $this->_connections[$name]->close();
-    
-    }
-
-	/**
-	 * @param string $name
-	 * @return null|Connection
-	 */
-    public function getConnection($name = "database")	{
-
-		if (isset($this->_connections[$name])) return $this->_connections[$name];
-
-		return null;
-    
-    }
-    
-    /**
-     * @param EntityRepository $em
-     */
-    public function setEntityRepository($er) {
-    	 
-    	$this->_entityrepository = $er;
-    
-    }
-    
-    /**
-     * @return EntityRepository
-     */
-    public function getEntityRepository() {
-    	 
-    	return $this->_entityrepository;
-    
-    }
-    
-    /**
-     * @param Router $rt
-     */
-    public function setRouter($rt) {
-    	
-    	$this->_router = $rt;	
-    	
-    }
-    
-    /**
-     * @return Router
-     */
-    public function getRouter() {
-    	
-    	return $this->_router;
-    	
-    }
-    
-    /**
-     * @param Validator $va
-     */
-    public function setValidator($va) { 
-    	
-    	$this->_validator = $va;		
-    
-    }
-    
-    /**
-     * @return Validator
-     */
-    public function getValidator() { 
-    	
-    	return $this->_validator;										
-    
-    }
-    
-    /**
-     * @param Request $rm
-     */
-    public function setRequest($rm) { 
-    	
-    	$this->_request = $rm;		
-    
-    }
-    
-    /**
-     * @return Request
-     */
-    public function getRequest() { 
-    	
-    	return $this->_request;									
-    
-    }
-    
-    /**
-     * @param Response $rm
-     */
-    public function setResponse($rm) { 
-    	
-    	$this->_response = $rm;		
-    
-    }
-    
-    /**
-     * @return Response
-     */
-    public function getResponse() { 
-    	
-    	return $this->_response;									
-    
-    }
-    
-    /**
-     * @param UserService $us
-     */
-    public function setUserService($us) { 
-    	
-    	$this->_userservice = $us;		
-    
-    }
-    
-    /**
-     * @return UserService
-     */
-    public function getUserService() { 
-    	
-    	return $this->_userservice;
-    
-    }
-    
-    /**
-     * @param Dictionary $dc
-     */
-    public function setDict($dc) { 
-    	
-    	$this->_dictionary = $dc;		
-    
-    }
-    
-    /**
-     * @return Dictionary
-     */
-    public function getDict() { 
-    	
-    	return $this->_dictionary;									
-    
-    }
-    
-    /**
-     * @param Store $st
-     */
-    public function setStore($st) { 
-    	
-    	$this->_store = $st;			
-    
-    }
-    
-    /**
-     * @return Store
-     */
-    public function getStore() { 
-    	
-    	return $this->_store;											
-    
-    }
-
-	/**
-	 * @param Bin $bin
-	 */
-	public function setBin(Bin $bin)
+	public function handleLogout()
 	{
-		$this->_bin = $bin;
+		if ($this->getRequest()->get('logout') !== null) {
+			$this->getUserService()->logout();
+
+			//Strip the logout parameter & redirect to the original destination page
+			header('Location: ' . __BASE_URL . preg_replace('/(logout&|\?logout$|&logout$)/', '', Request::getRequestPath(__BASE, false)));
+			exit;
+		}
 	}
 
 	/**
-	 * @return Bin
-	 */
-	public function getBin()
-	{
-		return $this->_bin;
-	}
-    
-    /**
-     * @return KLogger
-     */
-    public function getLogger() {
-    	
-    	return $this->_logger;
-    	
-    }
-    
-    /**
-     * @return Component|boolean
-     */
-    public function getComponent() {
-    	
-    	return $this->component;
-    	
-    }
-    
-    public function handleLogout() {
-        
-        if ($this->getRequest()->get('logout') !== null) {
-            
-            $this->getUserService()->logout();
-            
-            //Strip the logout parameter & redirect to the original destination page
-            header('Location: ' . __BASE_URL . preg_replace('/(logout&|\?logout$|&logout$)/', '', Request::getRequestPath(__BASE, false)));
-            exit;
-            
-        }
-    
-    }
-
-	/**
+	 * Handle the user defined dictionary service if present
+	 *
 	 * @param bool $fallback
 	 * @return $this
 	 * @throws PlinthException
 	 */
-    private function handleDictionaryService($fallback = false)
+	private function handleDictionaryService($fallback = false)
 	{
 		$dictionaryServiceClass = $this->getSetting("dictionaryservice");
 		$dictionaryServiceMerge = $this->getSetting("dictionarymerge");
@@ -673,20 +477,22 @@ class Main {
 	}
 
 	/**
+	 * Handle the application dictionary/translations
+	 *
 	 * @param array $cookie PHP $_COOKIE variable
 	 * @param string|boolean $fallback (optional)
 	 * @throws PlinthException
 	 */
-    public function handleDictionary($cookie, $fallback = false)
+	public function handleDictionary($cookie, $fallback = false)
 	{
-    	if (count(Language::getLanguages()) > 0) {
-    		$languageCookieIndex = 'plinth-language';
-    		$languageCookieAble = false;
-    		$languageCode = null;
-    		
-	    	$this->_lang = Language::getDefault();
-		    		    	
-	    	//Get browser language, Accept-Language overrules default language
+		if (count(Language::getLanguages()) > 0) {
+			$languageCookieIndex = 'plinth-language';
+			$languageCookieAble = false;
+			$languageCode = null;
+
+			$this->_lang = Language::getDefault();
+
+			//Get browser language, Accept-Language overrules default language
 			if ($this->getSetting('localeaccept') && isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) && count($this->config->get('language:locales')) > 0) {
 				$regex = '/'.implode('|',$this->config->get('language:locales')).'/';
 				$languageViaAccept = preg_match_all($regex, $_SERVER['HTTP_ACCEPT_LANGUAGE'], $matches);
@@ -725,90 +531,333 @@ class Main {
 			}
 
 			//Get get language, Get-Language overrules Custom-Subdomain-Language
-	    	if ($this->getSetting('localeget') !== false) {
-	    		$languageViaGet = $this->getRequest()->get($this->getSetting('localeget'));
-	    		if ($languageViaGet !== null) {
-	    			$languageCode = $languageViaGet;
-	    			$languageCookieAble = true;
-	    		}
-	    	}
-		    		    	
-	    	//Get route language, Route-Language overrules Get-Language
-	    	if ($this->getRouter()->hasRoute()) {
-		    	$languageViaRequest = $this->getRouter()->getRoute()->get(Route::DATA_LANG);
-		    	if ($languageViaRequest !== false) {
-		    		$languageCode = $languageViaRequest;
-		    		$languageCookieAble = true;
-		    	}
-	    	}
+			if ($this->getSetting('localeget') !== false) {
+				$languageViaGet = $this->getRequest()->get($this->getSetting('localeget'));
+				if ($languageViaGet !== null) {
+					$languageCode = $languageViaGet;
+					$languageCookieAble = true;
+				}
+			}
 
-	    	//Set the language code and save it to the cookie if needed
-	    	if ($languageCode !== null) {
-    	    	$this->_lang = Language::validate($languageCode);
-    	    	if ($this->getSetting('localecookie') && $languageCookieAble) {
-    	    		//Save language cookie if it doesn't exist or if it's different from the previously saved one
-    	    		if (!isset($cookie[$languageCookieIndex]) || (isset($cookie[$languageCookieIndex]) && $cookie[$languageCookieIndex] !== $this->_lang)) {
-    	    			$cookie[$languageCookieIndex] = $this->_lang;
-    	    			$this->getResponse()->saveCookie($languageCookieIndex, $this->_lang);
-    	    		}
-    	    	}
-	    	}
+			//Get route language, Route-Language overrules Get-Language
+			if ($this->getRouter()->hasRoute()) {
+				$languageViaRequest = $this->getRouter()->getRoute()->get(Route::DATA_LANG);
+				if ($languageViaRequest !== false) {
+					$languageCode = $languageViaRequest;
+					$languageCookieAble = true;
+				}
+			}
 
-	    	//If the language cookie is present get it and override the existing language code
-	    	if ($this->getSetting('localecookie') && isset($cookie[$languageCookieIndex]) && Language::validate($cookie[$languageCookieIndex]) && $cookie[$languageCookieIndex] !== $this->_lang) {
-	    		$this->_lang = $cookie[$languageCookieIndex];
-	    	}
+			//Set the language code and save it to the cookie if needed
+			if ($languageCode !== null) {
+				$this->_lang = Language::validate($languageCode);
+				if ($this->getSetting('localecookie') && $languageCookieAble) {
+					//Save language cookie if it doesn't exist or if it's different from the previously saved one
+					if (!isset($cookie[$languageCookieIndex]) || (isset($cookie[$languageCookieIndex]) && $cookie[$languageCookieIndex] !== $this->_lang)) {
+						$cookie[$languageCookieIndex] = $this->_lang;
+						$this->getResponse()->saveCookie($languageCookieIndex, $this->_lang);
+					}
+				}
+			}
 
-	    	//Load the translations into the dictionary
-	    	$this->getDict()->loadLanguage($this->_lang, $this->getSetting('localetype'));
+			//If the language cookie is present get it and override the existing language code
+			if ($this->getSetting('localecookie') && isset($cookie[$languageCookieIndex]) && Language::validate($cookie[$languageCookieIndex]) && $cookie[$languageCookieIndex] !== $this->_lang) {
+				$this->_lang = $cookie[$languageCookieIndex];
+			}
+
+			//Load the translations into the dictionary
+			$this->getDict()->loadLanguage($this->_lang, $this->getSetting('localetype'));
 
 			//If a fallback language is enabled load its translations into the dictionary
-	    	if ($fallback !== false) {
-	    		if (Language::validate($fallback) === $fallback) {
-	    			$this->getDict()->loadLanguage($fallback, $this->getSetting('localetype'), true);	    			
-	    		} else {
-	    			throw new PlinthException("Your fallback locale, $fallback, doesn't exist");	
-	    		}	    		
+			if ($fallback !== false) {
+				if (Language::validate($fallback) === $fallback) {
+					$this->getDict()->loadLanguage($fallback, $this->getSetting('localetype'), true);
+				} else {
+					throw new PlinthException("Your fallback locale, $fallback, doesn't exist");
+				}
 			}
 
 			//If a user defined dictionary service is defined load its translations into the dictionary
 			$this->handleDictionaryService($fallback);
-    	}
-    }
-    
-    public function handleUser() {
+		}
+	}
 
-        if ($this->getSetting('userservice')) {
-            $this->getUserService()->verifySession();
-        }
-            
+	/**
+	 * Verify the user session
+	 *
+	 * @throws PlinthException
+	 */
+	public function handleUser()
+	{
+		if ($this->getSetting('userservice')) {
+			$this->getUserService()->verifySession();
+		}
+	}
+
+	/**
+	 * @param string $class
+	 * @return mixed
+	 * @throws PlinthException
+	 * @deprecated
+	 */
+	public function handleModule($class)
+	{
+		$instance = new $class();
+		if (method_exists($instance, 'execute')) {
+			return $instance->execute($this);
+		} else {
+			throw new PlinthException("The method execute is not implemented on your $class class.");
+		}
+	}
+
+	/**
+	 * @param string[] $locales
+	 * @param string|bool $default
+	 */
+    private function initDictionaries($locales, $default = false)
+	{
+    	Language::init($locales, $default);
+    }
+
+	/**
+	 * @param array $connectionData
+	 * @param string $name
+	 * @return $this
+	 * @throws PlinthException
+	 */
+    public function initConnection($connectionData, $name = "database")
+	{
+    	$this->_connections[$name] = Connection::initializeFromArray($connectionData);
+
+    	return $this;
+    }
+
+	/**
+	 * @param string $name
+	 * @return $this
+	 */
+    public function closeConnection($name = "database")
+	{
+    	if (isset($this->_connections[$name])) $this->_connections[$name]->close();
+
+    	return $this;
+    }
+
+	/**
+	 * @param string $name
+	 * @return null|Connection
+	 */
+    public function getConnection($name = "database")
+	{
+		if (isset($this->_connections[$name])) return $this->_connections[$name];
+
+		return null;
     }
     
     /**
-     * @param string $class
+     * @param EntityRepository $er
+	 * @return $this
      */
-    public function handleModule ($class) {
+    public function setEntityRepository(EntityRepository $er)
+	{
+    	$this->_entityrepository = $er;
+
+    	return $this;
+    }
     
-    	$instance = new $class();
-    	return $instance->execute($this);
+    /**
+     * @return EntityRepository
+     */
+    public function getEntityRepository()
+	{
+    	return $this->_entityrepository;
+    }
     
+    /**
+     * @param Router $rt
+	 * @return $this
+     */
+    public function setRouter(Router $rt)
+	{
+    	$this->_router = $rt;
+
+    	return $this;
+    }
+    
+    /**
+     * @return Router
+     */
+    public function getRouter()
+	{
+    	return $this->_router;
+    }
+    
+    /**
+     * @param Validator $va
+	 * @return $this
+     */
+    public function setValidator(Validator $va)
+	{
+    	$this->_validator = $va;
+
+    	return $this;
+    }
+    
+    /**
+     * @return Validator
+     */
+    public function getValidator()
+	{
+    	return $this->_validator;
+    }
+    
+    /**
+     * @param Request $rm
+	 * @return $this
+     */
+    public function setRequest(Request $rm)
+	{
+    	$this->_request = $rm;		
+
+    	return $this;
+    }
+    
+    /**
+     * @return Request
+     */
+    public function getRequest()
+	{
+    	return $this->_request;
+    }
+    
+    /**
+     * @param Response $rm
+	 * @return $this
+     */
+    public function setResponse(Response $rm)
+	{
+    	$this->_response = $rm;		
+
+    	return $this;
+    }
+    
+    /**
+     * @return Response
+     */
+    public function getResponse()
+	{
+    	return $this->_response;
+    }
+    
+    /**
+     * @param UserService $us
+	 * @return $this
+     */
+    public function setUserService(UserService $us)
+	{
+    	$this->_userservice = $us;		
+
+    	return $this;
+    }
+    
+    /**
+     * @return UserService
+     */
+    public function getUserService()
+	{
+    	return $this->_userservice;
+    }
+    
+    /**
+     * @param Dictionary $dc
+	 * @return $this
+     */
+    public function setDict(Dictionary $dc)
+	{
+    	$this->_dictionary = $dc;
+
+    	return $this;
+    }
+    
+    /**
+     * @return Dictionary
+     */
+    public function getDict()
+	{
+    	return $this->_dictionary;
+    }
+    
+    /**
+     * @param Store $st
+	 * @return $this
+     */
+    public function setStore(Store $st)
+	{
+    	$this->_store = $st;			
+
+    	return $this;
+    }
+    
+    /**
+     * @return Store
+     */
+    public function getStore()
+	{
+    	return $this->_store;
+    }
+
+	/**
+	 * @param Bin $bin
+	 * @return $this
+	 */
+	public function setBin(Bin $bin)
+	{
+		$this->_bin = $bin;
+
+		return $this;
+	}
+
+	/**
+	 * @return Bin
+	 */
+	public function getBin()
+	{
+		return $this->_bin;
+	}
+    
+    /**
+     * @return KLogger
+     */
+    public function getLogger()
+	{
+    	return $this->_logger;
+    }
+    
+    /**
+     * @return Component|boolean
+     */
+    public function getComponent()
+	{
+    	return $this->component;
     }
     
     /**
      * @param Info $info
+	 * @return $this
      */
-    public function addInfo($info) { 
-    	
-    	array_push($this->_info, $info); 
-    
+    public function addInfo($info)
+	{
+    	array_push($this->_info, $info);
+
+    	return $this;
     }
     
     /**
      * @param boolean $asArray (optional)
      * @return Info[]
      */
-    public function getInfo($asArray = false) { 
-    	
+    public function getInfo($asArray = false)
+	{
     	if ($asArray === true) {
     		$infos = array();
     		foreach ($this->_info as $info) {
@@ -818,26 +867,26 @@ class Main {
     	}
     	
     	return $this->_info;
-    
     }
     
     /**
      * @return boolean
      */
-    public function hasInfo() {
-    	
+    public function hasInfo()
+	{
     	return count($this->_info) > 0;
-    	
     }
 
 	/**
 	 * @param $lang
+	 * @return $this
 	 */
 	public function setLang($lang)
 	{
 		if (Language::validate($lang)) {
 			$this->_lang = $lang;
 		}
+		return $this;
 	}
     
     /**
@@ -847,70 +896,56 @@ class Main {
 	{
     	return $this->_lang;
     }
-	
+
 	/**
-	 * @param string $label
-	 * @throws Exception
+	 * @param $label
+	 * @param bool $expires
 	 * @return string
+	 * @throws PlinthException
 	 */
-	public static function getToken($label, $expires = true) {
-				
+	public static function getToken($label, $expires = true)
+	{
 		if (ctype_alnum($label)) {
-		
 			if (session_status() !== PHP_SESSION_ACTIVE) session_start();
-			
+
 			if (isset($_SESSION)) {
-			
 				$token = md5(uniqid(rand(), TRUE));
 				
 				$_SESSION['tokens'][$label]['token'] = $token;
 				$_SESSION['tokens'][$label]['token_time'] = $expires ? time() : false;
 				
 				return $label . '_' . $token;
-		
 			} else {
-				
 				throw new PlinthException('getToken, this function can only be used when you are using PHP sessions');
-				
 			}
-			
 		} else {
-			
 			throw new PlinthException('getToken, the label can only contain alphanumeric characters');
-			
 		}
-		
 	}
 	
 	/**
 	 * @param string $formtoken
 	 * @return boolean
 	 */
-	public function validateToken($formtoken) {
-				
+	public function validateToken($formtoken)
+	{
 		$tokeninfo = explode('_', $formtoken);
 		
 		if (count($tokeninfo) === 2) {
-			
 			$label = $tokeninfo[0];
 			$token = $tokeninfo[1];
 			
 			if (session_status() !== PHP_SESSION_ACTIVE) session_start();
 			
 			if (isset($_SESSION['tokens'][$label])) {
-				
 				if ($_SESSION['tokens'][$label]['token_time'] !== false) {
 					if (time() > $_SESSION['tokens'][$label]['token_time'] + $this->getSetting('tokenexpire')) return false;
 				}
 				
 				if ($token === $_SESSION['tokens'][$label]['token']) return true;
-				
 			}
-			
 		}
 		
 		return false;
-		
 	}
-		
 }

@@ -2,6 +2,7 @@
 
 namespace Plinth\Validation;
 
+use Plinth\Main;
 use Plinth\Common\Debug;
 use Plinth\Connector;
 use Plinth\Common\Info;

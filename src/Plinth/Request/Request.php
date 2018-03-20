@@ -153,7 +153,7 @@ class Request extends Connector
 	 * @param Route $route
 	 * @param boolean $redirected (optional)
 	 */
-	public function loadRequest(Route $route, $redirected=false)
+	public function loadRequest(Route $route, $redirected = false)
 	{
 		if ($redirected === true) {
 			//Reset action when redirecting
