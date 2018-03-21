@@ -5,6 +5,7 @@ namespace Plinth\Request;
 use Plinth\Main;
 use Plinth\Common\Info;
 use Plinth\Connector;
+use Plinth\Validation\Property\ValidationProperty;
 
 abstract class ActionType extends Connector
 {
@@ -60,15 +61,27 @@ abstract class ActionType extends Connector
 	 *
 	 * @param array $variables
 	 * @param array $files
+	 * @param ValidationProperty[] $validations
 	 * @return array
 	 */
-	abstract public function onFinish(array $variables, array $files);
+	abstract public function onFinish(array $variables, array $files, array $validations);
 
 	/**
 	 * Method called when a request is invalid or has errors
 	 *
+	 * @param ValidationProperty[] $validations
 	 * @return array
 	 */
-	abstract public function onError();
+	abstract public function onError(array $validations);
 
+	/**
+	 * Method called after onFinish or onError and at the end of the request handling
+	 *
+	 * @param ValidationProperty[] $validations
+	 * @return array
+	 */
+	public function onFinally(array $validations)
+	{
+		return array();
+	}
 }

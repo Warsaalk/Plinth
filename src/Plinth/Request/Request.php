@@ -228,7 +228,7 @@ class Request extends Connector
 			}
 
 			if (!$this->hasErrors() && !$invalid) {
-				$actionTemplateData = $action->onFinish($validator->getVariables(), $validator->getFiles());
+				$actionTemplateData = $action->onFinish($validator->getVariables(), $validator->getFiles(), $validator->getValidations());
 			}
 		} else {
 			foreach ($validator->getErrors() as $error) {
@@ -238,7 +238,7 @@ class Request extends Connector
 		}
 
 		if ($this->hasErrors() || $invalid) {
-			$actionTemplateData = $action->onError();
+			$actionTemplateData = $action->onError($validator->getValidations());
 
 			if ($this->main->getSetting('requesterrorstomain')) {
 				foreach ($this->_errors as $i => $error) {
@@ -247,6 +247,12 @@ class Request extends Connector
 					}
 				}
 			}
+		}
+
+		$actionFinallyTemplateData = $action->onFinally($validator->getValidations());
+
+		if (is_array($actionFinallyTemplateData)) {
+			$actionTemplateData = array_merge($actionTemplateData, $actionFinallyTemplateData);
 		}
 
 		if (is_array($actionTemplateData)) {

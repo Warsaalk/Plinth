@@ -208,6 +208,14 @@ class Validator extends Connector {
 
 		return $this->_validate[$name];
 	}
+
+	/**
+	 * @return ValidationProperty[]
+	 */
+	public function getValidations()
+	{
+		return $this->_validate;
+	}
 	
 	/**
 	 * @param string $name
