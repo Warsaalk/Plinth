@@ -31,7 +31,9 @@ class Main
 			STATE_HANDLING = 1,
 			STATE_REQUEST = 2,
 			STATE_DONE = 3;
-	
+
+	const	DEFAULT_VALIDATOR_LABEL = 'default';
+
 	/**
 	 * @var string
 	 */
@@ -58,9 +60,9 @@ class Main
     private $_entityrepository;
     
     /**
-     * @var Validator
+     * @var Validator[]
      */
-    private $_validator;
+    private $_validators;
     
     /**
      * @var Request
@@ -324,7 +326,7 @@ class Main
 	 */
     private function registerClasses()
 	{
-    	$this->setValidator(new Validator($this)); //Connect form validator
+    	$this->addValidator(self::DEFAULT_VALIDATOR_LABEL, new Validator($this)); //Connect form validator
     	$this->setEntityRepository(new EntityRepository($this));
     	$this->setRequest(new Request($this)); //Connect Request
     	$this->setResponse(new Response($this));
@@ -416,9 +418,10 @@ class Main
 				$route = $this->getRouter()->getRoute();
 
 				$this->getRequest()->loadRequest($route, $redirected);
+				$this->getRequest()->handleController($route);
 
 				//On a login request first handle the request and afterwards the user
-				if ($this->getRequest()->isLoginRequest()) {
+				if ($this->getRequest()->isLoginRequest($route)) {
 					$this->getRequest()->handleRequest($route);
 					$this->handleUser();
 					$this->getRequest()->isRouteAuthorized($route);
@@ -691,24 +694,35 @@ class Main
 	{
     	return $this->_router;
     }
-    
-    /**
-     * @param Validator $va
+
+	/**
+	 * @param $label
+	 * @param Validator $va
 	 * @return $this
-     */
-    public function setValidator(Validator $va)
+	 */
+    public function addValidator($label, Validator $va)
 	{
-    	$this->_validator = $va;
+    	$this->_validators[$label] = $va;
 
     	return $this;
     }
-    
-    /**
-     * @return Validator
-     */
-    public function getValidator()
+
+	/**
+	 * @param $label
+	 * @return bool
+	 */
+    public function hasValidator($label = self::DEFAULT_VALIDATOR_LABEL)
 	{
-    	return $this->_validator;
+		return isset($this->_validators[$label]);
+	}
+
+	/**
+	 * @param string $label
+	 * @return null|Validator
+	 */
+    public function getValidator($label = self::DEFAULT_VALIDATOR_LABEL)
+	{
+    	return isset($this->_validators[$label]) ? $this->_validators[$label] : null;
     }
     
     /**

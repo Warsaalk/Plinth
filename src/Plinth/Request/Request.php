@@ -3,6 +3,7 @@
 namespace Plinth\Request;
 
 use Plinth\Connector;
+use Plinth\Controller\Controller;
 use Plinth\Routing\Route;
 use Plinth\Validation\Property\ValidationFile;
 use Plinth\Validation\Property\ValidationToken;
@@ -48,9 +49,9 @@ class Request extends Connector
 	private $_method;
 
 	/**
-	 * @var string|boolean
+	 * @var boolean
 	 */
-	private $_action = false;
+	private $_actionDisabled = false;
 
 	/**
 	 * @var Info[]
@@ -131,20 +132,10 @@ class Request extends Connector
 	{
 		if ($redirected === true) {
 			//Reset action when redirecting
-			$this->_action = false;
+			$this->_actionDisabled = false;
 		} else {
-			$method	= $this->getRequestMethod();
-
-			$this->_data = $this->loadData($method);
+			$this->_data = $this->loadData($this->getRequestMethod());
 			$this->_files = $this->loadFiles();
-
-			if ($route->hasActions()) {
-				$actions = $route->getActions();
-
-				if (array_key_exists($method, $actions)) {
-					$this->_action = $actions[$method];
-				}
-			}
 		}
 	}
 
@@ -177,16 +168,18 @@ class Request extends Connector
 
 	/**
 	 * @param Route $route
-	 * @param ActionType $action
+	 * @param string $actionLabel
+	 * @throws PlinthException
 	 */
-	private function validateAction(Route $route, ActionType $action)
+	private function validateAction(Route $route, $actionLabel)
 	{
+		$action = $this->getActionClass($actionLabel, $this->getRequestMethod());
 		$actionTemplateData = false;
 		$actionSettings = $action->getSettings();
 
 		//if (!isset($actionSettings['variables'])) throw new PlinthException("Please defined your action variables");
 
-		$validator 	= $this->main->getValidator();
+		$validator 	= $this->main->getValidator($actionLabel);
 		$userservice= $this->main->getUserService();
 		$variables 	= isset($actionSettings['variables']) ? $actionSettings['variables'] : false;
 		$uploadfiles= isset($actionSettings['files']) ? $actionSettings['files'] : false;
@@ -218,7 +211,7 @@ class Request extends Connector
 				$invalid = true;
 			}
 
-			if (!$this->isLoginRequest() && $user !== false && $user->isRequired()) {
+			if (!$this->isLoginRequest($route) && $user !== false && $user->isRequired()) {
 				$callback = $user->getCallback();
 				if (!$userservice->isSessionValid() || ($callback !== null && !$callback($userservice->getUser()))) {
 					if ($user->getMessage()) $this->addError($user->getMessage());
@@ -312,9 +305,73 @@ class Request extends Connector
 		}
 	}
 
+	/**
+	 * @return $this
+	 */
 	private function disableAction()
 	{
-		$this->_action = false;
+		$this->_actionDisabled = true;
+
+		return $this;
+	}
+
+	/**
+	 * @return bool
+	 */
+	private function isActionDisabled()
+	{
+		return $this->_actionDisabled;
+	}
+
+	/**
+	 * @param Route $route
+	 * @throws PlinthException
+	 */
+	public function handleController(Route $route)
+	{
+		if ($route->hasController()) {
+			$controllerParts = explode("::", $route->getController());
+			if (count($controllerParts) !== 2 || !class_exists($controllerParts[0]) || !method_exists($controllerParts[0], $controllerParts[1])) {
+				throw new PlinthException("Your controller::function, {$route->getController()}, cannot be found.");
+			}
+
+			if (!in_array(Controller::class, class_parents($controllerParts[0]))) {
+				throw new PlinthException("You controller, {$controllerParts[0]}, must extend " . Controller::class);
+			}
+
+			$controller = new $controllerParts[0]($this->main);
+			$data = $controller->{$controllerParts[1]}($route);
+
+			if (is_array($data)) {
+				if (isset($data[0]) && is_array($data[0])) {
+					$route->setTemplateData($data[0]);
+				}
+
+				if (isset($data['template'])) $route->setTemplate($data['template']);
+			}
+		}
+	}
+
+	/**
+	 * @param Route $route
+	 * @return array
+	 */
+	private function getPossibleActions(Route $route)
+	{
+		if ($route->hasActions()) {
+			$actions = $route->getActions();
+			$method = $this->getRequestMethod();
+
+			if (array_key_exists($method, $actions)) {
+				$requestActions = $actions[$method];
+
+				if (!is_array($requestActions)) $requestActions = [$requestActions];
+
+				return $requestActions;
+			}
+		}
+
+		return array();
 	}
 
 	/**
@@ -323,17 +380,37 @@ class Request extends Connector
 	 */
 	public function handleRequest(Route $route)
 	{
-		if ($this->_action !== false) {
-			$this->validateAction($route, $this->getActionClass($this->_action, $this->getRequestMethod()));
+		if (!$this->isActionDisabled()) {
+			$actions = $this->getPossibleActions($route);
+			$actionsCount = count($actions);
+			foreach ($actions as $actionLabel) {
+				if ($actionsCount === 1) {
+					$this->main->addValidator($actionLabel, $this->main->getValidator()); // Set the default validator as the single action validator
+				}
+
+				$this->validateAction($route, $actionLabel);
+			}
 		}
 	}
 
 	/**
-	 * @return boolean
+	 * @param Route $route
+	 * @return bool
+	 * @throws PlinthException
 	 */
-	public function isLoginRequest()
+	public function isLoginRequest(Route $route)
 	{
-		return preg_match('/^'. self::ACTION_LOGIN . '/', $this->_action) === 1;
+		$actions = $this->getPossibleActions($route);
+
+		for ($i = 0, $il = count($actions); $i < $il; $i++) {
+			if (preg_match('/^'. self::ACTION_LOGIN . '\#?/', $actions[$i]) === 1) {
+				if ($il > 1) throw new PlinthException("Your request of type {$this->getRequestMethod()} can only have 1 action when using a login action.");
+
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
