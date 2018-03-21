@@ -15,7 +15,7 @@ class ValidationUser
 	 * @param array $settings
 	 * @return ValidationUser
 	 */
-	public function loadFromArray(array $settings)
+	public static function loadFromArray(array $settings)
 	{
 		 $validationUser = new self();
 

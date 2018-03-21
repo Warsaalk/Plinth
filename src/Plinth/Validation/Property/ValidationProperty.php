@@ -2,7 +2,7 @@
 
 namespace Plinth\Validation\Property;
 
-abstract class ValidationProperty
+abstract class ValidationProperty implements ValidationPropertyLoader
 {
 	use ValidationDefaultsTrait;
 
@@ -51,13 +51,6 @@ abstract class ValidationProperty
 
 		return $this;
 	}
-
-	/**
-	 * @param string $name
-	 * @param array $settings
-	 * @return ValidationProperty
-	 */
-	abstract function loadFromArray ($name, array $settings);
 
 	/**
 	 * @return string

@@ -22,10 +22,11 @@ class ValidationVariable extends ValidationProperty
 	 * @param array $settings
 	 * @return ValidationProperty|ValidationVariable
 	 */
-	public function loadFromArray($name, array $settings)
+	public static function loadFromArray($name, array $settings)
 	{
 		$validationVariable = new self($name);
 
+		if (isset($settings['name'])) $validationVariable->setName($settings['name']); // Override the default name is defined in the settings
 		if (isset($settings['type'])) $validationVariable->setType($settings['type']);
 		if (isset($settings['rules'])) $validationVariable->setRules($settings['rules']);
 		if (isset($settings['default'])) $validationVariable->setDefault($settings['default']);

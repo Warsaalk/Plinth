@@ -18,12 +18,6 @@ trait ValidationDefaultsTrait
 	protected $message = null;
 
 	/**
-	 * @param array $settings
-	 * @return mixed
-	 */
-	abstract function loadFromArray (array $settings);
-
-	/**
 	 * @return bool
 	 */
 	public function isRequired()

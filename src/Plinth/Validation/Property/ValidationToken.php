@@ -22,10 +22,11 @@ class ValidationToken extends ValidationProperty
 	 * @param array $settings
 	 * @return ValidationProperty|ValidationToken
 	 */
-	public function loadFromArray($name, array $settings)
+	public static function loadFromArray($name, array $settings)
 	{
 		 $validationToken = new self($name);
 
+		 if (isset($settings['name'])) $validationToken->setName($settings['name']); // Override the default name is defined in the settings
 		 if (isset($settings['rules'])) $validationToken->setRules($settings['rules']);
 		 if (isset($settings['message'])) $validationToken->setMessage($settings['message']);
 		 if (isset($settings['required'])) $validationToken->setRequired($settings['required']);

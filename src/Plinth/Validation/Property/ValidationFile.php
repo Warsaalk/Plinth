@@ -17,10 +17,11 @@ class ValidationFile extends ValidationProperty
 	 * @param array $settings
 	 * @return ValidationProperty|ValidationFile
 	 */
-	public function loadFromArray($name, array $settings)
+	public static function loadFromArray($name, array $settings)
 	{
 		$validationFile = new self($name);
 
+		if (isset($settings['name'])) $validationFile->setName($settings['name']); // Override the default name is defined in the settings
 		if (isset($settings['rules'])) $validationFile->setRules($settings['rules']);
 		if (isset($settings['message'])) $validationFile->setMessage($settings['message']);
 		if (isset($settings['required'])) $validationFile->setRequired($settings['required']);
