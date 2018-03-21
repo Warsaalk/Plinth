@@ -72,7 +72,7 @@ class Route extends Connector
 	/**
 	 * @var string[]
 	 */
-	private $_headers;
+	private $_headers = array();
 	
 	/**
 	 * HTTP Request methods
@@ -84,7 +84,7 @@ class Route extends Connector
 	/**
 	 * @var string[]
 	 */
-	private $_actions;
+	private $_actions = array();
 
 	/**
 	 * @var boolean|array
@@ -120,6 +120,13 @@ class Route extends Connector
 	 * @var array
 	 */
 	private $_templateData;
+
+	/**
+	 * Fully qualified function name
+	 *
+	 * @var string
+	 */
+	private $_controller;
 	
 	/**
 	 * @var CacheSettings
@@ -163,6 +170,7 @@ class Route extends Connector
 		if (isset($args['sessions'])) $this->_sessions = $args['sessions'];
 		if (isset($args['roles'])) $this->_roles = $args['roles'];
 		if (isset($args['rolesAllowed'])) $this->_rolesAllowed = $args['rolesAllowed'];
+		if (isset($args['controller'])) $this->_controller = $args['controller'];
 		
 		$this->_cacheSettings = new CacheSettings();
 		
@@ -321,7 +329,18 @@ class Route extends Connector
 	{
 		return $this->_contentType !== false;
 	}
-	
+
+	/**
+	 * @param string|null $template
+	 * @return $this
+	 */
+	public function setTemplate($template = self::TPL_EMPTY)
+	{
+		$this->_template = $template;
+
+		return $this;
+	}
+
 	/**
 	 * @return string
 	 */
@@ -337,6 +356,25 @@ class Route extends Connector
 	{
 		return $this->_default === true;
 	}
+
+	/**
+	 * @param $header
+	 * @return $this
+	 */
+	public function addHeader($header)
+	{
+		$this->_headers[] = $header;
+
+		return $this;
+	}
+
+	/**
+	 * @return boolean
+	 */
+	public function hasHeaders()
+	{
+		return !empty($this->_headers);
+	}
 	
 	/**
 	 * @return string[]
@@ -347,19 +385,20 @@ class Route extends Connector
 	}
 	
 	/**
-	 * @return boolean
-	 */
-	public function hasHeaders()
-	{
-		return is_array($this->_headers);
-	}
-	
-	/**
 	 * @return string[]
 	 */
 	public function getMethods()
 	{
 		return $this->_methods;
+	}
+
+	/**
+	 * @param string $method
+	 * @param string $action
+	 */
+	public function addAction($method, $action)
+	{
+		$this->_actions[$method] = $action;
 	}
 	
 	/**
@@ -367,7 +406,7 @@ class Route extends Connector
 	 */
 	public function hasActions()
 	{
-		return is_array($this->_actions);
+		return !empty($this->_actions);
 	}
 	
 	/**
@@ -481,5 +520,21 @@ class Route extends Connector
 	public function areRolesAllowed()
 	{
 		return $this->_rolesAllowed;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function hasController()
+	{
+		return $this->_controller !== null;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getController()
+	{
+		return $this->_controller;
 	}
 }
