@@ -36,4 +36,12 @@ class ValidationUser
 
 		return $this;
 	}
+
+	/**
+	 * @return callable
+	 */
+	public function getCallback()
+	{
+		return $this->callback;
+	}
 }
