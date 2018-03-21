@@ -88,11 +88,27 @@ abstract class ValidationProperty implements ValidationPropertyLoader
 	}
 
 	/**
+	 * @return bool
+	 */
+	public function hasMultiple()
+	{
+		return !empty($this->multiple);
+	}
+
+	/**
 	 * @return array
 	 */
 	public function getRules()
 	{
 		return $this->rules;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function hasRules()
+	{
+		return !empty($this->rules);
 	}
 
 	/**
