@@ -10,8 +10,8 @@ use Plinth\Validation\Property\ValidationFile;
 use Plinth\Validation\Property\ValidationProperty;
 use Plinth\Validation\Property\ValidationVariable;
 
-class Validator extends Connector {
-
+class Validator extends Connector
+{
 	/**
 	 * Possible validation types
 	 */
@@ -309,10 +309,10 @@ class Validator extends Connector {
 
 		    $properties = self::filterOptions($validationProperty);
 		    
-		    if ($validationProperty->getType() instanceof ValidationFile)
-		    	$varArguments[$name] = $properties;
+		    if ($validationProperty instanceof ValidationFile)
+				$fileArguments[$name] = $validationProperty->getRules();
 		    else
-		    	$fileArguments[$name] = $validationProperty->getRules();
+				$varArguments[$name] = $properties;
 		    
 		    if ($validationProperty->hasPreCallback() && isset($form[$name])) {
 		    	$form[$name] = $this->callbackAction($form[$name], $validationProperty->getPreCallback());
