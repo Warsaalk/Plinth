@@ -128,10 +128,26 @@ abstract class ValidationProperty implements ValidationPropertyLoader
 	}
 
 	/**
+	 * @return bool
+	 */
+	public function hasPreCallback()
+	{
+		return is_callable($this->preCallback);
+	}
+
+	/**
 	 * @return callable
 	 */
 	public function getPostCallback()
 	{
 		return $this->postCallback;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function hasPostCallback()
+	{
+		return is_callable($this->postCallback);
 	}
 }
