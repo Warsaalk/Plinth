@@ -2,10 +2,13 @@
 
 namespace Plinth\Validation;
 
+use Plinth\Exception\PlinthException;
 use Plinth\Main;
-use Plinth\Common\Debug;
 use Plinth\Connector;
 use Plinth\Common\Info;
+use Plinth\Validation\Property\ValidationFile;
+use Plinth\Validation\Property\ValidationProperty;
+use Plinth\Validation\Property\ValidationVariable;
 
 class Validator extends Connector {
 
@@ -54,7 +57,7 @@ class Validator extends Connector {
 	private $_files = array();
 	
 	/**
-	 * @var array
+	 * @var ValidationProperty[]
 	 */
 	private $_validate	= array();
 	
@@ -76,32 +79,31 @@ class Validator extends Connector {
 	/**
 	 * @param Main $main
 	 */
-	public function __construct($main) {
-	
+	public function __construct($main)
+	{
 		parent::__construct($main);
 		
 		$this->_fileValidator = new FileValidator();
-	
 	}
-	
+
 	/**
-	 * @param array $props
+	 * @param ValidationProperty $validationProperty
 	 * @return array
 	 */
-	private static function filterOptions($props) {
-	    
+	private static function filterOptions(ValidationProperty $validationProperty)
+	{
 	    $filter = FILTER_DEFAULT;
 	    $options= array();
 	    $flags  = FILTER_REQUIRE_SCALAR;
 	    
 	    /* Define types */
-	    switch ($props['type']) {
+	    switch ($validationProperty->getType()) {
 	        case self::PARAM_MULTIPLE_INTEGER :
 	        case self::PARAM_CHECKBOX_INTEGER :
 	        case self::PARAM_INTEGER :
 	            $filter = FILTER_VALIDATE_INT;
-	            if (count($props['rules']) > 0)
-	                $options = $props['rules'];
+	            if ($validationProperty->hasRules())
+	                $options = $validationProperty->getRules();
 	            break;
 	    
 	        case self::PARAM_MULTIPLE_EMAIL :
@@ -117,7 +119,7 @@ class Validator extends Connector {
 	    
 	        case self::PARAM_HTML: //Strip script tags
 	            $filter = FILTER_CALLBACK;
-	            $htmlv = new HTMLValidator($props['rules']);
+	            $htmlv = new HTMLValidator($validationProperty->getRules());
 	            $options = array($htmlv, 'filter');
 	            break;
 	    
@@ -131,7 +133,7 @@ class Validator extends Connector {
 	    }
 	    
 	    /* Define flags */
-	    switch ($props['type']) {
+	    switch ($validationProperty->getType()) {
 	        case self::PARAM_MULTIPLE_STRING :
 	        case self::PARAM_CHECKBOX_STRING :
 	        case self::PARAM_MULTIPLE :
@@ -156,10 +158,9 @@ class Validator extends Connector {
 	        'flags' => $flags
 	    );
 	    
-	    if (count($options) > 0) $properties['options'] = $options;
+	    if (!empty($options)) $properties['options'] = $options;
     	    
 	    return $properties;
-	    
 	}
 	
 	/**
@@ -167,118 +168,105 @@ class Validator extends Connector {
 	 * @param integer $type
 	 * @return mixed
 	 */
-	public static function cleanInput($var, $type=self::PARAM_STRING) {
-	
-        $props = array(
-            'type' => $type,
-            'rules' => array()  
-        );	
-		$properties = self::filterOptions($props);
+	public static function cleanInput($var, $type = self::PARAM_STRING)
+	{
+        $validation = (new ValidationVariable("tmp"))->setType($type);
+		$properties = self::filterOptions($validation);
 
 		return filter_var($var, $properties['filter'], $properties);
-		
 	}
-	
-	/**
-	 * @param string $name
-	 * @param array $rules
-	 * @param integer $type
-	 * @param boolean $required
-	 * @param mixed $default
-	 */
-	public function addValidation($name, $rules=array(), $type=self::PARAM_STRING, $required=true, $default='', $multi=array(), $message=null, $preCallback=false, $postCallback=false) {
-	
-		$this->_validate[$name] = array( 
-			'type' 	=> $type,
-			'multi' => $multi,
-			'rules' => $rules,
-			'req'	=> $required,
-			'error'	=> '',
-			'raw'	=> false,
-		    'default'=> $default,
-		    'message'=> $message,
-			'preCallback'	=> $preCallback,
-			'postCallback'	=> $postCallback
-		);
 
+	/**
+	 * @param ValidationProperty $validationProperty
+	 * @return $this
+	 */
+	public function addValidation(ValidationProperty $validationProperty)
+	{
+		$this->_validate[$validationProperty->getName()] = $validationProperty;
+
+		return $this;
 	}
 	
 	/**
 	 * @param string $name
-	 * @param string $index
-	 * @return mixed|NULL
+	 * @param string|bool $member
+	 * @return null|ValidationProperty
+	 * @throws PlinthException
 	 */
-	public function getValidation($name, $index=false) {	
-		
-		if ($index !== false && (isset($this->_validate[$name][$index]) || $this->_validate[$name][$index] === NULL)) 
-			return $this->_validate[$name][$index];	
-		return isset($this->_validate[$name]) ? $this->_validate[$name] : null; //Avoid irritating notices		
-			
+	public function getValidation($name, $member = false)
+	{
+		if (!isset($this->_validate[$name])) return null;
+
+		if ($member !== false) {
+			$getter = "get" . ucfirst($member);
+			if (method_exists($this->_validate[$name], $getter)) {
+				return $this->_validate[$name]->$getter();
+			} else {
+				throw new PlinthException("$member is not a valid member of {$this->_validate[$name]}");
+			}
+		}
+
+		return $this->_validate[$name];
 	}
 	
 	/**
 	 * @param string $name
 	 * @return mixed|NULL
 	 */
-	public function getVariable($name) {	
-		
-		return isset($this->_vars[$name]) ? $this->_vars[$name] : null; //Avoid irritating notices		
-			
+	public function getVariable($name)
+	{
+		return isset($this->_vars[$name]) ? $this->_vars[$name] : null; //Avoid irritating notices
 	}
 	
 	/**
 	 * @return array
 	 */
-	public function getVariables() {
-		
+	public function getVariables()
+	{
 		return $this->_vars;
-	
 	}
 	
 	/**
 	 * @param string $name
 	 * @return mixed|NULL
 	 */
-	public function getFile($name) {	
-		
-		return isset($this->_files[$name]) ? $this->_files[$name] : null; //Avoid irritating notices		
-			
+	public function getFile($name)
+	{
+		return isset($this->_files[$name]) ? $this->_files[$name] : null; //Avoid irritating notices
 	}
 	
 	/**
 	 * @return array
 	 */
-	public function getFiles() {
-	    
+	public function getFiles()
+	{
 	    return $this->_files;
-	    
 	}
 	
 	/**
 	 * @return boolean
 	 */
-	public function isValid() {
-		
+	public function isValid()
+	{
 		return $this->_valid;
-	
 	}
-	
+
 	/**
-	 * 
+	 * @return $this
 	 */
-	public function invalidate() {
-		
+	public function invalidate()
+	{
 		$this->_valid = false;
-	
+
+		return $this;
 	}
 	
 	/**
 	 * @return boolean
 	 */
-	public function isValidated() {	
-		
-		return $this->_validated;	
-	
+	public function isValidated()
+	{
+		return $this->_validated;
 	}
 	
 	/**
@@ -286,8 +274,8 @@ class Validator extends Connector {
 	 * @param mixed $callback Callback function
 	 * @return mixed
 	 */
-	private function callbackAction($value, $callback) {
-		
+	private function callbackAction($value, $callback)
+	{
 		if (is_array($value)) {
 			foreach ($value as $i => $childValue) {
 				$value[$i] = $this->callbackAction($childValue, $callback);
@@ -296,32 +284,33 @@ class Validator extends Connector {
 		}
 		
 		return $callback($value);
-		
 	}
 	
 	/**
 	 * @param array $form
 	 * @param array $files
 	 */
-	public function validate($form, $files) {
-		
+	public function validate($form, $files)
+	{
 	    $varArguments = array();
         $fileArguments = array();
         
 		//Loop over all desired variables
 		// watchout the properties of a variable are passed by reference
-		foreach ($this->_validate as $name => &$props) {
+		foreach ($this->_validate as $name => &$validationProperty) {
 
-		    $properties = self::filterOptions($props);
+		    $properties = self::filterOptions($validationProperty);
 		    
-		    if ($props['type'] !== self::PARAM_FILE)  $varArguments[$name] = $properties;
-		    else                                      $fileArguments[$name] = $props['rules'];
+		    if ($validationProperty->getType() instanceof ValidationFile)
+		    	$varArguments[$name] = $properties;
+		    else
+		    	$fileArguments[$name] = $validationProperty->getRules();
 		    
-		    if ($props['preCallback'] !== false && is_callable($props['preCallback']) && isset($form[$name])) {
-		    	$form[$name] = $this->callbackAction($form[$name], $props['preCallback']);
+		    if ($validationProperty->hasPreCallback() && isset($form[$name])) {
+		    	$form[$name] = $this->callbackAction($form[$name], $validationProperty->getPreCallback());
 		    }
 
-			if ($props['req'] === false && isset($form[$name]) && is_scalar($form[$name]) && strlen($form[$name]) === 0) {
+			if (!$validationProperty->isRequired() && isset($form[$name]) && is_scalar($form[$name]) && strlen($form[$name]) === 0) {
 				unset($form[$name]); // If the variable is not required and empty unset it!
 			}
 		}
@@ -329,79 +318,72 @@ class Validator extends Connector {
 		$this->_vars = filter_var_array($form, $varArguments);
 
 		foreach ($this->_vars as $name => &$data) {
-		    
-		    $validData = true;
-		    
 		    if (is_array($data)) $validData = $this->checkMultipleValues($data, $this->_validate[$name]);
 		    else	             $validData = $this->checkValue($data, $this->_validate[$name]);
 		    
 		    if ($validData === false) $this->invalidate();
 		    else {
-		    	
-		    	$postProp = $this->_validate[$name]['postCallback'];
-		    	if ($postProp !== false && is_callable($postProp)) {
-		    		$data = $this->callbackAction($data, $postProp);
+		    	if ($this->_validate[$name]->hasPostCallback()) {
+		    		$data = $this->callbackAction($data, $this->_validate[$name]->getPostCallback());
 		    	}
-		    	
 		    }
-		    
 		}
 				
 		$this->_files = $this->_fileValidator->filter_array($files, $fileArguments);
 		
 		foreach ($this->_files as $label => &$filesArray) {
-		    
 		    if ($this->checkMultipleValues($filesArray, $this->_validate[$label]) === false) $this->invalidate();
-		    
 		}
 				
 		$this->_validated = true;
-
 	}
-	
-	/**
-	 * @param mixed $value
-	 * @param array $props
-	 */
-	private function checkValue(&$value, &$props) {
 
+	/**
+	 * @param $value
+	 * @param ValidationProperty $validationProperty
+	 * @return bool
+	 */
+	private function checkValue(&$value, ValidationProperty &$validationProperty)
+	{
        if ($value === FALSE) return $value = false; //Variable is invalid
-       if ($props['req'] === true) {
+
+       if ($validationProperty->isRequired()) {
            if ($value === NULL || $value === "") return $value = false; //Variable is required
        }
+
        //Only validate rules when the value isn't empty & when there are rules
-       if (count($props['rules']) > 0 && $value !== NULL && $value !== "") {
-           return $this->validateRules($value, $props);
+       if ($validationProperty->hasRules() && $value !== NULL && $value !== "") {
+           return $this->validateRules($value, $validationProperty);
        }
+
        return true;
-	       	    
 	}
-	
+
 	/**
-	 * @param mixed $value
-	 * @param array $props
+	 * @param $array
+	 * @param ValidationProperty $validationProperty
+	 * @return bool
 	 */
-	private function checkMultipleValues(&$array, &$props) {
-	    
+	private function checkMultipleValues(&$array, ValidationProperty &$validationProperty)
+	{
 	    $counter       = 0;
 	    $validmultiple = true;
 	    
 	    foreach ($array as $i => &$value) {
-	        	        
 	        if ($value === FALSE) return $value = false; //If a variable in the array is invalid always return fals
 	        if ($value !== NULL && $value !== "") {
-	            if ($this->validateRules($value, $props)) $counter++;
+	            if ($this->validateRules($value, $validationProperty)) $counter++;
                 else $validmultiple = false;
 	        } else {
-	            if ($props['req'] === false) $counter++;
+	            if (!$validationProperty->isRequired()) $counter++;
 	        }
-	        
 	    }
-	    	    
-	    if (isset($props['multi'][self::MULTIPLE_MIN]) || isset($props['multi'][self::MULTIPLE_MAX])) {
+
+	    $multiple = $validationProperty->getMultiple();
+	    if (isset($multiple[self::MULTIPLE_MIN]) || isset($multiple[self::MULTIPLE_MAX])) {
 	        if (
-	            (isset($props['multi'][self::MULTIPLE_MIN]) && $props['multi'][self::MULTIPLE_MIN] > $counter) ||  //If min is defined and min is higher than value
-	            (isset($props['multi'][self::MULTIPLE_MAX]) && $props['multi'][self::MULTIPLE_MAX] < $counter)     //If max is deinfed and max is lower than value
+	            (isset($multiple[self::MULTIPLE_MIN]) && $multiple[self::MULTIPLE_MIN] > $counter) ||  //If min is defined and min is higher than value
+	            (isset($multiple[self::MULTIPLE_MAX]) && $multiple[self::MULTIPLE_MAX] < $counter)     //If max is deinfed and max is lower than value
 	        ) {
 	            $validmultiple = false;
 	            $array = false;
@@ -414,53 +396,46 @@ class Validator extends Connector {
 	    }
 	    
 	    return $validmultiple;
-	    
 	}
 
 	/**
-	 * @param mixed $value
-	 * @param array $props
+	 * @param $value
+	 * @param ValidationProperty $validationProperty
+	 * @return bool
 	 */
-	public function validateRules(&$value, &$props) {
-	     
-	    $rules = $props['rules'];
-	     
-	    foreach ($rules as $rule => $ruleValue) {
-	
+	public function validateRules(&$value, ValidationProperty &$validationProperty)
+	{
+	    foreach ($validationProperty->getRules() as $rule => $ruleValue) {
 	        switch ($rule) {
-	             
 	            case self::RULE_MAX_LENGTH 	: if (mb_strlen($value) > $ruleValue)				return $value = false;
 	               break;
 	            case self::RULE_MIN_LENGTH 	: if (!$value || mb_strlen($value) < $ruleValue)	return $value = false;
 	               break;
-	            case self::RULE_SELECT  	: if (mb_strlen($value) < $ruleValue)          	return $value = false;
+	            case self::RULE_SELECT  	: if (mb_strlen($value) < $ruleValue)          		return $value = false;
 	               break;
-	            case self::RULE_REGEX   	: if (!preg_match($ruleValue, $value))			return $value = false;
+	            case self::RULE_REGEX   	: if (!preg_match($ruleValue, $value))				return $value = false;
 	               break;
-	
 	        }
-	
 	    }
 	    
 	    return true;
-	     
 	}
 
 	/**
 	 * @return array
 	 */
-	public function getErrors() {
-	    
+	public function getErrors()
+	{
 	    $errors = array();
 	    
-	    $checkValid = function ($name, $data, $index=false) use (&$errors, &$checkValid) {
+	    $checkValid = function ($name, $data) use (&$errors, &$checkValid) {
 	        if (is_array($data)) {
 	            foreach ($data as $deepName => $deepData) {
-	               $checkValid($name, $deepData, $deepName);
+	               $checkValid($name, $deepData);
 	            }
 	        } else {
-    	        if ($data === false && $this->_validate[$name]['message'] instanceof Info) {
-    	            $info = $this->_validate[$name]['message'];
+    	        if ($data === false && $this->_validate[$name]->getMessage() instanceof Info) {
+    	            $info = $this->_validate[$name]->getMessage();
     	            if (!$info->hasLabel()) $info->setLabel($name);
     	            $errors[$name] = $info;
     	        }
@@ -476,7 +451,5 @@ class Validator extends Connector {
 	    }
 	    
 	    return $errors;
-	    
 	}
-
 }

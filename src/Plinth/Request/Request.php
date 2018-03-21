@@ -3,13 +3,14 @@
 namespace Plinth\Request;
 
 use Plinth\Connector;
-use Plinth\Request\ActionType;
 use Plinth\Routing\Route;
-use App\Action;
+use Plinth\Validation\Property\ValidationFile;
+use Plinth\Validation\Property\ValidationToken;
+use Plinth\Validation\Property\ValidationUser;
+use Plinth\Validation\Property\ValidationVariable;
 use Plinth\Validation\Validator;
 use Plinth\Common\Info;
 use Plinth\Main;
-use Plinth\Common\Debug;
 use Plinth\Response\Response;
 use Plinth\Exception\PlinthException;
 
@@ -37,7 +38,7 @@ class Request extends Connector
 	/**
 	 * Contains file info
 	 *
-	 * @var File[]
+	 * @var array
 	 */
 	private $_files;
 
@@ -61,36 +62,6 @@ class Request extends Connector
 	 */
 	private $_getData = array();
 
-	private static $defaultVariableSettings = array(
-		'rules' 	=> array(),
-		'multiple'  => array(),
-		'type' 		=> Validator::PARAM_STRING,
-		'required' 	=> true,
-		'default' 	=> '',
-		'message'   => null,
-		'preCallback'	=> false,
-		'postCallback'	=> false
-	);
-
-	private static $defaultFileSettings = array(
-		'rules' 	=> array(),
-		'multiple'  => array(),
-		'type' 		=> Validator::PARAM_FILE,
-		'required' 	=> true,
-		'message'   => null
-	);
-
-	private static $defaultTokenSettings = array(
-		'required'	=> false,
-		'message'	=> null
-	);
-
-	private static $defaultUserSettings = array(
-		'required'	=> false,
-		'callback'	=> false,
-		'message'	=> null
-	);
-
 	/**
 	 * @param Main $main
 	 */
@@ -113,6 +84,9 @@ class Request extends Connector
 		}
 	}
 
+	/**
+	 * @return array
+	 */
 	private function loadFiles()
 	{
 		$files = array();
@@ -216,41 +190,38 @@ class Request extends Connector
 		$userservice= $this->main->getUserService();
 		$variables 	= isset($actionSettings['variables']) ? $actionSettings['variables'] : false;
 		$uploadfiles= isset($actionSettings['files']) ? $actionSettings['files'] : false;
-		$token		= isset($actionSettings['token']) ? array_merge(self::$defaultTokenSettings, $actionSettings['token']) : false;
-		$user		= isset($actionSettings['user']) ? array_merge(self::$defaultUserSettings, $actionSettings['user']) : false;
+		$token		= isset($actionSettings['token']) ? ValidationToken::loadFromArray('token', $actionSettings['token']) : false;
+		$user		= isset($actionSettings['user']) ? ValidationUser::loadFromArray($actionSettings['user']) : false;
 		$invalid	= false;
 
 		if ($variables !== false) {
 			foreach ($variables as $name => $settings) {
-				$settings = array_merge(self::$defaultVariableSettings, $settings);
-				$validator->addValidation($name, $settings['rules'], $settings['type'], $settings['required'], $settings['default'], $settings['multiple'], $settings['message'], $settings['preCallback'], $settings['postCallback']);
+				$validator->addValidation(ValidationVariable::loadFromArray($name, $settings));
 			}
 		}
 
 		if ($uploadfiles !== false) {
 			foreach ($uploadfiles as $name => $settings) {
-				$settings = array_merge(self::$defaultFileSettings, $settings);
-				$validator->addValidation($name, $settings['rules'], $settings['type'], $settings['required'], false, $settings['multiple'], $settings['message'], false, false);
+				$validator->addValidation(ValidationFile::loadFromArray($name, $settings));
 			}
 		}
 
 		if ($token !== false) {
-			$tokensettings = array_merge(self::$defaultVariableSettings, $token);
-			$validator->addValidation('token', $tokensettings['rules'], Validator::PARAM_STRING, $tokensettings['required'], false, array(), $tokensettings['message'], $tokensettings['preCallback'], $tokensettings['postCallback']);
+			$validator->addValidation($token);
 		}
 
 		$validator->validate($this->_data, $this->_files);
 
 		if ($validator->isValid()) {
-			if ($token !== false && $token['required'] === true && !$this->main->validateToken($validator->getVariable('token'))) {
-				if ($token['message']) $this->addError($token['message']);
+			if ($token !== false && $token->isRequired() && !$this->main->validateToken($validator->getVariable($token->getName()))) {
+				if ($token->getMessage()) $this->addError($token->getMessage());
 				$invalid = true;
 			}
 
-			if (!$this->isLoginRequest() && $user !== false && $user['required'] === true) {
-				$callback = $user['callback'];
-				if (!$userservice->isSessionValid() || ($callback !== false && !$callback($userservice->getUser()))) {
-					if ($user['message']) $this->addError($user['message']);
+			if (!$this->isLoginRequest() && $user !== false && $user->isRequired()) {
+				$callback = $user->getCallback();
+				if (!$userservice->isSessionValid() || ($callback !== null && !$callback($userservice->getUser()))) {
+					if ($user->getMessage()) $this->addError($user->getMessage());
 					$invalid = true;
 					header(Response::CODE_401);
 				}
