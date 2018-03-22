@@ -2,8 +2,8 @@
 
 namespace Plinth\Common;
 
-class Language {
-
+class Language
+{
 	/**
 	 * Default language 
 	 * @var string
@@ -17,17 +17,18 @@ class Language {
 	
 	/**
 	 * @param string[] $languages
-	 * @param string $default
+	 * @param string|bool $default
 	 */
-	public static function init( array $languages = [], $default=false ){
-	
-			self::$languages = $languages;
-	
-			if( $default !== false ) 				self::$default = $default;
-			elseif( $default === false && 
-					!empty( self::$languages ) )	self::$default = self::$languages[0];
-			else									self::$default = false;
-	
+	public static function init(array $languages = [], $default = false)
+	{
+		self::$languages = $languages;
+
+		if ($default !== false)
+			self::$default = $default;
+		elseif ($default === false && !empty(self::$languages))
+			self::$default = self::$languages[0];
+		else
+			self::$default = false;
 	}
 	
 	/**
@@ -36,30 +37,26 @@ class Language {
 	 * @param string $lang
 	 * @return string
 	 */
-	public static function validate( $lang ){
-				
-			if( !in_array( $lang, self::$languages ) )
-					return self::$default;
-			return $lang;
-	
+	public static function validate($lang)
+	{
+		if(!in_array($lang, self::$languages)) return self::$default;
+
+		return $lang;
 	}
 	
 	/**
 	 * @return string[]
 	 */
-	public static function getLanguages() {
-		
+	public static function getLanguages()
+	{
 		return self::$languages;
-		
 	}
 	
 	/**
 	 * @return string
 	 */
-	public static function getDefault(){
-				
-			return self::$default;
-	
+	public static function getDefault()
+	{
+		return self::$default;
 	}
-	
 }

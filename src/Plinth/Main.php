@@ -1,9 +1,4 @@
 <?php
-/**
-* General file information
-*
-* @package root\php_model
-*/ 
 
 namespace Plinth;
 

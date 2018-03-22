@@ -39,6 +39,7 @@ class Bin extends Connector
 	 * @param $scriptType
 	 * @param $scriptName
 	 * @param array $parameters
+	 * @param bool $inBackground
 	 * @return mixed
 	 * @throws PlinthException
 	 */
@@ -60,11 +61,14 @@ class Bin extends Connector
 			exec('bash -c "exec nohup setsid ' . $command . ' 2>/dev/null &"', $output);
 			return $output;
 		}
+
+		return null;
 	}
 
 	/**
 	 * @param $scriptName
 	 * @param array $parameters
+	 * @param bool $inBackground
 	 * @return mixed
 	 * @throws PlinthException
 	 */

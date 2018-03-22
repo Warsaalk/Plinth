@@ -4,8 +4,8 @@ namespace Plinth\Response;
 
 use Plinth\Routing\Route;
 
-class ResponseHelper {
-    
+class ResponseHelper
+{
     /**
      * @var string
      */
@@ -26,20 +26,16 @@ class ResponseHelper {
 	 */
 	const DEF		= "application/octet-stream";
     
-    public static function getContentType(Route $route) {
-    	
+    public static function getContentType(Route $route)
+	{
 		if ($route->hasContentType()) return $route->getContentType();
-		
+
     	switch ($route->getType()) {
-    		
     		case Route::TYPE_JSON 	: return self::JSON;
     		case Route::TYPE_XML 	: return self::XML;
     		case Route::TYPE_PAGE 	: 
     		case Route::TYPE_HTML 	: return self::HTML;
     		default					: return self::DEF;
-    		
     	}
-    	
     }
-    
 }

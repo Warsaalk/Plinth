@@ -2,8 +2,11 @@
 
 namespace Plinth;
 
-class Store extends Connector {
-   
+/**
+ * @deprecated
+ */
+class Store extends Connector
+{
     /**
      * @var array
      */
@@ -13,29 +16,25 @@ class Store extends Connector {
 	 * @param string $key
 	 * @param mixed $value
 	 */
-	public function set($key, $value) { 
-	    
-	    $this->_data[$key] = $value; 
-	
+	public function set($key, $value)
+	{
+	    $this->_data[$key] = $value;
 	}
 	
 	/**
 	 * @param string $key
 	 * @return mixed
 	 */
-	public function get($key) { 
-	    
-	    return isset($this->_data[$key]) ? $this->_data[$key] : null; 
-	
+	public function get($key)
+	{
+	    return isset($this->_data[$key]) ? $this->_data[$key] : null;
 	}
 	
 	/**
 	 * @param string $key
 	 */
-	public function destroy($key) {
-	    
+	public function destroy($key)
+	{
 	    unset($this->_data[$key]);
-	    
 	}
-
 }

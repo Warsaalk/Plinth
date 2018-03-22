@@ -5,8 +5,8 @@ namespace Plinth;
 use Plinth\Exception\PlinthException;
 use Plinth\Common\Debug;
 
-class Component {
-		
+class Component
+{
 	/**
 	 * @var string
 	 */
@@ -54,8 +54,8 @@ class Component {
 	 * @return Component
 	 * @throws PlinthException
 	 */
-	public static function loadFromArray($base, $label, $properties) {
-				
+	public static function loadFromArray($base, $label, $properties)
+	{
 		if (!isset($properties['path'])) throw new PlinthException('Please define the path for you component.');
 		if (!isset($properties['config']) && !isset($properties['routing'])) throw new PlinthException('Please define at least a config or routing.');
 		
@@ -84,7 +84,6 @@ class Component {
 		if (isset($properties['useRootCookiePath']) && $properties['useRootCookiePath']) $self->enableRootCookiePath();
 		
 		return $self;
-		
 	}
 	
 	/**
@@ -92,153 +91,136 @@ class Component {
 	 * @param string $label
 	 * @param string $path
 	 */
-	public function __construct($base, $label, $path) {
-		
+	public function __construct($base, $label, $path)
+	{
 		$this->base = $base;
 		$this->label = $label;
 		$this->path = $path;
-		
 	}
 	
-	public function matchesCurrentPath($currentPath) {
-		
+	public function matchesCurrentPath($currentPath)
+	{
 		$regex = '/^' . str_replace('/', '\/', $this->path). '($|\/)/';
 				
 		if ($this->path === false || preg_match($regex, $currentPath) === 1) return true;
 		
 		return false;
-		
 	}
 	
 	/**
 	 * @return string
 	 */
-	public function getLabel() {
-		
+	public function getLabel()
+	{
 		return $this->label;
-		
 	}
 	
 	/**
 	 * @return string
 	 */
-	public function getPath() {
-		
+	public function getPath()
+	{
 		return $this->path;
-		
 	}
 	
 	/**
 	 * @param string $config
 	 */
-	public function setConfig($config) {
-		
+	public function setConfig($config)
+	{
 		$this->config = $config;
-		
 	}
 	
 	/**
 	 * @return boolean|string
 	 */
-	public function getConfig() {
-		
+	public function getConfig()
+	{
 		return $this->config;
-		
 	}
 
 	/**
 	 * @return bool
 	 */
-	public function hasConfig() {
-
+	public function hasConfig()
+	{
 		return $this->config !== false;
-
 	}
 	
 	/**
 	 * @return boolean|string
 	 */
-	public function getConfigPath() {
-		
+	public function getConfigPath()
+	{
 		return $this->base . $this->config;
-		
 	}
 	
 	/**
 	 * @param string $routing
 	 */
-	public function setRouting($routing) {
-		
+	public function setRouting($routing)
+	{
 		$this->routing = $routing;
-		
 	}
 	
 	/**
 	 * @return boolean|string
 	 */
-	public function getRouting() {
-		
+	public function getRouting()
+	{
 		return $this->routing;
-		
 	}
 
 	/**
 	 * @return bool
 	 */
-	public function hasRouting() {
-
+	public function hasRouting()
+	{
 		return $this->routing !== false;
-
 	}
 	
 	/**
 	 * @return boolean|string
 	 */
-	public function getRoutingPath() {
-		
+	public function getRoutingPath()
+	{
 		return $this->base . $this->routing;
-		
 	}
 	
-	public function enableDefaultConfigMerge() {
-		
+	public function enableDefaultConfigMerge()
+	{
 		$this->mergeDefaultConfig = true;
-		
 	}
 	
 	/**
 	 * @return boolean
 	 */
-	public function getMergeDefaultConfig() {
-		
+	public function getMergeDefaultConfig()
+	{
 		return $this->mergeDefaultConfig;
-		
 	}
 	
-	public function enableDefaultRoutingMerge() {
-		
+	public function enableDefaultRoutingMerge()
+	{
 		$this->mergeDefaultRouting = true;
-		
 	}
 	
 	/**
 	 * @return boolean
 	 */
-	public function getMergeDefaultRouting() {
-		
+	public function getMergeDefaultRouting()
+	{
 		return $this->mergeDefaultRouting;
-		
 	}
 	
 	/**
 	 * @return integer
 	 */
-	public function getDepth() {
-		
+	public function getDepth()
+	{
 		if ($this->path === false) return -1;
 		
 		return substr_count($this->path, '/');
-		
 	}
 
 	public function enableRootCookiePath()

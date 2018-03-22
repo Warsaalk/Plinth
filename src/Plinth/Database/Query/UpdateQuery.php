@@ -43,8 +43,6 @@ class UpdateQuery extends WhereQuery
 	 */
 	private function getData()
 	{
-		$data = false;
-
 		if (count($this->_columns) === count($this->_values))
 			$data = implode(',', array_map(function($c,$v) { return "$c=$v"; }, $this->_columns, $this->_values));
 		else
@@ -64,6 +62,7 @@ class UpdateQuery extends WhereQuery
 	/**
 	 * @param bool $end
 	 * @return string
+	 * @throws PlinthException
 	 */
 	public function get($end = true)
 	{

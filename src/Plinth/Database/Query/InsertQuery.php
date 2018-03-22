@@ -130,8 +130,6 @@ class InsertQuery extends BaseQuery
 	 */
 	private function getData()
 	{
-		$data = false;
-		
 		if ($this->_type === self::VALUES_COLUMNS) {
 			if (count($this->_columns) === count($this->_values))
 				$data = " (" . implode(',', $this->_columns) . ") VALUES (" . implode(',', $this->_values) . ")";
@@ -213,6 +211,7 @@ class InsertQuery extends BaseQuery
 	/**
 	 * @param bool $end
 	 * @return string
+	 * @throws PlinthException
 	 */
 	public function get($end = true)
 	{

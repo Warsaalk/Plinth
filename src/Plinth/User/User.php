@@ -3,8 +3,9 @@
 namespace Plinth\User;
 
 use Plinth\Exception\PlinthException;
-abstract class User {
 
+abstract class User
+{
 	/**
 	 * @return mixed;
 	 */
@@ -25,56 +26,49 @@ abstract class User {
 	/**
 	 * @return mixed|boolean
 	 */
-	public function getLogin() {
-		
+	public function getLogin()
+	{
 		return false;
-		
 	}
 	
 	/**
 	 * @return boolean
 	 */
-	public function canLogin() {
-		
+	public function canLogin()
+	{
 		return true;
-		
 	}
 	
 	/**
 	 * @return mixed|boolean
 	 */
-	public function getRole() {
-		
+	public function getRole()
+	{
 		return false;
-		
 	}
 
 	/**
 	 * @return mixed
 	 */
-	public function getRouteRoles() {
-
+	public function getRouteRoles()
+	{
 		throw new PlinthException('Please implement the getRouteRoles method in your User class');
-
 	}
 	
 	/**
 	 * @return mixed|boolean
 	 */
-	public function getSession() {
-		
+	public function getSession()
+	{
 		throw new PlinthException('Please implement the getSession method in your User class');
-		
 	}
 	
 	/**
 	 * @param mixed $session
 	 * @return boolean
 	 */
-	public function setSession($session) {
-		
+	public function setSession($session)
+	{
 		throw new PlinthException('Please implement the setSession method in your User class');
-		
 	}
-
 }

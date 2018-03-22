@@ -1,30 +1,28 @@
 <?php
 namespace Plinth\Common;
 
-trait Rest {
-	
+trait Rest
+{
 	/**
 	 * @param mixed $value
 	 * @return mixed
 	 */
-	private function getPropValue($value, $used) {
-		
+	private function getPropValue($value, $used)
+	{
 		if (is_object($value)) {
-			
 			if (isset($used[spl_object_hash($value)])) return "*RECURSION*";
 				
 			return  $value->getPropertyDataArray($used);
 		}
 		return $value;
-		
 	}
-	
+
 	/**
-	 * @param string $class_name
+	 * @param array $used
 	 * @return array
 	 */
-	public function getPropertyDataArray($used = []) {
-		
+	public function getPropertyDataArray($used = [])
+	{
 		$class_name = __CLASS__;
 		$properties = get_class_vars($class_name);
 		$methods	= get_class_methods($class_name);
@@ -33,7 +31,6 @@ trait Rest {
 		$used[spl_object_hash($this)] = true;
 				
 		foreach ($properties as $property => $default) {
-			
 			$getpropertyname = 'get' . ucfirst($property);
 			if (in_array($getpropertyname, $methods)) { //Replace in_array with isset maybe
 				$propvalue = $this->$getpropertyname();				
@@ -45,13 +42,10 @@ trait Rest {
 			    	}
 			    }
 			}
-				
 		}
-	
+
 		return $data;
-		
 	}
 	
 	abstract public function getId();
-		
 }

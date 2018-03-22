@@ -5,8 +5,8 @@ namespace Plinth\User;
 use Plinth\Entity\EntityRepository;
 use Plinth\Exception\PlinthException;
 
-abstract class UserRepository extends EntityRepository {
-
+abstract class UserRepository extends EntityRepository
+{
 	/**
 	 * This function should return a User for $ID or NULL if no user was found
 	 * 
@@ -23,10 +23,9 @@ abstract class UserRepository extends EntityRepository {
 	 * @param mixed $login
 	 * @return User|boolean
 	 */
-	public function findUserWithLogin($login) {
-		
+	public function findUserWithLogin($login)
+	{
 		throw new PlinthException('Please implement the findUserWithLogin method in your UserRepository');
-		
 	}
 	
 	/**
@@ -37,10 +36,9 @@ abstract class UserRepository extends EntityRepository {
 	 * @param mixed $token
 	 * @return User|boolean
 	 */
-	public function findUserWithToken($token) {
-		
+	public function findUserWithToken($token)
+	{
 		throw new PlinthException('Please implement the findUserWithToken method in your UserRepository');
-		
 	}
 
 	/**
@@ -52,10 +50,9 @@ abstract class UserRepository extends EntityRepository {
 	 * @param $newToken
 	 * @throws PlinthException
 	 */
-	public function updateUserToken($userID, $newToken) {
-
+	public function updateUserToken($userID, $newToken)
+	{
 		throw new PlinthException('Please implement the updateUserToken method in your UserRepository');
-
 	}
 	
 	/**
@@ -63,10 +60,8 @@ abstract class UserRepository extends EntityRepository {
 	 * @param mixed $session
 	 * @return boolean
 	 */
-	public function updateUserSession($ID, $session) {
-		
+	public function updateUserSession($ID, $session)
+	{
 		throw new PlinthException('Please implement the updateUserSession method in your UserRepository');
-		
 	}
-
 }

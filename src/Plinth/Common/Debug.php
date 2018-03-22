@@ -2,16 +2,17 @@
 
 namespace Plinth\Common;
 
-class Debug {
-	
+class Debug
+{
 	/**
 	 * Print arrays in readable format
 	 *
 	 * @param array $arr
+	 * @param bool $breakLine
 	 */
-	public static function arr($arr, $breakLine=false) {
-		if ($breakLine === false) 
-			print '<pre>';
+	public static function arr($arr, $breakLine = false)
+	{
+		if ($breakLine === false) print '<pre>';
 		print_r ($arr);
 		print $breakLine === false ? '</pre>' : "\n";
 	} 
@@ -20,10 +21,11 @@ class Debug {
 	 * Print string on new line
 	 *
 	 * @param string $str
+	 * @param bool $breakLine
 	 */
-	public static function str($str, $breakLine=false) {
-		if ($breakLine === false) 
-			print '<div>';
+	public static function str($str, $breakLine = false)
+	{
+		if ($breakLine === false) print '<div>';
 		print ($str);
 		print $breakLine === false ? '</div>' : "\n";
 	}
@@ -33,10 +35,10 @@ class Debug {
 	 *
 	 * @param string $str
 	 */
-	public static function dump($str){
+	public static function dump($str)
+	{
 		print '<pre>';
 		var_dump($str);
 		print '</pre>';
 	}
-
 }

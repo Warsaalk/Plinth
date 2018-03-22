@@ -102,6 +102,7 @@ abstract class WhereQuery extends BaseQuery
 	 * @param $value
 	 * @param bool $seperator
 	 * @return $this
+	 * @throws PlinthException
 	 */
 	public function where($where, $operator, $value, $seperator = false)
 	{
@@ -118,6 +119,7 @@ abstract class WhereQuery extends BaseQuery
 	 * @param $right
 	 * @param bool $seperator
 	 * @return $this
+	 * @throws PlinthException
 	 */
 	public function whereBetween($where, $left, $right, $seperator = false)
 	{
@@ -129,11 +131,12 @@ abstract class WhereQuery extends BaseQuery
 	}
 
 	/**
-	 * @param $where
+	 * @param string $where
 	 * @param bool $seperator
 	 * @param array $values
 	 * @param bool $not
 	 * @return $this
+	 * @throws PlinthException
 	 */
 	public function whereIn($where, $seperator = false, $values = [], $not = false)
 	{
