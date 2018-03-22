@@ -328,7 +328,6 @@ class Main
 	{
     	$this->addValidator(self::DEFAULT_VALIDATOR_LABEL, new Validator($this)); //Connect form validator
     	$this->setEntityRepository(new EntityRepository($this));
-    	$this->setRequest(new Request($this)); //Connect Request
     	$this->setResponse(new Response($this));
     	$this->setDict(new Dictionary($this)); //Connect dictionary
     	$this->setStore(new Store($this)); //Connect Store
@@ -359,8 +358,6 @@ class Main
 	private function executeHandlers()
 	{
         $this->state = self::STATE_HANDLING;
-    	
-    	$this->getRequest()->initRequest($_GET);
     	    
     	$this->handleRouter();
     	$this->handleSessions();
@@ -401,12 +398,10 @@ class Main
     }
 
 	/**
-	 * Handle the current or redirected request
-	 *
-	 * @param boolean $redirected (optional)
+	 * Handle the current request
 	 * @throws PlinthException
 	 */
-    public function handleRequest($redirected = false)
+    public function handleRequest()
 	{
     	if ($this->state < self::STATE_HANDLING) {
         	$this->executeHandlers();
@@ -415,20 +410,20 @@ class Main
     	
     	if ($this->getRouter()->hasRoute()) {
 			if ($this->getRouter()->isRouteAllowed()) {
-				$route = $this->getRouter()->getRoute();
 
-				$this->getRequest()->loadRequest($route, $redirected);
-				$this->getRequest()->handleController($route);
+				// Create a new request
+				$this->setRequest(new Request($this, $this->getRouter()->getRoute()));
+				$this->getRequest()->handleController();
 
 				//On a login request first handle the request and afterwards the user
-				if ($this->getRequest()->isLoginRequest($route)) {
-					$this->getRequest()->handleRequest($route);
+				if ($this->getRequest()->isLoginRequest()) {
+					$this->getRequest()->handleRequest();
 					$this->handleUser();
-					$this->getRequest()->isRouteAuthorized($route);
+					$this->getRequest()->isRouteAuthorized();
 				} else {
 					$this->handleUser();
-					$this->getRequest()->isRouteAuthorized($route);
-					$this->getRequest()->handleRequest($route);
+					$this->getRequest()->isRouteAuthorized();
+					$this->getRequest()->handleRequest();
 				}
 			} else $this->getResponse()->hardExit(Response::CODE_405);
     	} else $this->getResponse()->hardExit(Response::CODE_404);
@@ -443,7 +438,7 @@ class Main
 	 */
 	public function handleLogout()
 	{
-		if ($this->getRequest()->get('logout') !== null) {
+		if (Request::get('logout') !== null) {
 			$this->getUserService()->logout();
 
 			//Strip the logout parameter & redirect to the original destination page
@@ -535,7 +530,7 @@ class Main
 
 			//Get get language, Get-Language overrules Custom-Subdomain-Language
 			if ($this->getSetting('localeget') !== false) {
-				$languageViaGet = $this->getRequest()->get($this->getSetting('localeget'));
+				$languageViaGet = Request::get($this->getSetting('localeget'));
 				if ($languageViaGet !== null) {
 					$languageCode = $languageViaGet;
 					$languageCookieAble = true;
@@ -700,9 +695,9 @@ class Main
 	 * @param Validator $va
 	 * @return $this
 	 */
-    public function addValidator($label, Validator $va)
+    public function addValidator($label, Validator $va = null)
 	{
-    	$this->_validators[$label] = $va;
+    	$this->_validators[$label] = $va?: new Validator($this);
 
     	return $this;
     }
@@ -738,9 +733,12 @@ class Main
     
     /**
      * @return Request
+	 * @throws PlinthException
      */
     public function getRequest()
 	{
+		if ($this->_request === null) throw new PlinthException("The request has not been initiated yet, this happens in 'handleRequest()'.");
+
     	return $this->_request;
     }
     
