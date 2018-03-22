@@ -2,8 +2,8 @@
 
 namespace Plinth\Routing;
 
+use Plinth\Request\Request;
 use Plinth\Settings\SettingsDefaults;
-use Translate;
 use Plinth\Common\Language;
 use Plinth\Exception\PlinthException;
 use Plinth\Connector;
@@ -37,7 +37,7 @@ class Route extends Connector
 	/**
 	 * @var array
 	 */
-	private	$_pathData = array();
+	private	$_pathData = [];
 	
 	/**
 	 * @var string
@@ -72,19 +72,19 @@ class Route extends Connector
 	/**
 	 * @var string[]
 	 */
-	private $_headers = array();
+	private $_headers = [];
 	
 	/**
 	 * HTTP Request methods
 	 * 
 	 * @var string[]
 	 */
-	private $_methods = array("GET");
+	private $_methods = [Request::HTTP_GET];
 	
 	/**
 	 * @var string[]
 	 */
-	private $_actions = array();
+	private $_actions = [];
 
 	/**
 	 * @var boolean|array
@@ -151,7 +151,7 @@ class Route extends Connector
 		$this->_sessions = $sessions;
 		$this->_templateBase = $templateBase;
 		$this->_templatePath = $templatePath;
-		$this->_templateData = array();
+		$this->_templateData = [];
 				
 		if (!isset($args['path'])) throw new PlinthException('A route needs to have a path');
 				
@@ -176,7 +176,7 @@ class Route extends Connector
 		
 		if (isset($args['caching'])) $this->_cacheSettings->load($args['caching']);
 		
-		$this->_data = array();
+		$this->_data = [];
 	}
 
 	/**
@@ -228,7 +228,7 @@ class Route extends Connector
 	 * @param array $data (optional)
 	 * @return string
 	 */
-	public function getPath(array $data = array())
+	public function getPath(array $data = [])
 	{
 		return $this->translatePath($this->_path, $data);
 	}
@@ -237,7 +237,7 @@ class Route extends Connector
 	 * @param array $data (optional)
 	 * @return string
 	 */
-	public function getDefaultLangPath(array $data = array())
+	public function getDefaultLangPath(array $data = [])
 	{
 		return $this->translatePath($this->_pathDefaultLang, $data);
 	}
@@ -462,7 +462,7 @@ class Route extends Connector
 	 * @param bool $merge
 	 * @return $this
 	 */
-	public function setTemplateData($templateData = array(), $merge = true)
+	public function setTemplateData($templateData = [], $merge = true)
 	{
 		if ($merge)	$this->_templateData = array_merge($this->_templateData, $templateData);
 		else		$this->_templateData = $templateData;
