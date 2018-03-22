@@ -19,7 +19,7 @@ class Language {
 	 * @param string[] $languages
 	 * @param string $default
 	 */
-	public static function init( array $languages = array(), $default=false ){
+	public static function init( array $languages = [], $default=false ){
 	
 			self::$languages = $languages;
 	

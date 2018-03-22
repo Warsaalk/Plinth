@@ -9,12 +9,12 @@ class UpdateQuery extends WhereQuery
 	/**
 	 * @var array
 	 */
-	private $_columns = array();
+	private $_columns = [];
 	
 	/**
 	 * @var array
 	 */
-	private $_values = array();
+	private $_values = [];
 
 	/**
 	 * @param $value

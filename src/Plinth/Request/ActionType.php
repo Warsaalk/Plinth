@@ -82,6 +82,6 @@ abstract class ActionType extends Connector
 	 */
 	public function onFinally(array $validations)
 	{
-		return array();
+		return [];
 	}
 }

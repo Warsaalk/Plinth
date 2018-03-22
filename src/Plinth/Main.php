@@ -42,7 +42,7 @@ class Main
     /**
      * @var Info[]
      */
-    private $_info = array();
+    private $_info = [];
     
     /**
      * @var UserService
@@ -151,7 +151,7 @@ class Main
                 
     	$this->loadDatabases();
                 
-        $this->initDictionaries($this->config->get('language:locales')?: array(), $this->getSetting('defaultlocale'));
+        $this->initDictionaries($this->config->get('language:locales')?: [], $this->getSetting('defaultlocale'));
         
         $this->registerClasses();
 		$this->registerSessionPath();
@@ -215,13 +215,13 @@ class Main
     private function loadSettings()
 	{
     	// Set initial settings base on the initial config
-		$userdefinedsettings = $this->initialConfig->get('settings')?: array();
+		$userdefinedsettings = $this->initialConfig->get('settings')?: [];
 
 		$this->initialSettings = new Settings();
 		$this->initialSettings->loadSettings($userdefinedsettings);
 
     	// Set settings
-        $userdefinedsettings = $this->config->get('settings')?: array();
+        $userdefinedsettings = $this->config->get('settings')?: [];
 
 		$this->settings = new Settings();
 		$this->settings->loadSettings($userdefinedsettings);
@@ -299,7 +299,7 @@ class Main
             }
         }
         
-        register_shutdown_function(array(KLogger::class, 'handleShutdown'), $this->_logger);
+        register_shutdown_function([KLogger::class, 'handleShutdown'], $this->_logger);
     }
 
 	/**
@@ -309,7 +309,7 @@ class Main
 	 */
     private function loadDatabases()
 	{
-		$databaseKeys = $this->config->get('databases:keys')?: array();
+		$databaseKeys = $this->config->get('databases:keys')?: [];
 
 		if (!isset($databaseKeys['database'])) $databaseKeys[] = 'database'; // Default database config key
 
@@ -871,7 +871,7 @@ class Main
     public function getInfo($asArray = false)
 	{
     	if ($asArray === true) {
-    		$infos = array();
+    		$infos = [];
     		foreach ($this->_info as $info) {
     			$infos[] = $info->getArray();
     		}

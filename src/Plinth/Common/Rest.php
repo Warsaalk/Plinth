@@ -28,7 +28,7 @@ trait Rest {
 		$class_name = __CLASS__;
 		$properties = get_class_vars($class_name);
 		$methods	= get_class_methods($class_name);
-		$data		= array();
+		$data		= [];
 	
 		$used[spl_object_hash($this)] = true;
 				

@@ -19,19 +19,19 @@ class InsertQuery extends BaseQuery
 	/**
 	 * @var array
 	 */
-	private $_columns = array();
+	private $_columns = [];
 	
 	/**
 	 * @var array
 	 */
-	private $_values = array();
+	private $_values = [];
 
 	/**
 	 * Column => Data for ON DUPLICATE KEY UPDATE
 	 *
 	 * @var array
 	 */
-	private $_update = array();
+	private $_update = [];
 
 	/**
 	 * @var SelectQuery
@@ -140,7 +140,7 @@ class InsertQuery extends BaseQuery
 		} elseif ($this->_type === self::VALUES_MULTIPLE) {
 			$columns = count($this->_columns);
 			$data = " (" . implode(',', $this->_columns) . ") VALUES ";
-			$dataValues = array();
+			$dataValues = [];
 			
 			if (!$this->hasData()) throw new PlinthException('Please insert values');
 						

@@ -51,7 +51,7 @@ class Response extends Connector
 		$this->assetVersion = $main->config->get('assets:version');
 		$this->assetPath = $main->getSetting('assetpath');
 
-		$this->_data = array();
+		$this->_data = [];
 		$this->_path = $main->getSetting('templatepath');
 	}
 
@@ -167,7 +167,7 @@ class Response extends Connector
 	 * @param string|bool $templatePath
 	 * @return string
 	 */
-	public function getTemplate($template, $templateData = array(), $templatePath = false)
+	public function getTemplate($template, $templateData = [], $templatePath = false)
 	{
 		if ($template === Route::TPL_EMPTY) return ""; // If there's no template return an empty string
 

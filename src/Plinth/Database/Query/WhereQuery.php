@@ -51,7 +51,7 @@ abstract class WhereQuery extends BaseQuery
 	{
 		parent::__construct($table, $as);
 		
-		$this->index = array();
+		$this->index = [];
 	}
 
 	/**
@@ -135,7 +135,7 @@ abstract class WhereQuery extends BaseQuery
 	 * @param bool $not
 	 * @return $this
 	 */
-	public function whereIn($where, $seperator = false, $values = array(), $not = false)
+	public function whereIn($where, $seperator = false, $values = [], $not = false)
 	{
 		$this->addSeperator($seperator);
 		

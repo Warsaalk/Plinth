@@ -33,10 +33,10 @@ class SelectQuery extends WhereQuery implements OrderByQuery
 	{
 		parent::__construct($table, $as);
 	
-		$this->select = array();
-		$this->groupBy= array();
-		$this->having = array();
-		$this->orderby= array();
+		$this->select = [];
+		$this->groupBy= [];
+		$this->having = [];
+		$this->orderby= [];
 	}
 
 	/**

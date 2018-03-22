@@ -63,7 +63,7 @@ class HTMLValidator {
         
         // Use array_filter
         $strip = true;
-        $tags = array();
+        $tags = [];
         
         foreach ($this->_rules as $rule => $ruleValue) {
             

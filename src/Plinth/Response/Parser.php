@@ -15,7 +15,7 @@ class Parser
 	 * @param Dictionary $dictionary
      * @return string
      */
-	public static function parse($self, $template, $templateData = array(), $path = "", $tplExt = __EXTENSION_PHP, Dictionary $dictionary = null)
+	public static function parse($self, $template, $templateData = [], $path = "", $tplExt = __EXTENSION_PHP, Dictionary $dictionary = null)
 	{
 		$fullPath = $path . $template . $tplExt;
 		

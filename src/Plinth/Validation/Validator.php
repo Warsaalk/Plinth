@@ -49,17 +49,17 @@ class Validator extends Connector
 	/**
 	 * @var array
 	 */
-	private $_vars = array();
+	private $_vars = [];
 	
 	/**
 	 * @var array
 	 */
-	private $_files = array();
+	private $_files = [];
 	
 	/**
 	 * @var ValidationProperty[]
 	 */
-	private $_validate	= array();
+	private $_validate	= [];
 	
 	/**
 	 * @var boolean
@@ -93,7 +93,7 @@ class Validator extends Connector
 	private static function filterOptions(ValidationProperty $validationProperty)
 	{
 	    $filter = FILTER_DEFAULT;
-	    $options= array();
+	    $options= [];
 	    $flags  = FILTER_REQUIRE_SCALAR;
 	    
 	    /* Define types */
@@ -300,8 +300,8 @@ class Validator extends Connector
 	 */
 	public function validate($form, $files)
 	{
-	    $varArguments = array();
-        $fileArguments = array();
+	    $varArguments = [];
+        $fileArguments = [];
         
 		//Loop over all desired variables
 		// watchout the properties of a variable are passed by reference
@@ -434,7 +434,7 @@ class Validator extends Connector
 	 */
 	public function getErrors()
 	{
-	    $errors = array();
+	    $errors = [];
 	    
 	    $checkValid = function ($name, $data) use (&$errors, &$checkValid) {
 	        if (is_array($data)) {

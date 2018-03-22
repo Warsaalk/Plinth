@@ -40,7 +40,7 @@ abstract class BaseQuery implements IQuery
 	 */
 	public function __construct($table, $as = false)
 	{
-		$this->joins 	= array();
+		$this->joins 	= [];
 		$this->table 	= $table;
 		$this->tableAs 	= $as;
 	}

@@ -70,7 +70,7 @@ class CacheSettings {
 	 */
 	public function getHeaders() {
 		
-		$headers = array();
+		$headers = [];
 		
 		if ($this->control)	$headers['Cache-Control'] = $this->control;
 		

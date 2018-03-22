@@ -42,7 +42,7 @@ class Bin extends Connector
 	 * @return mixed
 	 * @throws PlinthException
 	 */
-	public function run($scriptType, $scriptName, $parameters = array(), $inBackground = false)
+	public function run($scriptType, $scriptName, $parameters = [], $inBackground = false)
 	{
 		$executable = false;
 
@@ -68,7 +68,7 @@ class Bin extends Connector
 	 * @return mixed
 	 * @throws PlinthException
 	 */
-	public function runPHPScript($scriptName, $parameters = array(), $inBackground = false)
+	public function runPHPScript($scriptName, $parameters = [], $inBackground = false)
 	{
 		return $this->run(self::SCRIPT_TYPE_PHP, $scriptName, $parameters, $inBackground);
 	}

@@ -19,12 +19,12 @@ abstract class ValidationProperty implements ValidationPropertyLoader
 	/**
 	 * @var array
 	 */
-	protected $multiple = array();
+	protected $multiple = [];
 
 	/**
 	 * @var array
 	 */
-	protected $rules = array();
+	protected $rules = [];
 
 	/**
 	 * @var mixed

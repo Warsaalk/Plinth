@@ -27,7 +27,7 @@ class UnionQuery implements IQuery, OrderByQuery
 	 */
 	public function __construct($firstQuery, $secondQuery)
 	{
-		$this->orderby= array();		
+		$this->orderby= [];
 		
 		$this->firstQuery = $firstQuery;
 		$this->secondQuery = $secondQuery;

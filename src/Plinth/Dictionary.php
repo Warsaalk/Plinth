@@ -12,12 +12,12 @@ class Dictionary extends Connector
 	/**
 	 * @var string[]
 	 */
-	private $_fallback = array();
+	private $_fallback = [];
 	
     /**
      * @var string[]
      */
-	private $_messages = array();
+	private $_messages = [];
 
 	/**
 	 * @param string $languageCode
@@ -46,7 +46,7 @@ class Dictionary extends Connector
 	 */
 	public function loadFile($file, $type, $merge = false, $extension = __EXTENSION_PHP, $directory = __DICTIONARY, $fallback = false)
 	{
-		$lang = array();
+		$lang = [];
 		$path = $directory . $file . $extension;
 		
 		if (file_exists($path)) {
@@ -67,7 +67,7 @@ class Dictionary extends Connector
 	 * @param bool $fallback
 	 * @return $this
 	 */
-	public function loadFromArray($lang = array(), $merge = false, $fallback = false)
+	public function loadFromArray($lang = [], $merge = false, $fallback = false)
 	{
 		if ($fallback === true) $this->_fallback = $merge === true ? array_merge($this->_fallback, $lang) : $lang;
 		else					$this->_messages = $merge === true ? array_merge($this->_messages, $lang) : $lang;

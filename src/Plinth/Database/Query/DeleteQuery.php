@@ -7,7 +7,7 @@ class DeleteQuery extends WhereQuery
 	/**
 	 * @var array
 	 */
-	private $tablesToDelete = array();
+	private $tablesToDelete = [];
 
 	/**
 	 * @return boolean

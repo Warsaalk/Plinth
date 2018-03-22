@@ -48,14 +48,14 @@ class Config
 	 * @param array $array
 	 * @param mixed $value
 	 */
-	private function build($keys, &$array=array(), $value)
+	private function build($keys, &$array=[], $value)
 	{
 		if (count($keys) == 1) {
 			$array[$keys[0]] = $this->typeCastValue($value);
 		} else {
 			$key = array_shift($keys);
 
-			if(!isset($array[$key])) $array[$key] = array();
+			if(!isset($array[$key])) $array[$key] = [];
 
 			$this->build($keys, $array[$key], $value);
 		}
@@ -70,17 +70,17 @@ class Config
 	{
 		if ($config === false) throw new PlinthException('Your config file contains some errors');
 
-		$parsed = array();
+		$parsed = [];
 
 		foreach ($config as $section => $keys) {
-			$parsed[$section] = array();
+			$parsed[$section] = [];
 
 			foreach ($keys as $key => $value) {
 				if (preg_match( '/^(?!\.).*(?<!\.)$/', $key) && preg_match('/\./', $key)) { //Contains a point but doesn't start or end with one
 					$this->build(explode('.', $key), $parsed[$section], $value);
 				} else {
 					if (is_array($value)) {
-						$parsed[$section][$key] = array();
+						$parsed[$section][$key] = [];
 
 						foreach ($value as $i => $arrayvalue) {
 							$parsed[$section][$key][$i] = $this->typeCastValue($arrayvalue);

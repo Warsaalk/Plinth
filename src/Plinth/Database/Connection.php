@@ -94,7 +94,7 @@ class Connection
 	 * @throws \PDOException
 	 * @throws PlinthException
 	 */
-	public function exec($query, $array = array(), $action = self::EXECUTE, $class = false, array $const_args = array())
+	public function exec($query, $array = [], $action = self::EXECUTE, $class = false, array $const_args = array())
 	{
 		if ($this->connection !== NULL)	{
 			if ($action === self::FETCH) {
