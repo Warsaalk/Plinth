@@ -86,7 +86,7 @@ class InsertQuery extends BaseQuery
 	 * @return $this
 	 * @throws PlinthException
 	 */
-	public function insertSelectQuery(SelectQuery $query, $columns = array())
+	public function insertSelectQuery(SelectQuery $query, $columns = [])
 	{
 	    if ($this->_type === NULL) {
     	    $this->setType(self::SELECT_ONLY);
@@ -104,7 +104,7 @@ class InsertQuery extends BaseQuery
 	 * @throws PlinthException
 	 * @return InsertQuery
 	 */
-	public function setColumns($columns = array())
+	public function setColumns($columns = [])
 	{
 		if ($this->_type === NULL) {
     	    $this->setType(self::VALUES_MULTIPLE);

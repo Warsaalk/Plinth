@@ -94,7 +94,7 @@ class Connection
 	 * @throws \PDOException
 	 * @throws PlinthException
 	 */
-	public function exec($query, $array = [], $action = self::EXECUTE, $class = false, array $const_args = array())
+	public function exec($query, $array = [], $action = self::EXECUTE, $class = false, array $const_args = [])
 	{
 		if ($this->connection !== NULL)	{
 			if ($action === self::FETCH) {
@@ -137,7 +137,7 @@ class Connection
 	 * @return mixed
 	 * @throws \PDOException
 	 */
-	private function fetch($query, $data, $class, array $ctor_args = array())
+	private function fetch($query, $data, $class, array $ctor_args = [])
 	{
 		try {
 			$result = $this->connection->prepare($query);
@@ -159,7 +159,7 @@ class Connection
 	 * @return array
 	 * @throws \PDOException
 	 */
-	private function fetchAll($query, $data, $class, array $ctor_args = array())
+	private function fetchAll($query, $data, $class, array $ctor_args = [])
 	{
 		try {
 			$result = $this->connection->prepare($query);

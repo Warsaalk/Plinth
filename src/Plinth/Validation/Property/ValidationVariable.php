@@ -43,7 +43,7 @@ class ValidationVariable extends ValidationProperty
 	 * @param array $multiple
 	 * @return $this
 	 */
-	public function setMultiple(array $multiple = array())
+	public function setMultiple(array $multiple = [])
 	{
 		$this->multiple = $multiple;
 
@@ -54,7 +54,7 @@ class ValidationVariable extends ValidationProperty
 	 * @param array $rules
 	 * @return $this
 	 */
-	public function setRules(array $rules = array())
+	public function setRules(array $rules = [])
 	{
 		$this->rules = $rules;
 

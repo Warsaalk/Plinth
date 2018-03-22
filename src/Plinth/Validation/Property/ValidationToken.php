@@ -40,7 +40,7 @@ class ValidationToken extends ValidationProperty
 	 * @param array $rules
 	 * @return $this
 	 */
-	public function setRules(array $rules = array())
+	public function setRules(array $rules = [])
 	{
 		$this->rules = $rules;
 

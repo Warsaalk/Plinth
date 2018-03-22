@@ -49,7 +49,7 @@ class Settings
 	 * @param array $settings
 	 * @return $this
 	 */
-	public function loadSettings($settings = array())
+	public function loadSettings($settings = [])
 	{
 		$this->settings = array_merge($this->settings, $settings);
 

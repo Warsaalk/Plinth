@@ -23,7 +23,7 @@ trait Rest {
 	 * @param string $class_name
 	 * @return array
 	 */
-	public function getPropertyDataArray($used = array()) {
+	public function getPropertyDataArray($used = []) {
 		
 		$class_name = __CLASS__;
 		$properties = get_class_vars($class_name);

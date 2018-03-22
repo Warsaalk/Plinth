@@ -92,7 +92,7 @@ class Response extends Connector
 	 * @param array $attributes
 	 * @return string
 	 */
-	public function createHTMLAttributes ($attributes = array())
+	public function createHTMLAttributes ($attributes = [])
 	{
 		$copy = $attributes;
 		array_walk($copy, function (&$value, $key) {
@@ -106,7 +106,7 @@ class Response extends Connector
 	 * @param array $attributes
 	 * @return string
 	 */
-	public function getScriptTag($script, $attributes = array())
+	public function getScriptTag($script, $attributes = [])
 	{
 		return '<script type="text/javascript" src="' . $this->getAsset($script) . '" ' . $this->createHTMLAttributes($attributes) . '></script>';
 	}
@@ -118,7 +118,7 @@ class Response extends Connector
 	 * @param array $attributes
 	 * @return string
 	 */
-	public function getCssTag($css, $cond=false, $media=array('screen'), $attributes = array())
+	public function getCssTag($css, $cond=false, $media=array('screen'), $attributes = [])
 	{
 		$cssTag = '<link rel="stylesheet" type="text/css" href="' . $this->getAsset( $css ) . '" media="' . implode(',', $media) . '" ' . $this->createHTMLAttributes($attributes) . ' />';
 	
@@ -200,7 +200,7 @@ class Response extends Connector
 	 * @param array $data
 	 * @throws \Plinth\Exception\PlinthException
 	 */
-	public function hardRedirect($routeName, array $data = array())
+	public function hardRedirect($routeName, array $data = [])
 	{
 	    header('Location: ' . __BASE_URL . $this->Main()->getRouter()->getRoute($routeName)->getPath($data));
 	    exit;
