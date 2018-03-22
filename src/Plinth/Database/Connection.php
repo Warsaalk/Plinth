@@ -34,14 +34,14 @@ class Connection
 	 */
 	public static function initializeFromArray($connectionData)
 	{
-		$defaultConnectionData = array(
+		$defaultConnectionData = [
 			'type' => self::DEFAULT_TYPE,
 			'host' => self::DEFAULT_HOST,
 			'user' => self::DEFAULT_USER,
 			'pass' => self::DEFAULT_PASS,
 			'port' => self::DEFAULT_PORT,
 			'charset' => self::DEFAULT_CHARSET
-		);
+		];
 
 		$connectionData = array_merge($defaultConnectionData, $connectionData);
 

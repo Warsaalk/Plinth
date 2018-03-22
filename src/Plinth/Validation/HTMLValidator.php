@@ -2,9 +2,8 @@
 
 namespace Plinth\Validation;
 
-use Plinth\Common\Debug;
-class HTMLValidator {
-    
+class HTMLValidator
+{
     const   RULE_ALLOW_FULL = 'html_full',
             RULE_ALLOW_TAGS = 'html_allow',
             RULE_DENY_TAGS = 'html_deny';
@@ -14,7 +13,7 @@ class HTMLValidator {
      *  
      * https://developer.mozilla.org/en-US/docs/Web/HTML/Element 
      */
-    private $_tags = array(
+    private $_tags = [
         'html', //Basic
         'head', 'link', 'base', 'meta', 'style', 'title', //Document metadata
         'address', 'article', 'body', 'footer', 'header', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hgroup', 'nav', 'section', //Content sectioning
@@ -28,47 +27,59 @@ class HTMLValidator {
         'button', 'datalist', 'fieldset', 'form', 'input', 'keygen', 'label', 'legend', 'meter', 'optgroup', 'option', 'output', 'progress', 'select', 'textarea', //Forms
         'details', 'dialog', 'menu', 'menuitem', 'summary', //Interactive elements
         'content', 'decorator', 'element', 'shadow', 'template' //Web Components
-    );
-    
-    private $_rule_full_tags = array(
-        'html', 'head', 'link', 'base', 'meta', 'style', 'title', 'body'
-    );
-    
-    private $_defaultSettings = array(
-        self::RULE_ALLOW_FULL => false
-    );
-    
+    ];
+
+	/**
+	 * @var array
+	 */
+    private $_rule_full_tags = ['html', 'head', 'link', 'base', 'meta', 'style', 'title', 'body'];
+
+	/**
+	 * @var array
+	 */
+    private $_defaultSettings = [self::RULE_ALLOW_FULL => false];
+
+	/**
+	 * @var array
+	 */
     private $_rules;
-    
-    public function __construct($rules) {
-        
+
+	/**
+	 * HTMLValidator constructor.
+	 * @param $rules
+	 */
+    public function __construct($rules)
+	{
         $this->_rules = array_merge($this->_defaultSettings, $rules);
-        
     }
-    
-    public function filter($html) {
-        
+
+	/**
+	 * @param $html
+	 * @return mixed|string
+	 */
+    public function filter($html)
+	{
         //Strip CDATA from TinyMCE
-        $html = str_replace(array('// <![CDATA[','// ]]>'), '', $html);
+        $html = str_replace(['// <![CDATA[','// ]]>'], '', $html);
                 
         if (count($this->_rules) > 0) {
             $html = strip_tags($html, $this->calculateTags());
         }
                 
         return $html;
-        
     }
-    
-    private function calculateTags() {
-        
+
+	/**
+	 * @return string
+	 */
+    private function calculateTags()
+	{
         // Use array_filter
         $strip = true;
         $tags = [];
         
         foreach ($this->_rules as $rule => $ruleValue) {
-            
             switch ($rule) {
-                
                 case self::RULE_ALLOW_FULL:
                     if ($ruleValue === false) {
                         $tags = array_merge($tags, $this->_rule_full_tags);
@@ -89,17 +100,12 @@ class HTMLValidator {
                         break;
                     }                
             }
-            
         }
                 
         if ($strip === true) {
-
             $tags = array_diff($this->_tags, $tags);
-           
         }
                 
         return '<' . implode('><', $tags) . '>';
-        
     }
-    
 }

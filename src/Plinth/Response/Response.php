@@ -118,7 +118,7 @@ class Response extends Connector
 	 * @param array $attributes
 	 * @return string
 	 */
-	public function getCssTag($css, $cond=false, $media=array('screen'), $attributes = [])
+	public function getCssTag($css, $cond = false, $media = ['screen'], $attributes = [])
 	{
 		$cssTag = '<link rel="stylesheet" type="text/css" href="' . $this->getAsset( $css ) . '" media="' . implode(',', $media) . '" ' . $this->createHTMLAttributes($attributes) . ' />';
 	

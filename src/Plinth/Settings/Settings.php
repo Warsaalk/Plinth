@@ -11,7 +11,7 @@ class Settings
 
 	public function __construct()
 	{
-		$this->settings = array(
+		$this->settings = [
 			'forcelogin' 			=> SettingsDefaults::FORCE_LOGIN,
 			'forcesession' 			=> SettingsDefaults::FORCE_SESSION,
 			'userservice' 			=> SettingsDefaults::USER_SERVICE,
@@ -42,7 +42,7 @@ class Settings
 			'requesterrorstomain'	=> SettingsDefaults::REQUEST_ERRORS_TO_MAIN,
 			'executabledirectory'	=> SettingsDefaults::EXECUTABLE_DIRECTORY,
 			'executablephp'			=> SettingsDefaults::EXECUTABLE_PHP
-		);
+		];
 	}
 
 	/**

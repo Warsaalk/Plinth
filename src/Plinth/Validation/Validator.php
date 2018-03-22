@@ -120,7 +120,7 @@ class Validator extends Connector
 	        case self::PARAM_HTML: //Strip script tags
 	            $filter = FILTER_CALLBACK;
 	            $htmlv = new HTMLValidator($validationProperty->getRules());
-	            $options = array($htmlv, 'filter');
+	            $options = [$htmlv, 'filter'];
 	            break;
 	    
 	        case self::PARAM_MULTIPLE_STRING :
@@ -153,10 +153,7 @@ class Validator extends Connector
 	            break;
 	    }
 	    
-	    $properties = array(
-	        'filter' => $filter,
-	        'flags' => $flags
-	    );
+	    $properties = ['filter' => $filter, 'flags' => $flags];
 	    
 	    if (!empty($options)) $properties['options'] = $options;
     	    

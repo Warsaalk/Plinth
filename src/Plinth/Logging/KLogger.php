@@ -92,11 +92,12 @@ class KLogger {
      * Standard messages produced by the class. Can be modified for il8n
      * @var array
      */
-    private $_messages 			= array(
+    private $_messages 			= [
         'writefail'   => 'The file could not be written to. Check that appropriate permissions have been set.',
         'opensuccess' => 'The log file was opened successfully.',
         'openfail'    => 'The file could not be opened. Check permissions.',
-    );
+    ];
+
 	/**
 	 * Mailing list with addresses 
 	 * @var array

@@ -26,7 +26,7 @@ class Parser
 		 */
 		if ($dictionary !== null) {
 			$__ = function () use ($dictionary) {
-				return call_user_func_array(array($dictionary, 'get'), func_get_args());
+				return call_user_func_array([$dictionary, 'get'], func_get_args());
 			};
 		}
 		
