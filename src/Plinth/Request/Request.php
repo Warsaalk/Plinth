@@ -273,17 +273,17 @@ class Request extends Connector
 		}
 	}
 
+	/**
+	 * @return array
+	 * @throws PlinthException
+	 */
 	public function getPossibleActions()
 	{
 		$possibleActions = [];
 
-		if ($this->_route->hasActions()) {
-			$actions = $this->_route->getActions();
-			foreach ([self::HTTP_ALL, $this->getRequestMethod()] as $method) {
-				if (array_key_exists($method, $actions)) {
-					$requestActions = $actions[$method];
-					$possibleActions = array_merge($possibleActions, is_array($requestActions) ? $requestActions : [$requestActions]);
-				}
+		foreach ([self::HTTP_ALL, $this->getRequestMethod()] as $method) {
+			if ($this->_route->hasActions($method)) {
+				$possibleActions = array_merge($possibleActions, $this->_route->getActions($method));
 			}
 		}
 

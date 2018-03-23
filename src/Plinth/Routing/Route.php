@@ -82,7 +82,7 @@ class Route extends Connector
 	private $_methods = [Request::HTTP_GET];
 	
 	/**
-	 * @var string[]
+	 * @var string[][]
 	 */
 	private $_actions = [];
 
@@ -165,13 +165,18 @@ class Route extends Connector
 		if (isset($args['pathDefaultLang'])) $this->_pathDefaultLang = $args['pathDefaultLang'];
 		if (isset($args['default'])) $this->_default = $args['default'];
 		if (isset($args['headers'])) $this->_headers = $args['headers'];
-		if (isset($args['actions'])) $this->_actions = $args['actions'];
 		if (isset($args['public']))	$this->_public = $args['public'];
 		if (isset($args['sessions'])) $this->_sessions = $args['sessions'];
 		if (isset($args['roles'])) $this->_roles = $args['roles'];
 		if (isset($args['rolesAllowed'])) $this->_rolesAllowed = $args['rolesAllowed'];
 		if (isset($args['controller'])) $this->_controller = $args['controller'];
-		
+
+		if (isset($args['actions']) && is_array($args['actions'])) {
+			foreach ($args['actions'] as $actionMethod => $actions) {
+				$this->_actions[$actionMethod] = is_array($actions) ? $actions : [$actions];
+			}
+		}
+
 		$this->_cacheSettings = new CacheSettings();
 		
 		if (isset($args['caching'])) $this->_cacheSettings->load($args['caching']);
@@ -395,25 +400,44 @@ class Route extends Connector
 	/**
 	 * @param string $method
 	 * @param string $action
+	 * @return $this
 	 */
 	public function addAction($method, $action)
 	{
-		$this->_actions[$method] = $action;
+		if (!array_key_exists($method, $this->_actions)) {
+			$this->_actions[$method] = [];
+		}
+
+		$this->_actions[$method][] = $action;
+
+		return $this;
 	}
 	
 	/**
+	 * @param string|boolean $method
 	 * @return boolean
 	 */
-	public function hasActions()
+	public function hasActions($method = false)
 	{
+		if ($method !== false) return array_key_exists($method, $this->_actions) ? !empty($this->_actions[$method]) : false;
+
 		return !empty($this->_actions);
 	}
 	
 	/**
-	 * @return string[]
+	 * @param string|boolean $method
+	 * @return string[]|string[][]
+	 * @throws PlinthException
 	 */
-	public function getActions()
+	public function getActions($method = false)
 	{
+		if ($method !== false) {
+			if (array_key_exists($method, $this->_actions))
+				return $this->_actions[$method];
+			else
+				throw new PlinthException("The method, $method, you are trying to address on route {$this->_name} its actions does not exist.");
+		}
+
 		return $this->_actions;
 	}
 	
