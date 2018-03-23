@@ -2,7 +2,7 @@
 
 namespace Plinth\Request;
 
-use Plinth\Main;
+use Plinth\Exception\PlinthException;
 use Plinth\Common\Info;
 use Plinth\Connector;
 use Plinth\Validation\Property\ValidationProperty;
@@ -10,28 +10,15 @@ use Plinth\Validation\Property\ValidationProperty;
 abstract class ActionType extends Connector
 {
 	/**
-	 * @var \Closure
-	 */
-	private $requestErrorCallback;
-
-	/**
-	 * ActionType constructor.
-	 * @param Main $main
-	 * @param $errorCallback
-	 */
-	public function __construct(Main $main, \Closure $errorCallback)
-	{
-		parent::__construct($main);
-
-		$this->requestErrorCallback = $errorCallback;
-	}
-
-	/**
 	 * @param Info $error
+	 * @return $this
+	 * @throws PlinthException
 	 */
 	protected function addError(Info $error)
 	{
-		$this->requestErrorCallback->__invoke($error);
+		$this->main->getRequest()->addError($error);
+
+		return $this;
 	}
 
 	/**
@@ -48,8 +35,6 @@ abstract class ActionType extends Connector
 	 *              'message' => Info {optional}
 	 * 			)
 	 *		)
-	 *		'userlevel' => User::[name] {optional}
-	 *		'token' => boolean {optional}
 	 * )
 	 *
 	 * @return array

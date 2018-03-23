@@ -149,12 +149,8 @@ class Request extends Connector
 			require $legacyActionClassPath;
 		}
 
-		$self = $this;
-
 		if (class_exists($actionClassName, $legacyActionClassName !== $actionClassName)) {
-			return new $actionClassName($this->main, function (Info $error) use ($self) {
-				$self->addError($error);
-			});
+			return new $actionClassName($this->main);
 		} else {
 			throw new PlinthException("Your action class, $actionClassName, cannot be found.");
 		}
@@ -342,10 +338,13 @@ class Request extends Connector
 
 	/**
 	 * @param Info $error
+	 * @return $this
 	 */
-	private function addError(Info $error)
+	public function addError(Info $error)
 	{
 		$this->_errors[] = $error;
+
+		return $this;
 	}
 
 	/**
