@@ -275,6 +275,7 @@ class Request extends Connector
 	}
 
 	/**
+	 * @return boolean|string
 	 * @throws PlinthException
 	 */
 	public function isRouteAuthorized()
@@ -286,8 +287,8 @@ class Request extends Connector
 				if ($this->_route->getName() === $loginpage) throw new PlinthException('Please set your login page to public');
 
 				$this->disableAction();
-				$this->main->getRouter()->redirect($loginpage);
-				$this->main->handleRequest();
+
+				return $loginpage;
 			} else {
 				if ($this->_route->hasRoles()) {
 					$roles = $this->main->getUserService()->getUser()->getRouteRoles();
@@ -299,6 +300,8 @@ class Request extends Connector
 				}
 			}
 		}
+
+		return true;
 	}
 
 	/**
@@ -352,7 +355,7 @@ class Request extends Connector
 			}
 
 			if (!in_array(Controller::class, class_parents($controllerParts[0]))) {
-				throw new PlinthException("You controller, {$controllerParts[0]}, must extend " . Controller::class);
+				throw new PlinthException("Your controller, {$controllerParts[0]}, must extend " . Controller::class);
 			}
 
 			$controller = new $controllerParts[0]($this->main);

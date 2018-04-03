@@ -402,7 +402,9 @@ class Main
         	$this->executeHandlers();
         	$this->state = self::STATE_REQUEST;
     	}
-    	
+
+    	$authorized = true;
+
     	if ($this->getRouter()->hasRoute()) {
 			if ($this->getRouter()->isRouteAllowed()) {
 
@@ -414,18 +416,25 @@ class Main
 				if ($this->getRequest()->isLoginRequest()) {
 					$this->getRequest()->handleRequest();
 					$this->handleUser();
-					$this->getRequest()->isRouteAuthorized();
+					$authorized = $this->getRequest()->isRouteAuthorized();
 				} else {
 					$this->handleUser();
-					$this->getRequest()->isRouteAuthorized();
-					$this->getRequest()->handleRequest();
+					$authorized = $this->getRequest()->isRouteAuthorized();
+					if ($authorized === true) {
+						$this->getRequest()->handleRequest();
+					}
 				}
 			} else $this->getResponse()->hardExit(Response::CODE_405);
     	} else $this->getResponse()->hardExit(Response::CODE_404);
-    	
-    	if ($this->state < self::STATE_DONE) {
-    		$this->state = self::STATE_DONE;
-    	}
+
+    	if ($authorized === true) {
+			if ($this->state < self::STATE_DONE) {
+				$this->state = self::STATE_DONE;
+			}
+		} else {
+			$this->getRouter()->redirect($authorized);
+			$this->handleRequest();
+		}
     }
 
 	/**
