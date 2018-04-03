@@ -164,32 +164,52 @@ class Request extends Connector
 	{
 		$action = $this->getActionClass($actionLabel, $this->getRequestMethod());
 		$actionTemplateData = false;
+		$actionValidations = [];
 		$actionSettings = $action->getSettings();
 
 		//if (!isset($actionSettings['variables'])) throw new PlinthException("Please defined your action variables");
 
 		$validator 	= $this->main->getValidator($actionLabel);
 		$userservice= $this->main->getUserService();
-		$variables 	= isset($actionSettings['variables']) ? $actionSettings['variables'] : false;
-		$uploadfiles= isset($actionSettings['files']) ? $actionSettings['files'] : false;
-		$token		= isset($actionSettings['token']) ? ValidationToken::loadFromArray('token', $actionSettings['token']) : false;
-		$user		= isset($actionSettings['user']) ? ValidationUser::loadFromArray($actionSettings['user']) : false;
-		$invalid	= false;
 
-		if ($variables !== false) {
-			foreach ($variables as $name => $settings) {
-				$validator->addValidation(ValidationVariable::loadFromArray($name, $settings));
+		$invalid = $token = $user = false;
+
+		// Validation settings using the set validations on the action
+		$action->setValidations($actionValidations);
+		foreach ($actionValidations as $actionValidation) {
+			if ($actionValidation instanceof ValidationUser) {
+				$user = $actionValidation;
+			} else {
+				if ($actionValidation instanceof ValidationToken) {
+					$token = $actionValidation;
+				}
+
+				$validator->addValidation($actionValidation);
 			}
 		}
 
-		if ($uploadfiles !== false) {
-			foreach ($uploadfiles as $name => $settings) {
-				$validator->addValidation(ValidationFile::loadFromArray($name, $settings));
-			}
-		}
+		// Validation settings using the array syntax returned by getSettings
+		if (is_array($actionSettings)) {
+			$variables = isset($actionSettings['variables']) ? $actionSettings['variables'] : false;
+			$uploadfiles = isset($actionSettings['files']) ? $actionSettings['files'] : false;
+			$token = isset($actionSettings['token']) ? ValidationToken::loadFromArray('token', $actionSettings['token']) : false;
+			$user = isset($actionSettings['user']) ? ValidationUser::loadFromArray($actionSettings['user']) : false;
 
-		if ($token !== false) {
-			$validator->addValidation($token);
+			if ($variables !== false) {
+				foreach ($variables as $name => $settings) {
+					$validator->addValidation(ValidationVariable::loadFromArray($name, $settings));
+				}
+			}
+
+			if ($uploadfiles !== false) {
+				foreach ($uploadfiles as $name => $settings) {
+					$validator->addValidation(ValidationFile::loadFromArray($name, $settings));
+				}
+			}
+
+			if ($token !== false) {
+				$validator->addValidation($token);
+			}
 		}
 
 		$validator->validate($this->_data, $this->_files);

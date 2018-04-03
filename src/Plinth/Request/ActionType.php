@@ -22,6 +22,11 @@ abstract class ActionType extends Connector
 	}
 
 	/**
+	 * @param array $validations
+	 */
+	public function setValidations(array &$validations) {}
+
+	/**
 	 * Example:
 	 * array(
 	 * 		'variable' => array(
@@ -39,7 +44,10 @@ abstract class ActionType extends Connector
 	 *
 	 * @return array
 	 */
-	abstract public function getSettings();
+	public function getSettings()
+	{
+		return [];
+	}
 
 	/**
 	 * Method called when a request is valid and has no errors (yet)
