@@ -163,11 +163,8 @@ class Request extends Connector
 	private function validateAction($actionLabel)
 	{
 		$action = $this->getActionClass($actionLabel, $this->getRequestMethod());
-		$actionTemplateData = false;
 		$actionValidations = [];
 		$actionSettings = $action->getSettings();
-
-		//if (!isset($actionSettings['variables'])) throw new PlinthException("Please defined your action variables");
 
 		$validator 	= $this->main->getValidator($actionLabel);
 		$userservice= $this->main->getUserService();
@@ -212,36 +209,61 @@ class Request extends Connector
 			}
 		}
 
+		// The actual action validation
 		$validator->validate($this->_data, $this->_files);
 
+		// Error collection for this action / validation
+		$errors = [];
+
 		if ($validator->isValid()) {
+			// Token validation
 			if ($token !== false && $token->isRequired() && !$this->main->validateToken($validator->getVariable($token->getName()))) {
-				if ($token->getMessage()) $this->addError($token->getMessage());
+				if ($token->getMessage()) $errors[] = $token->getMessage();
 				$invalid = true;
 			}
 
+			// User validation
 			if (!$this->isLoginRequest() && $user !== false && $user->isRequired()) {
 				$callback = $user->getCallback();
 				if (!$userservice->isSessionValid() || ($callback !== null && !$callback($userservice->getUser()))) {
-					if ($user->getMessage()) $this->addError($user->getMessage());
+					if ($user->getMessage()) $errors[] = $user->getMessage();
 					$invalid = true;
 					header(Response::CODE_401);
 				}
 			}
-
-			if (!$this->hasErrors() && !$invalid) {
-				$actionTemplateData = $action->onFinish($validator->getVariables(), $validator->getFiles(), $validator->getValidations());
-			}
 		} else {
+			// Add errors from the validations if a property was invalid
 			foreach ($validator->getErrors() as $error) {
-				$this->addError($error);
+				$errors[] = $error;
 			}
 			$invalid = true;
 		}
 
-		if ($this->hasErrors() || $invalid) {
+		if ($invalid) {
 			$actionTemplateData = $action->onError($validator->getValidations());
+		} else {
+			$actionTemplateData = $action->onFinish($validator->getVariables(), $validator->getFiles(), $validator->getValidations());
+		}
 
+		if (is_array($actionTemplateData)) {
+			$this->_route->setTemplateData($actionTemplateData);
+		}
+
+		$actionFinallyTemplateData = $action->onFinally($validator->getValidations());
+
+		if (is_array($actionFinallyTemplateData)) {
+			$this->_route->setTemplateData($actionFinallyTemplateData);
+		}
+
+		if ($action->hasErrors()) {
+			// Add errors added from the Action
+			foreach ($action->getErrors() as $error) {
+				$errors[] = $error;
+			}
+		}
+
+		if (!empty($errors)) {
+			$this->addErrors($errors);
 			if ($this->main->getSetting('requesterrorstomain')) {
 				foreach ($this->_errors as $i => $error) {
 					if ($error !== null) {
@@ -249,16 +271,6 @@ class Request extends Connector
 					}
 				}
 			}
-		}
-
-		$actionFinallyTemplateData = $action->onFinally($validator->getValidations());
-
-		if (is_array($actionFinallyTemplateData)) {
-			$actionTemplateData = is_array($actionTemplateData) ? array_merge($actionTemplateData, $actionFinallyTemplateData) : $actionFinallyTemplateData;
-		}
-
-		if (is_array($actionTemplateData)) {
-			$this->_route->setTemplateData($actionTemplateData);
 		}
 	}
 
@@ -360,9 +372,20 @@ class Request extends Connector
 	 * @param Info $error
 	 * @return $this
 	 */
-	public function addError(Info $error)
+	private function addError(Info $error)
 	{
 		$this->_errors[] = $error;
+
+		return $this;
+	}
+
+	/**
+	 * @param Info[] $errors
+	 * @return $this
+	 */
+	private function addErrors($errors)
+	{
+		$this->_errors = array_merge($this->_errors, $errors);
 
 		return $this;
 	}

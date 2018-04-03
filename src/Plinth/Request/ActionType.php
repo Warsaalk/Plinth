@@ -10,15 +10,35 @@ use Plinth\Validation\Property\ValidationProperty;
 abstract class ActionType extends Connector
 {
 	/**
+	 * @var Info[]
+	 */
+	protected $errors = [];
+
+	/**
 	 * @param Info $error
 	 * @return $this
-	 * @throws PlinthException
 	 */
 	protected function addError(Info $error)
 	{
-		$this->main->getRequest()->addError($error);
+		$this->errors[] = $error;
 
 		return $this;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function hasErrors()
+	{
+		return !empty($this->errors);
+	}
+
+	/**
+	 * @return Info[]
+	 */
+	public function getErrors()
+	{
+		return $this->errors;
 	}
 
 	/**
