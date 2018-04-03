@@ -254,7 +254,7 @@ class Request extends Connector
 		$actionFinallyTemplateData = $action->onFinally($validator->getValidations());
 
 		if (is_array($actionFinallyTemplateData)) {
-			$actionTemplateData = array_merge($actionTemplateData, $actionFinallyTemplateData);
+			$actionTemplateData = is_array($actionTemplateData) ? array_merge($actionTemplateData, $actionFinallyTemplateData) : $actionFinallyTemplateData;
 		}
 
 		if (is_array($actionTemplateData)) {
