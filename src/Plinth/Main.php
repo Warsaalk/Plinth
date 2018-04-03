@@ -454,16 +454,18 @@ class Main
 		$dictionaryServiceClass = $this->getSetting("dictionaryservice");
 		$dictionaryServiceMerge = $this->getSetting("dictionarymerge");
 
-		if (class_exists($dictionaryServiceClass)) {
-			/** @var Dictionary\DictionaryService $dictionaryService */
-			$dictionaryService = new $dictionaryServiceClass($this);
+		if ($dictionaryServiceClass !== false) {
+			if (class_exists($dictionaryServiceClass)) {
+				/** @var Dictionary\DictionaryService $dictionaryService */
+				$dictionaryService = new $dictionaryServiceClass($this);
 
-			$this->getDict()->loadFromArray($dictionaryService->loadTranslations($this->getLang()), $dictionaryServiceMerge);
-			if (Language::validate($fallback) === $fallback) {
-				$this->getDict()->loadFromArray($dictionaryService->loadTranslations($fallback), $dictionaryServiceMerge, true);
+				$this->getDict()->loadFromArray($dictionaryService->loadTranslations($this->getLang()), $dictionaryServiceMerge);
+				if (Language::validate($fallback) === $fallback) {
+					$this->getDict()->loadFromArray($dictionaryService->loadTranslations($fallback), $dictionaryServiceMerge, true);
+				}
+			} else {
+				throw new PlinthException("Your dictionary service implementation, $dictionaryServiceClass, cannot be found.");
 			}
-		} else {
-			throw new PlinthException("Your dictionary service implementation, $dictionaryServiceClass, cannot be found.");
 		}
 
 		return $this;
