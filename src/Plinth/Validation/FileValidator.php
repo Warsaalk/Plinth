@@ -93,17 +93,23 @@ class FileValidator
 	 */
 	public function filter_array(array $files, array $properties)
 	{
-        foreach ($files as $label => $uploadedFiles) {
-            if (isset($properties[$label])) {
-                foreach ($uploadedFiles as $i => $file) {
+        foreach ($properties as $label => $settings) {
+            if (isset($files[$label])) {
+                foreach ($files[$label] as $i => $file) {
                     /* @var $file UploadedFile */
                     if ($file->getError() === UPLOAD_ERR_NO_FILE) $files[$label][$i] = NULL;
                     else {
                         if (!$this->validateRules($file, $properties[$label])) $files[$label][$i] = false;
                     }
                 }
-            } else unset($files[$label]);
+            } else {
+            	$files[$label] = array(NULL);
+			}
         }
+
+        foreach (array_diff_key($files, $properties) as $label => $uploadedFiles) {
+			unset($files[$label]);
+		}
         
         return $files;
 	}
