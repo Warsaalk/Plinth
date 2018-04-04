@@ -47,14 +47,9 @@ class Request extends Connector
 	private $_files;
 
 	/**
-	 * @var boolean
-	 */
-	private $_actionDisabled = false;
-
-	/**
 	 * @var integer
 	 */
-	private $_type = self::TYPE_DEFAULT;
+	private $_loginActionLabel = null;
 
 	/**
 	 * @var Route
@@ -78,18 +73,17 @@ class Request extends Connector
 
 		$this->_data = $this->loadData($this->getRequestMethod());
 		$this->_files = $this->loadFiles();
-
-		$this->_type = self::TYPE_DEFAULT;
 		$this->_route = $route;
 
 		// Check if there's a login action
 		$actions = $this->getPossibleActions();
 		for ($i = 0, $il = count($actions); $i < $il; $i++) {
 			if (preg_match('/^'. self::ACTION_LOGIN . '\#?/', $actions[$i]) === 1) {
-				if ($il > 1) throw new PlinthException("Your request of type {$this->getRequestMethod()} can only have 1 action when using a login action.");
-
-				$this->_type = self::TYPE_LOGIN;
-				break;
+				if (!$this->hasLoginAction()) {
+					$this->_loginActionLabel = str_replace(self::ACTION_LOGIN . "#", "", $actions[$i]);
+				} else {
+					throw new PlinthException("Your request of type {$this->getRequestMethod()} for route {$route->getName()} can only have 1 login action.");
+				}
 			}
 		}
 	}
@@ -136,7 +130,7 @@ class Request extends Connector
 	/**
 	 * @param string $actionClassName
 	 * @param string $method
-	 * @return ActionType
+	 * @return ActionType|ActionTypeLogin
 	 * @throws PlinthException
 	 */
 	private function getActionClass($actionClassName, $method)
@@ -165,6 +159,9 @@ class Request extends Connector
 		$action = $this->getActionClass($actionLabel, $this->getRequestMethod());
 		$actionValidations = [];
 		$actionSettings = $action->getSettings();
+		$actionLogin = in_array(ActionTypeLogin::class, class_parents($action));
+
+		if ($actionLogin && strcmp($actionLabel, $this->_loginActionLabel) !== 0) throw new PlinthException("Your action, " . get_class($action) . ", implements " . ActionTypeLogin::class . ", only login actions can implement this action type.");
 
 		$validator 	= $this->main->getValidator($actionLabel);
 		$userservice= $this->main->getUserService();
@@ -223,7 +220,7 @@ class Request extends Connector
 			}
 
 			// User validation
-			if (!$this->isLoginRequest() && $user !== false && $user->isRequired()) {
+			if (strcmp($actionLabel, $this->_loginActionLabel) !== 0 && $user !== false && $user->isRequired()) {
 				$callback = $user->getCallback();
 				if (!$userservice->isSessionValid() || ($callback !== null && !$callback($userservice->getUser()))) {
 					if ($user->getMessage()) $errors[] = $user->getMessage();
@@ -239,14 +236,41 @@ class Request extends Connector
 			$invalid = true;
 		}
 
+		$actionLoginTemplateData = null;
+
 		if ($invalid) {
 			$actionTemplateData = $action->onError($validator->getValidations());
 		} else {
 			$actionTemplateData = $action->onFinish($validator->getVariables(), $validator->getFiles(), $validator->getValidations());
+
+			if ($actionLogin) {
+				$loginLabel = $action->getLoginLabel();
+				$tokenLabel = $action->getTokenLabel();
+				$tokenData = $validator->getVariable($tokenLabel);
+				if ($tokenData === null) throw new PlinthException("The token label $tokenLabel can't be found in your login action, " . get_class($action) . ".");
+
+				if ($loginLabel === null) {
+					$loginSuccess = $userservice->loginWithToken($tokenData);
+				} else {
+					$loginData = $validator->getVariable($loginLabel);
+					if ($loginData === null) throw new PlinthException("The login label $loginLabel can't be found in your login action, " . get_class($action) . ".");
+					$loginSuccess = $userservice->login($loginData, $tokenData);
+				}
+
+				if ($loginSuccess) {
+					$actionLoginTemplateData = $action->onLoginSuccess($validator->getVariables(), $validator->getValidations());
+				} else {
+					$actionLoginTemplateData = $action->onLoginFailed($validator->getVariables(), $validator->getValidations());
+				}
+			}
 		}
 
 		if (is_array($actionTemplateData)) {
 			$this->_route->setTemplateData($actionTemplateData);
+		}
+
+		if (is_array($actionLoginTemplateData)) {
+			$this->_route->setTemplateData($actionLoginTemplateData);
 		}
 
 		$actionFinallyTemplateData = $action->onFinally($validator->getValidations());
@@ -286,8 +310,6 @@ class Request extends Connector
 			if (!$this->main->getUserService()->isSessionValid()) {
 				if ($this->_route->getName() === $loginpage) throw new PlinthException('Please set your login page to public');
 
-				$this->disableAction();
-
 				return $loginpage;
 			} else {
 				if ($this->_route->hasRoles()) {
@@ -296,6 +318,8 @@ class Request extends Connector
 					if (!is_array($roles)) throw new PlinthException('The route roles for a user needs to return a array of scalar values.');
 					if (!$this->main->getRouter()->isUserRoleAllowed($roles)) {
 						$this->main->getResponse()->hardExit(Response::CODE_403);
+
+						return $loginpage;
 					}
 				}
 			}
@@ -324,13 +348,25 @@ class Request extends Connector
 	/**
 	 * @throws PlinthException
 	 */
+	public function handleLoginRequest()
+	{
+		if ($this->hasLoginAction())
+		{
+			$this->main->addValidator($this->_loginActionLabel);
+			$this->validateAction($this->_loginActionLabel);
+		}
+	}
+
+	/**
+	 * @throws PlinthException
+	 */
 	public function handleRequest()
 	{
-		if (!$this->isActionDisabled()) {
-			$actions = $this->getPossibleActions();
-			for ($i = 0, $il = count($actions); $i < $il; $i++) {
-				$actionLabel = str_replace(self::ACTION_LOGIN . "#", "", $actions[$i]); // Strip the login# from the action name/action fqcn
-
+		$actions = $this->getPossibleActions();
+		for ($i = 0, $il = count($actions); $i < $il; $i++) {
+			$actionLabel = $actions[$i];
+			// Login requests will be handled earlier in the flow
+			if (preg_match('/^'. self::ACTION_LOGIN . '\#?/', $actionLabel) === 0) {
 				// On a single action/the first action set the default validator as the action validator
 				if ($il === 1 || $i === 0) {
 					$this->main->addValidator($actionLabel, $this->main->getValidator());
@@ -372,17 +408,6 @@ class Request extends Connector
 	}
 
 	/**
-	 * @param Info $error
-	 * @return $this
-	 */
-	private function addError(Info $error)
-	{
-		$this->_errors[] = $error;
-
-		return $this;
-	}
-
-	/**
 	 * @param Info[] $errors
 	 * @return $this
 	 */
@@ -410,29 +435,11 @@ class Request extends Connector
 	}
 
 	/**
-	 * @return $this
-	 */
-	private function disableAction()
-	{
-		$this->_actionDisabled = true;
-
-		return $this;
-	}
-
-	/**
 	 * @return bool
 	 */
-	private function isActionDisabled()
+	private function hasLoginAction()
 	{
-		return $this->_actionDisabled;
-	}
-
-	/**
-	 * @return bool
-	 */
-	public function isLoginRequest()
-	{
-		return $this->_type === self::TYPE_LOGIN;
+		return $this->_loginActionLabel !== null;
 	}
 
 	/**

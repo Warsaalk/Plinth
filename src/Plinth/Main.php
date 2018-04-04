@@ -394,9 +394,11 @@ class Main
 
 	/**
 	 * Handle the current request
+	 *
+	 * @param boolean $redirected
 	 * @throws PlinthException
 	 */
-    public function handleRequest()
+    public function handleRequest($redirected = false)
 	{
     	if ($this->state < self::STATE_HANDLING) {
         	$this->executeHandlers();
@@ -407,22 +409,20 @@ class Main
 
     	if ($this->getRouter()->hasRoute()) {
 			if ($this->getRouter()->isRouteAllowed()) {
-
 				// Create a new request
 				$this->setRequest(new Request($this, $this->getRouter()->getRoute()));
-				$this->getRequest()->handleController();
 
-				//On a login request first handle the request and afterwards the user
-				if ($this->getRequest()->isLoginRequest()) {
+				// Don't handle the login in case of a redirect
+				if ($redirected === false) {
+					$this->getRequest()->handleLoginRequest();
+				}
+
+				$this->handleUser();
+
+				$authorized = $this->getRequest()->isRouteAuthorized();
+				if ($authorized === true) {
+					$this->getRequest()->handleController();
 					$this->getRequest()->handleRequest();
-					$this->handleUser();
-					$authorized = $this->getRequest()->isRouteAuthorized();
-				} else {
-					$this->handleUser();
-					$authorized = $this->getRequest()->isRouteAuthorized();
-					if ($authorized === true) {
-						$this->getRequest()->handleRequest();
-					}
 				}
 			} else $this->getResponse()->hardExit(Response::CODE_405);
     	} else $this->getResponse()->hardExit(Response::CODE_404);
@@ -433,7 +433,7 @@ class Main
 			}
 		} else {
 			$this->getRouter()->redirect($authorized);
-			$this->handleRequest();
+			$this->handleRequest(true);
 		}
     }
 
