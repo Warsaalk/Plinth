@@ -19,11 +19,15 @@ class EntityRepository extends Connector
 	 */
 	public function getRepository($fqcn)
 	{
+		$fqcnLegacy = $fqcn . 'Repository';
+		if (class_exists($fqcnLegacy)) {
+			$fqcn = $fqcnLegacy;
+		} elseif (!class_exists($fqcn)) {
+			throw new PlinthException("Your repository, $fqcn, cannot be found.");
+		}
+
 		if (!in_array(self::class, class_parents($fqcn))) {
-			$fqcn .= 'Repository'; // Legacy check
-			if (!in_array(self::class, class_parents($fqcn))) {
-				throw new PlinthException("Your repository, $fqcn, must extend " . self::class);
-			}
+			throw new PlinthException("Your repository, $fqcn, must extend " . self::class . ".");
 		}
 
 		if (!isset($this->repositories[$fqcn])) {
