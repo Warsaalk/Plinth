@@ -186,8 +186,8 @@ class Request extends Connector
 		if (is_array($actionSettings)) {
 			$variables = isset($actionSettings['variables']) ? $actionSettings['variables'] : false;
 			$uploadfiles = isset($actionSettings['files']) ? $actionSettings['files'] : false;
-			$token = isset($actionSettings['token']) ? ValidationToken::loadFromArray('token', $actionSettings['token']) : false;
-			$user = isset($actionSettings['user']) ? ValidationUser::loadFromArray($actionSettings['user']) : false;
+			$tokenLegacy = isset($actionSettings['token']) ? ValidationToken::loadFromArray('token', $actionSettings['token']) : false;
+			$userLegacy = isset($actionSettings['user']) ? ValidationUser::loadFromArray($actionSettings['user']) : false;
 
 			if ($variables !== false) {
 				foreach ($variables as $name => $settings) {
@@ -201,21 +201,23 @@ class Request extends Connector
 				}
 			}
 
-			if ($token !== false) {
+			if ($token === false && $tokenLegacy !== false) {
+				$token = $tokenLegacy;
 				$validator->addValidation($token);
+			}
+
+			if ($user === false && $userLegacy !== false) {
+				$user = $userLegacy;
 			}
 		}
 
 		// The actual action validation
 		$validator->validate($this->_data, $this->_files);
 
-		// Error collection for this action / validation
-		$errors = [];
-
 		if ($validator->isValid()) {
 			// Token validation
 			if ($token !== false && $token->isRequired() && !$this->main->validateToken($validator->getVariable($token->getName()))) {
-				if ($token->getMessage()) $errors[] = $token->getMessage();
+				if ($token->getMessage()) $action->addError($token->getMessage());
 				$invalid = true;
 			}
 
@@ -223,7 +225,7 @@ class Request extends Connector
 			if (strcmp($actionLabel, $this->_loginActionLabel) !== 0 && $user !== false && $user->isRequired()) {
 				$callback = $user->getCallback();
 				if (!$userservice->isSessionValid() || ($callback !== null && !$callback($userservice->getUser()))) {
-					if ($user->getMessage()) $errors[] = $user->getMessage();
+					if ($user->getMessage()) $action->addError($user->getMessage());
 					$invalid = true;
 					header(Response::CODE_401);
 				}
@@ -231,7 +233,7 @@ class Request extends Connector
 		} else {
 			// Add errors from the validations if a property was invalid
 			foreach ($validator->getErrors() as $error) {
-				$errors[] = $error;
+				$action->addError($error);
 			}
 			$invalid = true;
 		}
@@ -280,14 +282,7 @@ class Request extends Connector
 		}
 
 		if ($action->hasErrors()) {
-			// Add errors added from the Action
-			foreach ($action->getErrors() as $error) {
-				$errors[] = $error;
-			}
-		}
-
-		if (!empty($errors)) {
-			$this->addErrors($errors);
+			$this->addErrors($action->getErrors());
 			if ($this->main->getSetting('requesterrorstomain')) {
 				foreach ($this->_errors as $i => $error) {
 					if ($error !== null) {

@@ -18,7 +18,7 @@ abstract class ActionType extends Connector
 	 * @param Info $error
 	 * @return $this
 	 */
-	protected function addError(Info $error)
+	public function addError(Info $error)
 	{
 		$this->errors[] = $error;
 
