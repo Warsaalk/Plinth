@@ -3,7 +3,7 @@
 namespace Plinth\Validation\Property;
 
 
-use Plinth\Common\Info;
+use Plinth\Common\Message;
 
 trait ValidationDefaultsTrait
 {
@@ -13,7 +13,7 @@ trait ValidationDefaultsTrait
 	protected $required = true;
 
 	/**
-	 * @var Info
+	 * @var Message
 	 */
 	protected $message = null;
 
@@ -37,7 +37,7 @@ trait ValidationDefaultsTrait
 	}
 
 	/**
-	 * @return Info
+	 * @return Message
 	 */
 	public function getMessage()
 	{
@@ -45,10 +45,10 @@ trait ValidationDefaultsTrait
 	}
 
 	/**
-	 * @param Info $message
+	 * @param Message $message
 	 * @return $this
 	 */
-	public function setMessage($message)
+	public function setMessage(Message $message)
 	{
 		$this->message = $message;
 

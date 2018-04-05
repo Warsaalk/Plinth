@@ -2,23 +2,22 @@
 
 namespace Plinth\Request;
 
-use Plinth\Exception\PlinthException;
-use Plinth\Common\Info;
+use Plinth\Common\Message;
 use Plinth\Connector;
 use Plinth\Validation\Property\ValidationProperty;
 
 abstract class ActionType extends Connector
 {
 	/**
-	 * @var Info[]
+	 * @var Message[]
 	 */
 	protected $errors = [];
 
 	/**
-	 * @param Info $error
+	 * @param Message $error
 	 * @return $this
 	 */
-	public function addError(Info $error)
+	public function addError(Message $error)
 	{
 		$this->errors[] = $error;
 
@@ -34,7 +33,7 @@ abstract class ActionType extends Connector
 	}
 
 	/**
-	 * @return Info[]
+	 * @return Message[]
 	 */
 	public function getErrors()
 	{
@@ -57,7 +56,7 @@ abstract class ActionType extends Connector
 	 * 				'type' => Validator::PARAM_* {optional}
 	 * 				'required' => boolean {optional}
 	 * 				'default' => mixed {optional}
-	 *              'message' => Info {optional}
+	 *              'message' => Message {optional}
 	 * 			)
 	 *		)
 	 * )

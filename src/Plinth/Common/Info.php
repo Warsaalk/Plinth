@@ -2,27 +2,12 @@
 
 namespace Plinth\Common;
 
-class Info implements \JsonSerializable
+class Info extends Message
 {
 	const	INFORMATION = 'information',
 			SUCCESS		= 'success',
 			WARNING		= 'warning',
 			ERROR		= 'error';
-
-	/**
-	 * @var string
-	 */
-	private $_message;
-
-	/**
-	 * @var string
-	 */
-	private $_label;
-
-	/**
-	 * @var string
-	 */
-	private $_type;
 
 	/**
 	 * @var array
@@ -48,55 +33,41 @@ class Info implements \JsonSerializable
 	
 	/**
 	 * Info constructor.
-	 * @param string $mess
+	 * @param string $message
 	 * @param string $type
 	 * @param string $label
 	 */
-	public function __construct ($mess, $type = self::SUCCESS, $label = null)
+	public function __construct ($message, $type = self::SUCCESS, $label = null)
 	{
-		$this->_message	= $mess;
-		$this->_type	= $type;
-		$this->_label   = $label;
+		parent::__construct($message, $type, $label);
 	}
-	
+
 	/**
 	 * @return string
-	 */
-	public function getMessage()
-	{
-		return $this->_message;
-	}
-	
-	/**
-	 * @return string
-	 */
-	public function getType()
-	{
-	    return $this->_type;
-	}
-	
-	/**
-	 * @return string
+	 * @deprecated
 	 */
 	public function getLabel()
 	{
-	    return $this->_label;
+		return $this->getActionLabel();
 	}
-	
+
 	/**
 	 * @param string $label
+	 * @return $this
+	 * @deprecated
 	 */
 	public function setLabel($label)
 	{
-	    $this->_label = $label;
+		return $this->setActionLabel($label);
 	}
-	
+
 	/**
 	 * @return boolean
+	 * @deprecated
 	 */
 	public function hasLabel()
 	{
-	    return $this->_label !== null;
+		return $this->hasActionLabel();
 	}
 	
 	/**
@@ -126,13 +97,5 @@ class Info implements \JsonSerializable
 	       'type' => $this->getType(),
 	       'img' => $this->getBase64Image()
 	    ];
-	}
-
-	/**
-	 * @return array
-	 */
-	public function jsonSerialize()
-	{
-		return $this->getArray();
 	}
 }

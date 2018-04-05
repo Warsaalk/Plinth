@@ -2,6 +2,7 @@
 
 namespace Plinth;
 
+use Plinth\Common\Message;
 use Plinth\Database\Connection;
 use Plinth\Common\Info;
 use Plinth\Common\Language;
@@ -35,9 +36,9 @@ class Main
     private $_lang;
     
     /**
-     * @var Info[]
+     * @var Message[]
      */
-    private $_info = [];
+    private $_messages = [];
     
     /**
      * @var UserService
@@ -860,40 +861,69 @@ class Main
     }
     
     /**
-     * @param Info $info
+     * @param Message $message
 	 * @return $this
      */
-    public function addInfo($info)
+    public function addMessage(Message $message)
 	{
-    	array_push($this->_info, $info);
+    	$this->_messages[] = $message;
 
     	return $this;
     }
     
     /**
      * @param boolean $asArray (optional)
-     * @return Info[]
+     * @return Message[]
      */
-    public function getInfo($asArray = false)
+    public function getMessages($asArray = false)
 	{
     	if ($asArray === true) {
-    		$infos = [];
-    		foreach ($this->_info as $info) {
-    			$infos[] = $info->getArray();
+    		$messages = [];
+    		foreach ($this->_messages as $message) {
+    			$messages[] = $message->getArray();
     		}
-    		return $infos;
+    		return $messages;
     	}
     	
-    	return $this->_info;
+    	return $this->_messages;
     }
     
     /**
      * @return boolean
      */
-    public function hasInfo()
+    public function hasMessages()
 	{
-    	return count($this->_info) > 0;
+    	return !empty($this->_messages);
     }
+
+	/**
+	 * @param Info $info
+	 * @return $this
+	 * @deprecated
+	 */
+	public function addInfo($info)
+	{
+		return $this->addMessage($info);
+	}
+
+	/**
+	 * @param boolean $asArray (optional)
+	 * @return Info[]|Message[]
+	 * @deprecated
+	 */
+	public function getInfo($asArray = false)
+	{
+		return $this->getMessages($asArray);
+	}
+
+	/**
+	 * @return boolean
+	 * @deprecated
+	 */
+	public function hasInfo()
+	{
+		return $this->hasMessages();
+	}
 
 	/**
 	 * @param $lang

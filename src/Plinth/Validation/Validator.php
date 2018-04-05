@@ -5,7 +5,7 @@ namespace Plinth\Validation;
 use Plinth\Exception\PlinthException;
 use Plinth\Main;
 use Plinth\Connector;
-use Plinth\Common\Info;
+use Plinth\Common\Message;
 use Plinth\Validation\Property\ValidationFile;
 use Plinth\Validation\Property\ValidationProperty;
 use Plinth\Validation\Property\ValidationVariable;
@@ -439,10 +439,10 @@ class Validator extends Connector
 	               $checkValid($name, $deepData);
 	            }
 	        } else {
-    	        if ($data === false && $this->_validate[$name]->getMessage() instanceof Info) {
-    	            $info = $this->_validate[$name]->getMessage();
-    	            if (!$info->hasLabel()) $info->setLabel($name);
-    	            $errors[$name] = $info;
+    	        if ($data === false && $this->_validate[$name]->getMessage() instanceof Message) {
+    	            $message = $this->_validate[$name]->getMessage();
+    	            if (!$message->hasActionLabel()) $message->setActionLabel($name);
+    	            $errors[$name] = $message;
     	        }
 	        }
 	    };

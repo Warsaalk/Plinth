@@ -10,7 +10,7 @@ use Plinth\Validation\Property\ValidationToken;
 use Plinth\Validation\Property\ValidationUser;
 use Plinth\Validation\Property\ValidationVariable;
 use Plinth\Validation\Validator;
-use Plinth\Common\Info;
+use Plinth\Common\Message;
 use Plinth\Main;
 use Plinth\Response\Response;
 use Plinth\Exception\PlinthException;
@@ -57,7 +57,7 @@ class Request extends Connector
 	private $_route;
 
 	/**
-	 * @var Info[]
+	 * @var Message[]
 	 */
 	private $_errors = [];
 
@@ -286,7 +286,7 @@ class Request extends Connector
 			if ($this->main->getSetting('requesterrorstomain')) {
 				foreach ($this->_errors as $i => $error) {
 					if ($error !== null) {
-						$this->main->addInfo($error);
+						$this->main->addMessage($error);
 					}
 				}
 			}
@@ -403,7 +403,7 @@ class Request extends Connector
 	}
 
 	/**
-	 * @param Info[] $errors
+	 * @param Message[] $errors
 	 * @return $this
 	 */
 	private function addErrors($errors)
@@ -422,7 +422,7 @@ class Request extends Connector
 	}
 
 	/**
-	 * @return Info[]
+	 * @return Message[]
 	 */
 	public function getErrors()
 	{
