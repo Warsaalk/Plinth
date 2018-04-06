@@ -20,7 +20,7 @@ class Message implements \JsonSerializable
 	/**
 	 * @var string
 	 */
-	private $_message;
+	private $_content;
 
 	/**
 	 * @var string
@@ -35,13 +35,13 @@ class Message implements \JsonSerializable
 	/**
 	 * Message constructor.
 	 *
-	 * @param string $message
+	 * @param string $content
 	 * @param integer|string $type
 	 * @param string $actionLabel
 	 */
-	public function __construct ($message, $type = self::TYPE_INFO, $actionLabel = null)
+	public function __construct ($content, $type = self::TYPE_INFO, $actionLabel = null)
 	{
-		$this->_message		= $message;
+		$this->_content		= $content;
 		$this->_type		= $type;
 		$this->_actionLabel	= $actionLabel;
 	}
@@ -49,9 +49,9 @@ class Message implements \JsonSerializable
 	/**
 	 * @return string
 	 */
-	public function getMessage()
+	public function getContent()
 	{
-		return $this->_message;
+		return $this->_content;
 	}
 
 	/**
@@ -95,7 +95,7 @@ class Message implements \JsonSerializable
 	public function getArray()
 	{
 		return [
-			'message' => $this->getMessage(),
+			'content' => $this->getContent(),
 			'label' => $this->getActionLabel(),
 			'type' => $this->getType()
 		];

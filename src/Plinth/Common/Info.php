@@ -44,6 +44,15 @@ class Info extends Message
 
 	/**
 	 * @return string
+	 * @deprecated 
+	 */
+	public function getMessage()
+	{
+		return $this->getContent();
+	}
+
+	/**
+	 * @return string
 	 * @deprecated
 	 */
 	public function getLabel()
