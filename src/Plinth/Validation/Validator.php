@@ -304,6 +304,8 @@ class Validator extends Connector
 		// watchout the properties of a variable are passed by reference
 		foreach ($this->_validate as $name => &$validationProperty) {
 
+			$validationProperty->setValue(isset($form[$name]) ? $form[$name] : null);
+
 		    $properties = self::filterOptions($validationProperty);
 		    
 		    if ($validationProperty instanceof ValidationFile)
@@ -328,6 +330,7 @@ class Validator extends Connector
 		    
 		    if ($validData === false) $this->invalidate();
 		    else {
+				$this->_validate[$name]->setValid();
 		    	if ($this->_validate[$name]->hasPostCallback()) {
 		    		$data = $this->callbackAction($data, $this->_validate[$name]->getPostCallback());
 		    	}
@@ -337,7 +340,11 @@ class Validator extends Connector
 		$this->_files = $this->_fileValidator->filter_array($files, $fileArguments);
 		
 		foreach ($this->_files as $label => &$filesArray) {
-		    if ($this->checkMultipleValues($filesArray, $this->_validate[$label]) === false) $this->invalidate();
+		    if ($this->checkMultipleValues($filesArray, $this->_validate[$label]) === false) {
+		    	$this->invalidate();
+			} else {
+				$this->_validate[$label]->setValid();
+			}
 		}
 				
 		$this->_validated = true;

@@ -42,6 +42,16 @@ abstract class ValidationProperty implements ValidationPropertyLoader
 	protected $postCallback;
 
 	/**
+	 * @var mixed
+	 */
+	private $value;
+
+	/**
+	 * @var bool
+	 */
+	private $valid = false;
+
+	/**
 	 * @param string $name
 	 * @return $this
 	 */
@@ -149,5 +159,42 @@ abstract class ValidationProperty implements ValidationPropertyLoader
 	public function hasPostCallback()
 	{
 		return is_callable($this->postCallback);
+	}
+
+	/**
+	 * @return mixed
+	 */
+	public function getValue()
+	{
+		return $this->value;
+	}
+
+	/**
+	 * @param mixed $value
+	 * @return $this
+	 */
+	public function setValue($value)
+	{
+		$this->value = $value;
+
+		return $this;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function isValid()
+	{
+		return $this->valid;
+	}
+
+	/**
+	 * @return $this
+	 */
+	public function setValid()
+	{
+		$this->valid = true;
+
+		return $this;
 	}
 }
