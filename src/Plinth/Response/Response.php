@@ -173,7 +173,7 @@ class Response extends Connector
 
 		$path = $templatePath !== false ? $templatePath : $this->_path;
 		
-		return Parser::parse($this,	$template, $templateData, $path, __EXTENSION_TEMPLATE, $this->getDict());
+		return $this->parse($template, $templateData, $path, __EXTENSION_TEMPLATE);
 	}
 
 	/**
@@ -288,5 +288,50 @@ class Response extends Connector
 		} else {
 			return false;
 		}
+	}
+
+	/**
+	 * @param string $template
+	 * @param array $templateData
+	 * @param string $path
+	 * @param string $tplExt
+	 * @return string
+	 */
+	public function parse($template, $templateData = [], $path = "", $tplExt = __EXTENSION_PHP)
+	{
+		$fullPath = $path . $template . $tplExt;
+
+		if (!file_exists($fullPath)) return false;
+
+		/*
+		 * Create shorthand for translating string via the dictionary
+		 */
+		if ($this->getDict() !== null) {
+			$dictionary = $this->getDict();
+			$__ = function () use ($dictionary) {
+				return call_user_func_array([$dictionary, 'get'], func_get_args());
+			};
+		}
+
+		/*
+		 * Push data into variables
+		 */
+		if ($this->hasData()) {
+			$templateData = array_merge($templateData, $this->getData());
+		}
+
+		foreach ($templateData as $cantoverride_key => $cantoverride_value) {
+			${$cantoverride_key} = $cantoverride_value;
+		}
+		unset($cantoverride_key);
+		unset($cantoverride_value);
+
+		$self = $this; // Legacy support $self contains the Response instance
+
+		ob_start();
+		require $fullPath;
+		$content = ob_get_contents();
+		ob_end_clean();
+		return $content;
 	}
 }

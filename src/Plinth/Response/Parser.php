@@ -4,23 +4,28 @@ namespace Plinth\Response;
 
 use Plinth\Dictionary;
 
+/**
+ * Class Parser
+ * @deprecated
+ */
 class Parser
 {
-    /**
-     * @param Response $self
-     * @param string $template
+	/**
+	 * @param Response $self
+	 * @param string $template
 	 * @param array $templateData
-     * @param string $path
-     * @param string $tplExt
+	 * @param string $path
+	 * @param string $tplExt
 	 * @param Dictionary $dictionary
-     * @return string
-     */
+	 * @return string
+	 * @deprecated
+	 */
 	public static function parse($self, $template, $templateData = [], $path = "", $tplExt = __EXTENSION_PHP, Dictionary $dictionary = null)
 	{
 		$fullPath = $path . $template . $tplExt;
-		
+
 		if (!file_exists($fullPath)) return false;
-		
+
 		/*
 		 * Create shorthand for translating string via the dictionary
 		 */
@@ -29,7 +34,7 @@ class Parser
 				return call_user_func_array([$dictionary, 'get'], func_get_args());
 			};
 		}
-		
+
 		/*
 		 * Push data into variables
 		 */
@@ -42,7 +47,7 @@ class Parser
 		}
 		unset($cantoverride_key);
 		unset($cantoverride_value);
-		
+
 		ob_start();
 		require $fullPath;
 		$content = ob_get_contents();
