@@ -2,6 +2,7 @@
 namespace Plinth\Database;
 
 use \PDO;
+use Plinth\Database\Query\IQuery;
 use Plinth\Exception\PlinthException;
 
 class Connection
@@ -85,7 +86,7 @@ class Connection
 	}
 
 	/**
-	 * @param string $query
+	 * @param string|IQuery $query
 	 * @param array $array
 	 * @param integer $action
 	 * @param boolean|string $class
@@ -97,6 +98,14 @@ class Connection
 	public function exec($query, $array = [], $action = self::EXECUTE, $class = false, array $const_args = [])
 	{
 		if ($this->connection !== NULL)	{
+			if (!is_string($query)) {
+				if (is_object($query) && in_array(IQuery::class, class_implements($query))) {
+					$query = $query->get(true);
+				} else {
+					throw new PlinthException("The \$query parameter in Connection::exec must be a string containing a query or an implementation of the IQuery class.");
+				}
+			}
+
 			if ($action === self::FETCH) {
 				return $this->fetch($query, $array, $class, $const_args);
 			} elseif ($action === self::FETCH_ALL) {
