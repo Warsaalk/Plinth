@@ -12,7 +12,7 @@ You need to add Plinth to your composer.json.
 
 	{
 	    "require": {
-	        "plinth/plinth": "v0.1.9"
+	        "plinth/plinth": "~0.2"
 	    },
 	    "scripts" : {
 	    	"post-install-cmd" : "PlinthScripts\\ComposerHandler::initProject"
