@@ -14,7 +14,7 @@ class EntityRepository extends Connector
 
 	/**
 	 * @param $fqcn
-	 * @return EntityRepository
+	 * @return EntityRepository|mixed
 	 * @throws PlinthException
 	 */
 	public function getRepository($fqcn)
@@ -35,5 +35,15 @@ class EntityRepository extends Connector
 		}
 
 		return $this->repositories[$fqcn];
+	}
+
+	/**
+	 * @param $fqcn
+	 * @return EntityRepository|mixed
+	 * @throws PlinthException
+	 */
+	public function __get($fqcn)
+	{
+		return $this->getRepository($fqcn);
 	}
 }
