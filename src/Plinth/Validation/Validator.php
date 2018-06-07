@@ -23,11 +23,21 @@ class Validator extends Connector
 			PARAM_PASSWORD = 5,
 			PARAM_HTML = 6,
 			PARAM_FILE = 7,
+			PARAM_URL = 8,
+			PARAM_IP = 9,
+			PARAM_MAC = 10,
+			PARAM_DOMAIN = 11,
+			PARAM_FLOAT = 12,
 			PARAM_MULTIPLE = 100,
 			PARAM_MULTIPLE_STRING = 101,
 			PARAM_MULTIPLE_DATE = 102,
 			PARAM_MULTIPLE_EMAIL = 103,
 			PARAM_MULTIPLE_INTEGER = 104,
+			PARAM_MULTIPLE_URL = 105,
+			PARAM_MULTIPLE_IP = 106,
+			PARAM_MULTIPLE_MAC = 107,
+			PARAM_MULTIPLE_DOMAIN = 108,
+			PARAM_MULTIPLE_FLOAT = 109,
 			PARAM_CHECKBOX = 200,
 			PARAM_CHECKBOX_STRING = 201,
 			PARAM_CHECKBOX_INTEGER = 202;
@@ -39,6 +49,7 @@ class Validator extends Connector
 			RULE_MAX_INTEGER = 'max_range',
 			RULE_MIN_LENGTH = 'min_length',
 			RULE_MIN_INTEGER = 'min_range',
+			RULE_DECIMAL = 'decimal',
 			RULE_SELECT = 'select',
 			RULE_REGEX = 'regex',
 	        RULE_DEFAULT = 'default';
@@ -102,9 +113,32 @@ class Validator extends Connector
 	        case self::PARAM_CHECKBOX_INTEGER :
 	        case self::PARAM_INTEGER :
 	            $filter = FILTER_VALIDATE_INT;
-	            if ($validationProperty->hasRules())
-	                $options = $validationProperty->getRules();
 	            break;
+
+			case self::PARAM_MULTIPLE_URL :
+			case self::PARAM_URL :
+				$filter = FILTER_VALIDATE_URL;
+				break;
+
+			case self::PARAM_MULTIPLE_IP :
+			case self::PARAM_IP :
+				$filter = FILTER_VALIDATE_IP;
+				break;
+
+			case self::PARAM_MULTIPLE_MAC :
+			case self::PARAM_MAC :
+				$filter = FILTER_VALIDATE_MAC;
+				break;
+
+			case self::PARAM_MULTIPLE_DOMAIN :
+			case self::PARAM_DOMAIN :
+				$filter = FILTER_VALIDATE_DOMAIN;
+				break;
+
+			case self::PARAM_MULTIPLE_FLOAT :
+			case self::PARAM_FLOAT :
+				$filter = FILTER_VALIDATE_FLOAT;
+			break;
 	    
 	        case self::PARAM_MULTIPLE_EMAIL :
 	        case self::PARAM_EMAIL :
@@ -131,6 +165,18 @@ class Validator extends Connector
 	            $filter = FILTER_SANITIZE_STRING;
 	            break;
 	    }
+
+		/* Define options */
+		switch ($validationProperty->getType()) {
+			case self::PARAM_MULTIPLE_INTEGER :
+			case self::PARAM_CHECKBOX_INTEGER :
+			case self::PARAM_INTEGER :
+			case self::PARAM_MULTIPLE_FLOAT :
+			case self::PARAM_FLOAT :
+				if ($validationProperty->hasRules())
+					$options = array_merge($options, $validationProperty->getRules());
+				break;
+		}
 	    
 	    /* Define flags */
 	    switch ($validationProperty->getType()) {
@@ -145,6 +191,11 @@ class Validator extends Connector
 	        case self::PARAM_CHECKBOX_INTEGER :
 	        case self::PARAM_MULTIPLE_EMAIL :
 	        case self::PARAM_MULTIPLE_DATE :
+			case self::PARAM_MULTIPLE_URL :
+			case self::PARAM_MULTIPLE_IP :
+			case self::PARAM_MULTIPLE_MAC :
+			case self::PARAM_MULTIPLE_DOMAIN :
+			case self::PARAM_MULTIPLE_FLOAT :
 	            $flags = FILTER_REQUIRE_ARRAY;
 	            break;
 	    
@@ -152,6 +203,11 @@ class Validator extends Connector
 	            $flags = FILTER_FLAG_NO_ENCODE_QUOTES;
 	            break;
 	    }
+
+	    /* Add custom flags */
+		if ($validationProperty->hasFlags()) {
+			$flags |= $validationProperty->getFlags();
+		}
 	    
 	    $properties = ['filter' => $filter, 'flags' => $flags];
 	    
