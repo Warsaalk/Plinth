@@ -27,6 +27,14 @@ abstract class ValidationProperty implements ValidationPropertyLoader
 	protected $rules = [];
 
 	/**
+	 * PHP Filter flags
+	 * http://php.net/manual/en/filter.filters.flags.php
+	 *
+	 * @var int
+	 */
+	protected $flags;
+
+	/**
 	 * @var mixed
 	 */
 	protected $default;
@@ -119,6 +127,22 @@ abstract class ValidationProperty implements ValidationPropertyLoader
 	public function hasRules()
 	{
 		return !empty($this->rules);
+	}
+
+	/**
+	 * @return int
+	 */
+	public function getFlags()
+	{
+		return $this->flags;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function hasFlags()
+	{
+		return $this->flags !== null;
 	}
 
 	/**

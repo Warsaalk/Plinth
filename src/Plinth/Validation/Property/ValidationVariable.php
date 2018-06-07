@@ -29,6 +29,7 @@ class ValidationVariable extends ValidationProperty
 		if (isset($settings['name'])) $validationVariable->setName($settings['name']); // Override the default name is defined in the settings
 		if (isset($settings['type'])) $validationVariable->setType($settings['type']);
 		if (isset($settings['rules'])) $validationVariable->setRules($settings['rules']);
+		if (isset($settings['flags'])) $validationVariable->setFlags($settings['flags']);
 		if (isset($settings['default'])) $validationVariable->setDefault($settings['default']);
 		if (isset($settings['message'])) $validationVariable->setMessage($settings['message']);
 		if (isset($settings['required'])) $validationVariable->setRequired($settings['required']);
@@ -57,6 +58,17 @@ class ValidationVariable extends ValidationProperty
 	public function setRules(array $rules = [])
 	{
 		$this->rules = $rules;
+
+		return $this;
+	}
+
+	/**
+	 * @param $flags
+	 * @return $this
+	 */
+	public function setFlags($flags)
+	{
+		$this->flags = $flags;
 
 		return $this;
 	}
