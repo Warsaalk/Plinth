@@ -150,7 +150,8 @@ class Main
         $this->initDictionaries($this->config->get('language:locales')?: [], $this->getSetting('defaultlocale'));
         
         $this->registerClasses();
-		$this->registerSessionPath();
+
+		$this->handleSessionConfig();
     }
 
 	/**
@@ -335,7 +336,7 @@ class Main
 	/**
 	 * Register different session paths for the different components 
 	 */
-	private function registerSessionPath()
+	private function handleSessionConfig()
 	{
 		$cookiePath = __BASE;
 
@@ -344,6 +345,10 @@ class Main
 		}
 
 		session_set_cookie_params(0, $cookiePath);
+
+		if ($this->settings->getSetting("sessionsavepath") !== false) {
+			session_save_path(__BASE_ROOT . $this->settings->getSetting("sessionsavepath"));
+		}
 	}
 
 	/**

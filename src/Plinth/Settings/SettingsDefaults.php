@@ -45,6 +45,8 @@ final class SettingsDefaults
 
 	CONST SESSION_REGENERATE = 300;
 
+	CONST SESSION_SAVE_PATH = false;
+
 	CONST TEMPLATE_BASE = 'base';
 
 	CONST TEMPLATE_PATH = __TEMPLATE;

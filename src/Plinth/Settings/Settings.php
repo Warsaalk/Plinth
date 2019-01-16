@@ -32,6 +32,7 @@ class Settings
 			'dictionarymerge'		=> SettingsDefaults::DICTIONARY_MERGE,
 			'tokenexpire' 			=> SettingsDefaults::TOKEN_EXPIRE,
 			'sessionregenerate' 	=> SettingsDefaults::SESSION_REGENERATE,
+			'sessionsavepath'		=> SettingsDefaults::SESSION_SAVE_PATH,
 			'templatebase' 			=> SettingsDefaults::TEMPLATE_BASE,
 			'templatepath' 			=> SettingsDefaults::TEMPLATE_PATH,
 			'assetpath' 			=> SettingsDefaults::ASSET_PATH,
