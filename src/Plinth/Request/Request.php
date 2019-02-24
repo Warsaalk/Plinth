@@ -32,12 +32,23 @@ class Request extends Connector
 	const	TYPE_DEFAULT = 0,
 			TYPE_LOGIN = 1;
 
+	const
+			CONTENT_TYPE_MULTIPART_FORM_DATA = "multipart/form-data",
+			CONTENT_TYPE_APPLICATION_WWW_FORM = "application/x-www-form-urlencoded",
+			CONTENT_TYPE_APPLICATION_JSON = "application/json",
+			CONTENT_TYPE_NOTSET = NULL;
+
 	/**
 	 * Contains form data
 	 *
 	 * @var array
 	 */
 	private $_data;
+
+	/**
+	 * @var string
+	 */
+	private $contentType;
 
 	/**
 	 * Contains file info
@@ -71,7 +82,9 @@ class Request extends Connector
 	{
 		parent::__construct($main);
 
-		$this->_data = $this->loadData($this->getRequestMethod());
+		$this->contentType = self::getContentType();
+
+		$this->_data = $this->loadData(self::getRequestMethod());
 		$this->_files = $this->loadFiles();
 		$this->_route = $route;
 
@@ -116,12 +129,21 @@ class Request extends Connector
 	{
 		$data = [];
 
-		switch ($method) {
-			case self::HTTP_GET:	$data = $_GET; break;
-			case self::HTTP_POST:	$data = $_POST; break;
-			case self::HTTP_PUT:
-			case self::HTTP_DELETE:	parse_str(file_get_contents('php://input'), $data); break;
-			default;
+		if (strcmp($this->contentType, self::CONTENT_TYPE_MULTIPART_FORM_DATA) === 0 && strcmp($method, self::HTTP_POST) === 0) {
+			$data = $_POST;
+		} elseif (strcmp($this->contentType, self::CONTENT_TYPE_APPLICATION_WWW_FORM) === 0) {
+			switch ($method) {
+				case self::HTTP_POST: $data = $_POST; break;
+				case self::HTTP_PUT:
+				case self::HTTP_DELETE: parse_str(file_get_contents('php://input'), $data);break;
+				default;
+			}
+		} elseif (strcmp($this->contentType, self::CONTENT_TYPE_APPLICATION_JSON) === 0) {
+			$data = json_decode(file_get_contents('php://input'), true);
+		} elseif (strcmp($method, self::HTTP_POST) === 0 || strcmp($method, self::HTTP_PUT) === 0 || strcmp($method, self::HTTP_DELETE) === 0) {
+			$data = file_get_contents('php://input');
+		} elseif (strcmp($method, self::HTTP_GET) === 0) {
+			$data = $_GET;
 		}
 
 		return $data;
@@ -442,7 +464,34 @@ class Request extends Connector
 	 */
 	public static function getRequestMethod()
 	{
-		return isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : self::HTTP_NOTSET;
+		return isset($_SERVER['REQUEST_METHOD']) ? strtoupper($_SERVER['REQUEST_METHOD']) : self::HTTP_NOTSET;
+	}
+
+	/**
+	 * @return array
+	 */
+	public static function getSupportedContentTypes()
+	{
+		return [
+			self::CONTENT_TYPE_APPLICATION_WWW_FORM,
+			self::CONTENT_TYPE_MULTIPART_FORM_DATA,
+			self::CONTENT_TYPE_APPLICATION_JSON
+		];
+	}
+
+	/**
+	 * @return string|null
+	 */
+	public static function getContentType()
+	{
+		if (isset($_SERVER['CONTENT_TYPE'])) {
+			$requestContentType = strtolower($_SERVER['CONTENT_TYPE']);
+			foreach (self::getSupportedContentTypes() as $contentType) {
+				if (stripos($requestContentType, $contentType) !== false) return $contentType;
+			}
+		}
+
+		return self::CONTENT_TYPE_NOTSET;
 	}
 
 	/**
