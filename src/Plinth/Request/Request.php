@@ -452,6 +452,14 @@ class Request extends Connector
 	}
 
 	/**
+	 * @return array|string
+	 */
+	public function getRawData()
+	{
+		return $this->_data;
+	}
+
+	/**
 	 * @return bool
 	 */
 	private function hasLoginAction()
