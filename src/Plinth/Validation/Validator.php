@@ -28,6 +28,7 @@ class Validator extends Connector
 			PARAM_MAC = 10,
 			PARAM_DOMAIN = 11,
 			PARAM_FLOAT = 12,
+			PARAM_BOOLEAN = 13,
 			PARAM_MULTIPLE = 100,
 			PARAM_MULTIPLE_STRING = 101,
 			PARAM_MULTIPLE_DATE = 102,
@@ -38,6 +39,7 @@ class Validator extends Connector
 			PARAM_MULTIPLE_MAC = 107,
 			PARAM_MULTIPLE_DOMAIN = 108,
 			PARAM_MULTIPLE_FLOAT = 109,
+			PARAM_MULTIPLE_BOOLEAN = 110,
 			PARAM_CHECKBOX = 200,
 			PARAM_CHECKBOX_STRING = 201,
 			PARAM_CHECKBOX_INTEGER = 202;
@@ -138,12 +140,17 @@ class Validator extends Connector
 			case self::PARAM_MULTIPLE_FLOAT :
 			case self::PARAM_FLOAT :
 				$filter = FILTER_VALIDATE_FLOAT;
-			break;
+				break;
 	    
 	        case self::PARAM_MULTIPLE_EMAIL :
 	        case self::PARAM_EMAIL :
 	            $filter = FILTER_VALIDATE_EMAIL;
 	            break;
+
+			case self::PARAM_MULTIPLE_BOOLEAN :
+			case self::PARAM_BOOLEAN :
+				$filter = FILTER_VALIDATE_BOOLEAN;
+				break;
 	    
 	        case self::PARAM_MULTIPLE_DATE :
 	        case self::PARAM_DATE :
@@ -196,6 +203,7 @@ class Validator extends Connector
 			case self::PARAM_MULTIPLE_MAC :
 			case self::PARAM_MULTIPLE_DOMAIN :
 			case self::PARAM_MULTIPLE_FLOAT :
+			case self::PARAM_MULTIPLE_BOOLEAN :
 	            $flags = FILTER_REQUIRE_ARRAY;
 	            break;
 	    
