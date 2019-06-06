@@ -532,7 +532,7 @@ class Validator extends Connector
 	               $checkValid($name, $deepData);
 	            }
 	        } else {
-    	        if ($data === false && $this->_validate[$name]->getMessage() instanceof Message) {
+    	        if ($this->isValueInvalid($data, $this->_validate[$name]) && $this->_validate[$name]->getMessage() instanceof Message) {
     	            $message = $this->_validate[$name]->getMessage();
     	            if (!$message->hasActionLabel()) $message->setActionLabel($name);
     	            $errors[$name] = $message;
