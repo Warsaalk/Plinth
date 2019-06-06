@@ -1,13 +1,26 @@
 {
 	"name" : "plinth/plinth",
 	"description" : "A light weight PHP framework",
+    "keywords": ["framework"],
+    "homepage": "https://github.com/Warsaalk/Plinth",
     "type" : "library",
     "license": "MIT",
-    "authors" : [{"name": "Klaas Van Parys"}],
+    "authors" : [
+        {
+            "name": "Klaas Van Parys",
+            "homepage": "https://klaas.cc/"
+        }
+    ],
     "autoload" : {
         "psr-4": {
         	"Plinth\\" : "src/Plinth",
         	"PlinthScripts\\" : "src/PlinthScripts"
         }
+    },
+    "require" : {
+        "php": "^5.5|^7.1",
+        "ext-mbstring": "*",
+        "ext-json": "*",
+        "ext-pdo": "*"
     }
 }
