@@ -428,7 +428,7 @@ class Validator extends Connector
 	 */
 	private function checkValue(&$value, ValidationProperty &$validationProperty)
 	{
-       if ($this->isValueInvalid($value, $validationProperty)) return $value = false; //Variable is invalid
+       if ($this->isValueInvalid($value, $validationProperty)) return false; //Variable is invalid
 
        if ($validationProperty->isRequired()) {
            if ($value === NULL || $value === "") return $value = false; //Variable is required
@@ -453,7 +453,7 @@ class Validator extends Connector
 	    $validmultiple = true;
 	    
 	    foreach ($array as $i => &$value) {
-	        if ($this->isValueInvalid($value, $validationProperty)) return $value = false; //If a variable in the array is invalid always return fals
+	        if ($this->isValueInvalid($value, $validationProperty)) return false; //If a variable in the array is invalid always return fals
 	        if ($value !== NULL && $value !== "") {
 	            if ($this->validateRules($value, $validationProperty)) $counter++;
                 else $validmultiple = false;
