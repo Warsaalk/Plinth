@@ -203,13 +203,20 @@ class Validator extends Connector
 			case self::PARAM_MULTIPLE_MAC :
 			case self::PARAM_MULTIPLE_DOMAIN :
 			case self::PARAM_MULTIPLE_FLOAT :
-			case self::PARAM_MULTIPLE_BOOLEAN :
 	            $flags = FILTER_REQUIRE_ARRAY;
 	            break;
 	    
 	        case self::PARAM_STRING:
 	            $flags = FILTER_FLAG_NO_ENCODE_QUOTES;
 	            break;
+
+			case self::PARAM_MULTIPLE_BOOLEAN :
+				$flags = FILTER_REQUIRE_ARRAY | FILTER_NULL_ON_FAILURE;
+				break;
+
+			case self::PARAM_BOOLEAN :
+				$flags = FILTER_NULL_ON_FAILURE;
+				break;
 	    }
 
 	    /* Add custom flags */
@@ -421,7 +428,7 @@ class Validator extends Connector
 	 */
 	private function checkValue(&$value, ValidationProperty &$validationProperty)
 	{
-       if ($value === FALSE) return $value = false; //Variable is invalid
+       if ($this->isValueInvalid($value, $validationProperty)) return $value = false; //Variable is invalid
 
        if ($validationProperty->isRequired()) {
            if ($value === NULL || $value === "") return $value = false; //Variable is required
@@ -446,7 +453,7 @@ class Validator extends Connector
 	    $validmultiple = true;
 	    
 	    foreach ($array as $i => &$value) {
-	        if ($value === FALSE) return $value = false; //If a variable in the array is invalid always return fals
+	        if ($this->isValueInvalid($value, $validationProperty)) return $value = false; //If a variable in the array is invalid always return fals
 	        if ($value !== NULL && $value !== "") {
 	            if ($this->validateRules($value, $validationProperty)) $counter++;
                 else $validmultiple = false;
@@ -472,6 +479,21 @@ class Validator extends Connector
 	    }
 	    
 	    return $validmultiple;
+	}
+
+	/**
+	 * @param $value
+	 * @param ValidationProperty $validationProperty
+	 * @return bool
+	 */
+	private function isValueInvalid($value, ValidationProperty $validationProperty)
+	{
+		if ($validationProperty->getType() === Validator::PARAM_BOOLEAN ||
+			$validationProperty->getType() === Validator::PARAM_MULTIPLE_BOOLEAN) {
+			return $value === NULL;
+		}
+
+		return $value === FALSE;
 	}
 
 	/**
