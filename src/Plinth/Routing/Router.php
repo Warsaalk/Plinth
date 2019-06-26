@@ -72,16 +72,24 @@ class Router extends Connector
 		} else {
 			foreach ($this->_routes as $routeName => $route) {
 				$routeData 	= [];
-				$routeRegex = '/^' . str_replace('/', '\/', $route->getPathRegex()) . '$/i';
+				$routePathRegex = $route->getPathRegex();
+				$routeRegex = '/^' . str_replace('/', '\/', $routePathRegex->path) . '$/i';
+				$routeRegexDefaultLang = $routePathRegex->pathDefaultLang !== false ? '/^' . str_replace('/', '\/', $routePathRegex->pathDefaultLang) . '$/i' : false;
 								
-				if(preg_match($routeRegex, $this->_path, $routeData) === 1) {
+				if (preg_match($routeRegex, $this->_path, $routeData) === 1 || ($routeRegexDefaultLang !== false && preg_match($routeRegexDefaultLang, $this->_path, $routeData) === 1)) {
 					if (count($routeData) > 1) {
 						if ($route->hasPathData() < 1) throw new PlinthException('Please define your route data');
 						
 						foreach ($route->getPathData() as $label => $regex) {
-							if (!isset($routeData[$label])) throw new PlinthException('Your route data indexes don\'t match');
-								
-							$route->addData($label, $routeData[$label]);
+							if (!isset($routeData[$label])) {
+								if ($routeRegexDefaultLang !== false && $label === Route::DATA_LANG) {
+									$route->addData($label, $this->main->getLang());
+								} else {
+									throw new PlinthException('Your route data indexes don\'t match');
+								}
+							} else {
+								$route->addData($label, $routeData[$label]);
+							}
 						}
 					}
 					$this->_route = $route;

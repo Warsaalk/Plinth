@@ -589,6 +589,11 @@ class Main
 
 			//If a user defined dictionary service is defined load its translations into the dictionary
 			$this->handleDictionaryService($fallback);
+
+			// If the route has lang in it but it's null then set the current language
+			if ($this->getRouter()->hasRoute() && $this->getRouter()->getRoute()->hasPathDataWithLang() && $this->getRouter()->getRoute()->get(Route::DATA_LANG) === false) {
+				$this->getRouter()->getRoute()->addData(Route::DATA_LANG, $this->_lang);
+			}
 		}
 	}
 

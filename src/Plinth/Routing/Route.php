@@ -254,9 +254,11 @@ class Route extends Connector
 	 */
 	private function translatePath($path, array $data)
 	{
-		if ($this->Main()->getSetting('autoroutelocale') === true && $this->getPathData('lang') === true && !isset($data['lang'])) {
-			$lang = $this->Main()->getLang();
-			if ($lang) $data['lang'] = $lang;
+		$data = array_merge($this->_data, $data);
+
+		if ($this->Main()->getSetting('autoroutelocale') === true && $this->hasPathDataWithLang() && !isset($data['lang'])) {
+			$lang = $this->main->getLang();
+			if ($lang) $data[self::DATA_LANG] = $lang;
 		}
 		
 		$callb = function($match) use($data) { return isset($data[$match[1]]) ? $data[$match[1]] : '{'.$match[1].'}'; };
@@ -264,11 +266,13 @@ class Route extends Connector
 	}
 
 	/**
-	 * @return string
+	 * @return \stdClass
 	 */
 	public function getPathRegex()
 	{
-		$regex = $this->_path;
+		$regex = new \stdClass();
+		$regex->path = $this->_path;
+		$regex->pathDefaultLang = $this->hasPathDataWithLang() && $this->_pathDefaultLang !== null ? $this->_pathDefaultLang : false;
 		
 		if ($this->hasPathData() > 0) {
 			$data = $this->getPathData();
@@ -282,10 +286,11 @@ class Route extends Connector
 				}
 				return $match[1];
 			};
-			$regex = preg_replace_callback('/{(\w+)}/', $replaceMatches, $regex);
+
+			$regex->path = preg_replace_callback('/{(\w+)}/', $replaceMatches, $regex->path);
 			
-			if (isset($data[self::DATA_LANG]) && $data[self::DATA_LANG] === true && $this->_pathDefaultLang !== null) {
-				$regex = '(?:' . $this->_pathDefaultLang . '|' . $regex . ')';
+			if ($regex->pathDefaultLang !== false) {
+				$regex->pathDefaultLang = preg_replace_callback('/{(\w+)}/', $replaceMatches, $regex->pathDefaultLang);
 			}
 		}
 		
@@ -309,6 +314,14 @@ class Route extends Connector
 	public function hasPathData()
 	{
 		return count($this->_pathData);
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function hasPathDataWithLang()
+	{
+		return $this->getPathData(self::DATA_LANG) === true;
 	}
 	
 	/**
