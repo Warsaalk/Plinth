@@ -6,10 +6,17 @@ use Plinth\Exception\PlinthException;
 
 class Config
 {
+	const ENV_FILE = "env.ini";
+
 	/**
 	 * @var array
 	 */
 	private $config;
+
+	/**
+	 * @var array
+	 */
+	private $env;
 
 	/**
 	 * Config constructor.
@@ -18,8 +25,12 @@ class Config
 	 */
 	public function __construct($file)
 	{
+		if (file_exists(__BASE_ROOT . self::ENV_FILE)) {
+			$this->env = $this->parse(parse_ini_file(__BASE_ROOT . self::ENV_FILE, true, INI_SCANNER_RAW));
+		}
+
 		if (file_exists($file)) {
-			$this->config = $this->parse(parse_ini_file($file, true, INI_SCANNER_RAW));
+			$this->config = $this->parse(parse_ini_file($file, true, INI_SCANNER_RAW), true);
 		} else {
 			throw new PlinthException("Your config file, $file, cannot be found.");
 		}
@@ -28,16 +39,32 @@ class Config
 	}
 
 	/**
-	 * @param mixed $value
+	 * @param $value
+	 * @return mixed
+	 */
+	private function getEnvValue ($value)
+	{
+		$path = explode(".", $value);
+
+		array_shift($path); // Remove the $ENV
+
+		return array_reduce($path, function ($result, $item) {return isset($result[$item]) ? $result[$item] : null;}, $this->env);
+	}
+
+	/**
+	 * @param $value
+	 * @param bool $checkEnv
 	 * @return boolean|integer|string
 	 */
-	private function typeCastValue($value)
+	private function processValue($value, $checkEnv = false)
 	{
 		if (preg_match('/^true|false$/', $value)) {
 			return $value === 'true' ? true : false;
 		} elseif (preg_match('/^\d+$/', $value)) {
 			if ($value > PHP_INT_MAX) return $value;
 			return (int)$value;
+		} elseif ($checkEnv && preg_match('/^\$ENV(\.\w+)+$/', $value)) {
+			return $this->getEnvValue($value);
 		}
 
 		return $value;
@@ -47,28 +74,30 @@ class Config
 	 * @param array $keys
 	 * @param array $array
 	 * @param mixed $value
+	 * @param bool $checkEnv
 	 */
-	private function build($keys, &$array=[], $value)
+	private function build($keys, $value, &$array = [], $checkEnv = false)
 	{
 		if (count($keys) == 1) {
-			$array[$keys[0]] = $this->typeCastValue($value);
+			$array[$keys[0]] = $this->processValue($value, $checkEnv);
 		} else {
 			$key = array_shift($keys);
 
 			if(!isset($array[$key])) $array[$key] = [];
 
-			$this->build($keys, $array[$key], $value);
+			$this->build($keys, $value, $array[$key], $checkEnv);
 		}
 	}
 
 	/**
-	 * @param array $config
+	 * @param $config
+	 * @param bool $checkEnv
 	 * @return array
 	 * @throws PlinthException
 	 */
-	private function parse($config)
+	private function parse($config, $checkEnv = false)
 	{
-		if ($config === false) throw new PlinthException('Your config file contains some errors');
+		if ($config === false) throw new PlinthException('Your config/env file contains some errors');
 
 		$parsed = [];
 
@@ -77,16 +106,16 @@ class Config
 
 			foreach ($keys as $key => $value) {
 				if (preg_match( '/^(?!\.).*(?<!\.)$/', $key) && preg_match('/\./', $key)) { //Contains a point but doesn't start or end with one
-					$this->build(explode('.', $key), $parsed[$section], $value);
+					$this->build(explode('.', $key), $value, $parsed[$section], $checkEnv);
 				} else {
 					if (is_array($value)) {
 						$parsed[$section][$key] = [];
 
 						foreach ($value as $i => $arrayvalue) {
-							$parsed[$section][$key][$i] = $this->typeCastValue($arrayvalue);
+							$parsed[$section][$key][$i] = $this->processValue($arrayvalue, $checkEnv);
 						}
 					} else {
-						$parsed[$section][$key] = $this->typeCastValue($value);
+						$parsed[$section][$key] = $this->processValue($value, $checkEnv);
 					}
 				}
 			}
