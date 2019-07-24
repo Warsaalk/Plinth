@@ -71,15 +71,18 @@ class Config
 	}
 
 	/**
-	 * @param array $keys
+	 * @param $keys
+	 * @param $value
 	 * @param array $array
-	 * @param mixed $value
 	 * @param bool $checkEnv
+	 * @throws PlinthException
 	 */
 	private function build($keys, $value, &$array = [], $checkEnv = false)
 	{
 		if (count($keys) == 1) {
-			$array[$keys[0]] = $this->processValue($value, $checkEnv);
+			$array[$keys[0]] = is_array($value) ?
+				$this->parse($value, $checkEnv) :
+				$this->processValue($value, $checkEnv);
 		} else {
 			$key = array_shift($keys);
 
@@ -101,23 +104,13 @@ class Config
 
 		$parsed = [];
 
-		foreach ($config as $section => $keys) {
-			$parsed[$section] = [];
-
-			foreach ($keys as $key => $value) {
-				if (preg_match( '/^(?!\.).*(?<!\.)$/', $key) && preg_match('/\./', $key)) { //Contains a point but doesn't start or end with one
-					$this->build(explode('.', $key), $value, $parsed[$section], $checkEnv);
-				} else {
-					if (is_array($value)) {
-						$parsed[$section][$key] = [];
-
-						foreach ($value as $i => $arrayvalue) {
-							$parsed[$section][$key][$i] = $this->processValue($arrayvalue, $checkEnv);
-						}
-					} else {
-						$parsed[$section][$key] = $this->processValue($value, $checkEnv);
-					}
-				}
+		foreach ($config as $key => $value) {
+			if (preg_match( '/^(?!\.).*(?<!\.)$/', $key) && preg_match('/\./', $key)) { //Contains a point but doesn't start or end with one
+				$this->build(explode('.', $key), $value, $parsed, $checkEnv);
+			} else {
+				$parsed[$key] = is_array($value) ?
+					$this->parse($value, $checkEnv) :
+					$this->processValue($value, $checkEnv);
 			}
 		}
 
