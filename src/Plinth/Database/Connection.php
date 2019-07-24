@@ -22,6 +22,11 @@ class Connection
 	 * @var PDO
 	 */
 	private $connection;
+
+	/**
+	 * @var string
+	 */
+	private $type;
 	
 	/**
 	 * @var boolean
@@ -77,8 +82,21 @@ class Connection
 	 */
 	public function __construct($type, $db, $host, $user, $pass, $charset = self::DEFAULT_CHARSET, $port = self::DEFAULT_PORT)
 	{
+		$this->type = $type;
+
+		$dsn = "$type:dbname=$db;host=$host;port=$port";
+
+		switch ($type) {
+			case "mysql":
+				$dsn .= ";charset=$charset";
+				break;
+			case "pgsql":
+				$dsn .= ";options='-c client_encoding=$charset'";
+				break;
+		}
+
 		try {
-			$this->connection = new PDO($type . ":dbname=".$db.";host=".$host.";port=".$port.";charset=".$charset, $user, $pass);
+			$this->connection = new PDO($dsn, $user, $pass);
 			$this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 		} catch(\PDOException $e) {
 			throw new PlinthException('No connection or connection limit reached, please contact admin.');
@@ -239,6 +257,14 @@ class Connection
 			$this->connection->rollBack(); //Rollback PDO transaction
 			$this->userTransaction = false; //Deactivate transaction
 		}
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getType()
+	{
+		return $this->type;
 	}
 
 	/**
