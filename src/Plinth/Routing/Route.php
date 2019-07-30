@@ -132,6 +132,11 @@ class Route extends Connector
 	 * @var CacheSettings
 	 */
 	private $_cacheSettings;
+
+	/**
+	 * @var bool
+	 */
+	private $_cors = false;
 	
 	/**
 	 * @param array $args
@@ -170,6 +175,7 @@ class Route extends Connector
 		if (isset($args['roles'])) $this->_roles = $args['roles'];
 		if (isset($args['rolesAllowed'])) $this->_rolesAllowed = $args['rolesAllowed'];
 		if (isset($args['controller'])) $this->_controller = $args['controller'];
+		if (isset($args['cors'])) $this->_cors = $args['cors'];
 
 		if (isset($args['actions']) && is_array($args['actions'])) {
 			foreach ($args['actions'] as $actionMethod => $actions) {
@@ -573,5 +579,21 @@ class Route extends Connector
 	public function getController()
 	{
 		return $this->_controller;
+	}
+
+	/**
+	 * @return bool|array
+	 */
+	public function getCors()
+	{
+		return $this->_cors;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function isCorsAllowed()
+	{
+		return $this->_cors === true || is_array($this->_cors);
 	}
 }
