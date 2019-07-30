@@ -40,6 +40,7 @@ class Validator extends Connector
 			PARAM_MULTIPLE_DOMAIN = 108,
 			PARAM_MULTIPLE_FLOAT = 109,
 			PARAM_MULTIPLE_BOOLEAN = 110,
+			PARAM_MULTIPLE_HTML = 111,
 			PARAM_CHECKBOX = 200,
 			PARAM_CHECKBOX_STRING = 201,
 			PARAM_CHECKBOX_INTEGER = 202;
@@ -157,7 +158,8 @@ class Validator extends Connector
 	            $filter = FILTER_VALIDATE_REGEXP;
 	            $options['regexp'] = '/\d{4}-\d{2}-\d{2}/'; //Format yyyy-mm-dd
 	            break;
-	    
+
+			case self::PARAM_MULTIPLE_HTML:
 	        case self::PARAM_HTML: //Strip script tags
 	            $filter = FILTER_CALLBACK;
 	            $htmlv = new HTMLValidator($validationProperty->getRules());
@@ -203,6 +205,7 @@ class Validator extends Connector
 			case self::PARAM_MULTIPLE_MAC :
 			case self::PARAM_MULTIPLE_DOMAIN :
 			case self::PARAM_MULTIPLE_FLOAT :
+			case self::PARAM_MULTIPLE_HTML :
 	            $flags = FILTER_REQUIRE_ARRAY;
 	            break;
 	    
