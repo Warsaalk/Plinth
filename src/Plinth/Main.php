@@ -414,9 +414,12 @@ class Main
     	$authorized = true;
 
     	if ($this->getRouter()->hasRoute()) {
-			if ($this->getRouter()->isRouteAllowed()) {
-				// Create a new request
-				$this->setRequest(new Request($this, $this->getRouter()->getRoute()));
+			// Create a new request
+			$this->setRequest(new Request($this, $this->getRouter()->getRoute()));
+
+			if ($this->getRouter()->isRedirected() || $this->getRequest()->isRouteAllowed()) {
+				// Prepare the request for further handling
+				$this->getRequest()->prepare();
 
 				// Don't handle the login in case of a redirect
 				if ($redirected === false) {

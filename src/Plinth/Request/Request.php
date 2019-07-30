@@ -51,6 +51,11 @@ class Request extends Connector
 	private $contentType;
 
 	/**
+	 * @var string
+	 */
+	private $requestMethod;
+
+	/**
 	 * Contains file info
 	 *
 	 * @var array
@@ -83,10 +88,18 @@ class Request extends Connector
 		parent::__construct($main);
 
 		$this->contentType = self::getContentType();
+		$this->requestMethod = self::getRequestMethod();
 
-		$this->_data = $this->loadData(self::getRequestMethod());
-		$this->_files = $this->loadFiles();
 		$this->_route = $route;
+	}
+
+	/**
+	 * @throws PlinthException
+	 */
+	public function prepare()
+	{
+		$this->_data = $this->loadData();
+		$this->_files = $this->loadFiles();
 
 		// Check if there's a login action
 		$actions = $this->getPossibleActions();
@@ -122,17 +135,16 @@ class Request extends Connector
 	}
 
 	/**
-	 * @param string $method
 	 * @return array|string
 	 */
-	private function loadData($method)
+	private function loadData()
 	{
 		$data = [];
 
-		if (strcmp($this->contentType, self::CONTENT_TYPE_MULTIPART_FORM_DATA) === 0 && strcmp($method, self::HTTP_POST) === 0) {
+		if (strcmp($this->contentType, self::CONTENT_TYPE_MULTIPART_FORM_DATA) === 0 && strcmp($this->requestMethod, self::HTTP_POST) === 0) {
 			$data = $_POST;
 		} elseif (strcmp($this->contentType, self::CONTENT_TYPE_APPLICATION_WWW_FORM) === 0) {
-			switch ($method) {
+			switch ($this->requestMethod) {
 				case self::HTTP_POST: $data = $_POST; break;
 				case self::HTTP_PUT:
 				case self::HTTP_DELETE: parse_str(file_get_contents('php://input'), $data);break;
@@ -140,9 +152,9 @@ class Request extends Connector
 			}
 		} elseif (strcmp($this->contentType, self::CONTENT_TYPE_APPLICATION_JSON) === 0) {
 			$data = json_decode(file_get_contents('php://input'), true);
-		} elseif (strcmp($method, self::HTTP_POST) === 0 || strcmp($method, self::HTTP_PUT) === 0 || strcmp($method, self::HTTP_DELETE) === 0) {
+		} elseif (strcmp($this->requestMethod, self::HTTP_POST) === 0 || strcmp($this->requestMethod, self::HTTP_PUT) === 0 || strcmp($this->requestMethod, self::HTTP_DELETE) === 0) {
 			$data = file_get_contents('php://input');
-		} elseif (strcmp($method, self::HTTP_GET) === 0) {
+		} elseif (strcmp($this->requestMethod, self::HTTP_GET) === 0) {
 			$data = $_GET;
 		}
 
@@ -313,6 +325,25 @@ class Request extends Connector
 				}
 			}
 		}
+	}
+
+	/**
+	 * @param $method
+	 * @return bool
+	 */
+	private function isRouteAllowedForMethod ($method)
+	{
+		return in_array($method, $this->_route->getMethods()) === true;
+	}
+
+	/**
+	 * Only allow defined methods for specific route.
+	 *
+	 * @return bool
+	 */
+	public function isRouteAllowed()
+	{
+		return $this->isRouteAllowedForMethod($this->requestMethod);
 	}
 
 	/**

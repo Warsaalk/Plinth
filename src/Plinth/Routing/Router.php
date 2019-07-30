@@ -175,14 +175,11 @@ class Router extends Connector
 	}
 
 	/**
-	 * Only allow defined methods for specific route. When a route is redirected it is always allowed
-	 *
 	 * @return bool
-	 * @throws PlinthException
 	 */
-	public function isRouteAllowed()
+	public function isRedirected()
 	{
-		return $this->_redirected || in_array(Request::getRequestMethod(), $this->getRoute()->getMethods()) === true;
+		return $this->_redirected;
 	}
 
 	/**
