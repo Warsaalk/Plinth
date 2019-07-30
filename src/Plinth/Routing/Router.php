@@ -32,7 +32,7 @@ class Router extends Connector
 	 * @var boolean
 	 */
 	private $_redirected = false;
-	
+
 	/**
 	 * @param string $routesFile
 	 * @param boolean $public Default public setting
@@ -44,15 +44,15 @@ class Router extends Connector
 	public function loadRoutes($routesFile, $public, $sessions, $templateBase, $templatePath)
 	{
 		if (!file_exists($routesFile)) throw new PlinthException('Add routing.json to your application config');
-		
-		$routes = json_decode(file_get_contents($routesFile), true);
+
+		$routes = json_decode($this->main->config->replaceReferencesInText(file_get_contents($routesFile)), true);
 		
 		if (!is_array($routes)) throw new PlinthException('Cannot parse routing.json config');
 		
 		foreach ($routes as $routeName => $routeInfo) {
 			$newroute = new Route(['name' => $routeName] + $routeInfo, $this->main, $public, $sessions, $templateBase, $templatePath);
 			$this->_routes[$routeName] = $newroute;
-			
+
 			if ($newroute->isDefault()) {
 				if ($this->_defaultRoute !== false) throw new PlinthException('You can only define 1 default route');
 				$this->_defaultRoute = $newroute;
