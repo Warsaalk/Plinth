@@ -243,19 +243,27 @@ class Response extends Connector
 				header($property . ': ' . $value);
 			}
 		}
+
+		if ($route->isCorsAllowed()) {
+			if ($route->getCors() === true) {
+				$route->addHeader("Access-Control-Allow-Origin: *");
+			} elseif (in_array($_SERVER['HTTP_ORIGIN'], $route->getCors())) {
+				$route->addHeader("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
+			}
+		}
 		
 		if ($route->hasHeaders()) {
 			foreach ($route->getHeaders() as $header) {
 				header($header);
 			}
 		}
-		 
+
 		$contentType = ResponseHelper::getContentType($route);
 
 		if ($contentType !== false) header('Content-type: '. $contentType .'; charset=' . $this->Main()->getSetting('characterencoding'));
-	
+
 		$this->content = $this->getTemplateByRoute($route);
-	
+
 		if ($route->getType() !== Route::TYPE_PAGE && $route->getType() !== Route::TYPE_ERROR) {
 			return $this->content;
 		} else {
