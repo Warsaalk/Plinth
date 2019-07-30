@@ -10,6 +10,10 @@ class Config
 
 	const REF_REGEX = '\$(ENV|CNF)((?:\.\w+)+)';
 
+	const
+		REF_TYPE_ENV = "ENV",
+		REF_TYPE_CNF = "CNF";
+
 	/**
 	 * @var array
 	 */
@@ -51,7 +55,7 @@ class Config
 
 		array_shift($path); // Remove the leading . (dot)
 
-		return array_reduce($path, function ($result, $item) {return isset($result[$item]) ? $result[$item] : null;}, $refType === "CNF" ? $this->config : $this->env);
+		return array_reduce($path, function ($result, $item) {return isset($result[$item]) ? $result[$item] : null;}, $refType === self::REF_TYPE_CNF ? $this->config : $this->env);
 	}
 
 	/**
@@ -208,5 +212,28 @@ class Config
 		$this->config = array_replace_recursive($this->config, $config->getAll());
 
 		return $this;
+	}
+
+	/**
+	 * @param string $content
+	 * @return string
+	 */
+	public function replaceReferencesInText ($content)
+	{
+		preg_match_all('/(?|' . self::REF_REGEX . '|"' . self::REF_REGEX . '\|(raw)")/', $content, $matches, PREG_SET_ORDER);
+
+		if (count($matches) > 0) {
+			$replacements = [];
+			foreach ($matches as $match) {
+				// Build-in check to avoid the same reference to be replaced twice
+				if (!isset($replacements[$match[0]])) {
+					$replacements[$match[0]] = $this->getRefValue($match[1], $match[2]);
+				}
+			}
+
+			$content = str_replace(array_keys($replacements), array_values($replacements), $content);
+		}
+
+		return $content;
 	}
 }
