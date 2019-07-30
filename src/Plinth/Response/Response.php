@@ -4,6 +4,7 @@ namespace Plinth\Response;
 
 use Plinth\Connector;
 use Plinth\Dictionary;
+use Plinth\Request\Request;
 use Plinth\Routing\Route;
 use Plinth\Main;
 
@@ -237,12 +238,6 @@ class Response extends Connector
 	{
 		$router = $this->main->getRouter();
 		$route = $router->getRoute();
-		 
-		if ($route->hasCacheSettings()) {
-			foreach ($route->getCacheSettings()->getHeaders() as $property => $value) {
-				header($property . ': ' . $value);
-			}
-		}
 
 		if ($route->isCorsAllowed()) {
 			if ($route->getCors() === true) {
@@ -262,12 +257,27 @@ class Response extends Connector
 
 		if ($contentType !== false) header('Content-type: '. $contentType .'; charset=' . $this->Main()->getSetting('characterencoding'));
 
-		$this->content = $this->getTemplateByRoute($route);
+		if ($this->main->getRequest()->handlePreFlightRequest()) {
+			$methods = $route->getMethods();
+			$methods[] = Request::HTTP_OPTIONS;
 
-		if ($route->getType() !== Route::TYPE_PAGE && $route->getType() !== Route::TYPE_ERROR) {
-			return $this->content;
+			header("Access-Control-Allow-Methods: " . implode(',', $methods));
+			header("Access-Control-Allow-Headers: Content-Type");
+			header(self::CODE_204);
 		} else {
-			return $this->getTemplate($route->getTemplateBase(), $route->getTemplateData(), $route->getTemplatePath());
+			if ($route->hasCacheSettings()) {
+				foreach ($route->getCacheSettings()->getHeaders() as $property => $value) {
+					header($property . ': ' . $value);
+				}
+			}
+
+			$this->content = $this->getTemplateByRoute($route);
+
+			if ($route->getType() !== Route::TYPE_PAGE && $route->getType() !== Route::TYPE_ERROR) {
+				return $this->content;
+			} else {
+				return $this->getTemplate($route->getTemplateBase(), $route->getTemplateData(), $route->getTemplatePath());
+			}
 		}
 	}
 

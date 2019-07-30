@@ -24,6 +24,7 @@ class Request extends Connector
 			HTTP_PUT 	= "PUT",
 			HTTP_POST 	= "POST",
 			HTTP_DELETE = "DELETE",
+			HTTP_OPTIONS= "OPTIONS",
 			HTTP_ALL	= "ALL",
 			HTTP_NOTSET	= NULL;
 
@@ -108,7 +109,7 @@ class Request extends Connector
 				if (!$this->hasLoginAction()) {
 					$this->_loginActionLabel = str_replace(self::ACTION_LOGIN . "#", "", $actions[$i]);
 				} else {
-					throw new PlinthException("Your request of type {$this->getRequestMethod()} for route {$route->getName()} can only have 1 login action.");
+					throw new PlinthException("Your request of type {$this->requestMethod} for route {$this->_route->getName()} can only have 1 login action.");
 				}
 			}
 		}
@@ -190,7 +191,7 @@ class Request extends Connector
 	 */
 	private function validateAction($actionLabel)
 	{
-		$action = $this->getActionClass($actionLabel, $this->getRequestMethod());
+		$action = $this->getActionClass($actionLabel, $this->requestMethod);
 		$actionValidations = [];
 		$actionSettings = $action->getSettings();
 		$actionLogin = in_array(ActionTypeLogin::class, class_parents($action));
@@ -328,6 +329,18 @@ class Request extends Connector
 	}
 
 	/**
+	 * @return bool
+	 */
+	public function handlePreFlightRequest ()
+	{
+		return $this->requestMethod === self::HTTP_OPTIONS
+			&& isset($_SERVER["HTTP_ACCESS_CONTROL_REQUEST_METHOD"])
+			&& isset($_SERVER["HTTP_ACCESS_CONTROL_REQUEST_HEADERS"])
+			&& isset($_SERVER["HTTP_ORIGIN"])
+			&& $this->_route->isCorsAllowed();
+	}
+
+	/**
 	 * @param $method
 	 * @return bool
 	 */
@@ -384,7 +397,7 @@ class Request extends Connector
 	{
 		$possibleActions = [];
 
-		foreach ([self::HTTP_ALL, $this->getRequestMethod()] as $method) {
+		foreach ([self::HTTP_ALL, $this->requestMethod] as $method) {
 			if ($this->_route->hasActions($method)) {
 				$possibleActions = array_merge($possibleActions, $this->_route->getActions($method));
 			}

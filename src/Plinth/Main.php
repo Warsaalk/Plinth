@@ -417,23 +417,27 @@ class Main
 			// Create a new request
 			$this->setRequest(new Request($this, $this->getRouter()->getRoute()));
 
-			if ($this->getRouter()->isRedirected() || $this->getRequest()->isRouteAllowed()) {
-				// Prepare the request for further handling
-				$this->getRequest()->prepare();
+			if (!$this->getRequest()->handlePreFlightRequest()) {
+				if ($this->getRouter()->isRedirected() || $this->getRequest()->isRouteAllowed()) {
+					// Prepare the request for further handling
+					$this->getRequest()->prepare();
 
-				// Don't handle the login in case of a redirect
-				if ($redirected === false) {
-					$this->getRequest()->handleLoginRequest();
+					// Don't handle the login in case of a redirect
+					if ($redirected === false) {
+						$this->getRequest()->handleLoginRequest();
+					}
+
+					$this->handleUser();
+
+					$authorized = $this->getRequest()->isRouteAuthorized();
+					if ($authorized === true) {
+						$this->getRequest()->handleController();
+						$this->getRequest()->handleRequest();
+					}
+				} else {
+					$this->getResponse()->hardExit(Response::CODE_405);
 				}
-
-				$this->handleUser();
-
-				$authorized = $this->getRequest()->isRouteAuthorized();
-				if ($authorized === true) {
-					$this->getRequest()->handleController();
-					$this->getRequest()->handleRequest();
-				}
-			} else $this->getResponse()->hardExit(Response::CODE_405);
+			}
     	} else $this->getResponse()->hardExit(Response::CODE_404);
 
     	if ($authorized === true) {
