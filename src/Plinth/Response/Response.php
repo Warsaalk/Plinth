@@ -71,6 +71,18 @@ class Response extends Connector
 
     	return $this;
     }
+
+	/**
+	 * @return string
+	 */
+    public function getAssetVersion ()
+	{
+		if ($this->assetVersion === false) {
+			return "undefined";
+		}
+
+		return $this->assetVersion;
+	}
 	
 	/**
 	 * @param string $asset
