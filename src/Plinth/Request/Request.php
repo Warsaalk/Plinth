@@ -159,6 +159,8 @@ class Request extends Connector
 			$data = $_GET;
 		}
 
+		if ($data === NULL) return [];
+
 		return $data;
 	}
 
