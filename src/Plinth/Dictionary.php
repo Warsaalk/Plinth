@@ -109,7 +109,15 @@ class Dictionary extends Connector
 		}
 		return $i;
 	}
-	
+
+    /**
+     * @return string[]
+     */
+    public function getAll ()
+    {
+        return $this->_messages;
+    }
+
 	/**
 	 * @param string[] $lang
 	 */
