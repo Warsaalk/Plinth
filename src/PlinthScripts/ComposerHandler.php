@@ -4,10 +4,10 @@ namespace PlinthScripts;
 use Composer\Script\Event;
 use Composer\Installer\PackageEvent;
 
-class ComposerHandler {
-	
-	public static function copyDirectory($src, $dest) {
-		
+class ComposerHandler
+{
+	public static function copyDirectory($src, $dest)
+	{
 		if(!is_dir($src)) return false;
 		if(!is_dir($dest)) {
 			if(!mkdir($dest)) return false;
@@ -21,19 +21,20 @@ class ComposerHandler {
 				self::copyDirectory($f->getRealPath(), "$dest/$f");
 			}
 		}
-		
 	}
 	
-	public static function initProject(Event $event) {
-	
-		self::copyDirectory(__DIR__ . DIRECTORY_SEPARATOR . 'project', getcwd());
-	
+	public static function initProject(Event $event)
+	{
+		if (!file_exists(getcwd() . DIRECTORY_SEPARATOR . "const.php")) {
+			self::copyDirectory(__DIR__ . DIRECTORY_SEPARATOR . 'project', getcwd());
+		}
 	}
 	
-	public static function preInstall() {
-		
-		
-		
+	public static function postInstall(Event $event)
+	{
+		self::initProject($event);
 	}
-	
+
+	public static function postUpdate(Event $event)
+	{}
 }

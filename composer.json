@@ -22,5 +22,9 @@
         "ext-mbstring": "*",
         "ext-json": "*",
         "ext-pdo": "*"
+    },
+    "scripts" : {
+        "post-install-cmd" : "PlinthScripts\\ComposerHandler::postInstall",
+        "post-update-cmd" : "PlinthScripts\\ComposerHandler::postUpdate"
     }
 }
