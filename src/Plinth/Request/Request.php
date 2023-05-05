@@ -26,7 +26,7 @@ class Request extends Connector
 			HTTP_DELETE = "DELETE",
 			HTTP_OPTIONS= "OPTIONS",
 			HTTP_ALL	= "ALL",
-			HTTP_NOTSET	= NULL;
+			HTTP_NOTSET	= "";
 
 	const	ACTION_LOGIN = "login";
 
@@ -37,7 +37,7 @@ class Request extends Connector
 			CONTENT_TYPE_MULTIPART_FORM_DATA = "multipart/form-data",
 			CONTENT_TYPE_APPLICATION_WWW_FORM = "application/x-www-form-urlencoded",
 			CONTENT_TYPE_APPLICATION_JSON = "application/json",
-			CONTENT_TYPE_NOTSET = NULL;
+			CONTENT_TYPE_NOTSET = "";
 
 	/**
 	 * Contains form data
