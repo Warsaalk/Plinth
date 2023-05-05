@@ -171,7 +171,7 @@ class Validator extends Connector
 	        case self::PARAM_MULTIPLE :
 	        case self::PARAM_CHECKBOX :
 	        case self::PARAM_STRING :
-	            $filter = FILTER_SANITIZE_STRING;
+	            $filter = @FILTER_SANITIZE_STRING;
 	            break;
 	    }
 
