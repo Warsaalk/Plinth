@@ -66,7 +66,7 @@ class Request extends Connector
 	/**
 	 * @var integer
 	 */
-	private $_loginActionLabel = null;
+	private $_loginActionLabel = "";
 
 	/**
 	 * @var Route
@@ -510,7 +510,7 @@ class Request extends Connector
 	 */
 	private function hasLoginAction()
 	{
-		return $this->_loginActionLabel !== null;
+		return strlen($this->_loginActionLabel) > 0;
 	}
 
 	/**
